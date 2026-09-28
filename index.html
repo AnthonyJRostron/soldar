@@ -73,6 +73,20 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 .constraint-note{padding:10px 12px;background:rgba(249,115,22,0.08);border-left:3px solid var(--accent);border-radius:6px;font-size:0.75rem;color:#fdba74;margin-bottom:14px;display:none;line-height:1.6}
 .constraint-note.show{display:block}
 .constraint-note strong{color:var(--accent);display:block;margin-bottom:4px;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px}
+.material-panel{padding:14px;background:rgba(34,197,94,0.06);border:1.5px solid rgba(34,197,94,0.3);border-radius:var(--radius-sm);margin-bottom:14px;display:none}
+.material-panel.show{display:block}
+.material-panel h4{font-size:0.72rem;color:var(--ok);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:700}
+.material-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.material-chip{padding:4px 10px;background:rgba(34,197,94,0.15);border-radius:12px;font-size:0.72rem;color:#86efac;font-weight:600}
+.electrode-panel{padding:14px;background:rgba(249,115,22,0.06);border:1.5px solid rgba(249,115,22,0.3);border-radius:var(--radius-sm);margin-bottom:14px;display:none}
+.electrode-panel.show{display:block}
+.electrode-panel h4{font-size:0.72rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:700}
+.electrode-list{list-style:none}
+.electrode-list li{padding:6px 0;font-size:0.78rem;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.electrode-list li:last-child{border-bottom:none}
+.electrode-list .code{color:var(--accent);font-weight:700;font-family:monospace}
+.electrode-list .note{font-size:0.7rem;color:var(--text-dim);text-align:right;flex:1}
+.electrode-notes{margin-top:8px;padding:8px 10px;background:rgba(234,179,8,0.08);border-radius:6px;font-size:0.72rem;color:#fde047;line-height:1.5}
 .machine-search-wrapper{position:relative;margin-bottom:14px}
 .machine-search-wrapper input{margin-bottom:0;padding-right:44px}
 .machine-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:8px;min-width:36px;min-height:36px;display:none}
@@ -109,6 +123,8 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 <div class="panel active" id="tab-calc">
 <div id="machineBanner" class="machine-info"></div>
 <div id="constraintNote" class="constraint-note"></div>
+<div id="materialPanel" class="material-panel"></div>
+<div id="electrodePanel" class="electrode-panel"></div>
 
 <label>Proceso de Soldadura</label>
 <div class="process-tabs" id="processTabs">
@@ -242,7 +258,7 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 const MM_PER_INCH=25.4;
 const MIG_DATA={'0.6':{baseAmps:[30,80],baseVolts:[14,18],wfs:[2.0,4.5],gasFlow:[6,9],thicknessMax:2},'0.8':{baseAmps:[40,145],baseVolts:[15,21],wfs:[2.5,7.0],gasFlow:[8,12],thicknessMax:5},'0.9':{baseAmps:[50,180],baseVolts:[16,23],wfs:[3.0,8.0],gasFlow:[9,13],thicknessMax:8},'1.0':{baseAmps:[60,220],baseVolts:[17,25],wfs:[3.5,9.5],gasFlow:[10,14],thicknessMax:12},'1.2':{baseAmps:[80,280],baseVolts:[18,28],wfs:[4.0,11.0],gasFlow:[12,16],thicknessMax:20}};
 const TIG_DATA={carbon:{ampsPerMM:[30,40],currentType:'DCEN',gasFlow:[8,12]},stainless:{ampsPerMM:[25,35],currentType:'DCEN',gasFlow:[8,12]},aluminum:{ampsPerMM:[35,50],currentType:'AC',gasFlow:[10,15]}};
-const STICK_ELECTRODES={'6010':{factor:1.00,polarity:'DC+ (DCEP)',cls:'dc+',volts:25},'6011':{factor:1.00,polarity:'AC / DC+',cls:'ac',volts:25},'6013':{factor:0.95,polarity:'AC / DC-',cls:'ac',volts:22},'7014':{factor:1.05,polarity:'AC / DC-',cls:'ac',volts:24},'7018':{factor:1.05,polarity:'DC+ (DCEP)',cls:'dc+',volts:24},'7024':{factor:1.15,polarity:'AC / DC-',cls:'ac',volts:28},'8018':{factor:1.10,polarity:'DC+ (DCEP)',cls:'dc+',volts:25},'11018':{factor:1.10,polarity:'DC+ (DCEP)',cls:'dc+',volts:25}};
+const STICK_ELECTRODES={'6010':{factor:1.00,polarity:'DC+ (DCEP)',cls:'dc+',volts:25,note:'Penetración profunda, tuberías'},'6011':{factor:1.00,polarity:'AC / DC+',cls:'ac',volts:25,note:'Todas posiciones, acero sucio'},'6013':{factor:0.95,polarity:'AC / DC-',cls:'ac',volts:22,note:'Uso general, chapa fina'},'7014':{factor:1.05,polarity:'AC / DC-',cls:'ac',volts:24,note:'Alta deposición'},'7018':{factor:1.05,polarity:'DC+ (DCEP)',cls:'dc+',volts:24,note:'Bajo hidrógeno, estructural'},'7024':{factor:1.15,polarity:'AC / DC-',cls:'ac',volts:28,note:'Alta deposición, solo plana'},'8018':{factor:1.10,polarity:'DC+ (DCEP)',cls:'dc+',volts:25,note:'Alta resistencia'},'11018':{factor:1.10,polarity:'DC+ (DCEP)',cls:'dc+',volts:25,note:'Muy alta resistencia'}};
 const STICK_BASE_AMPS={'1.6':[30,55],'2.0':[50,80],'2.5':[60,110],'3.2':[90,150],'4.0':[120,200],'5.0':[170,260],'6.0':[210,320]};
 const FCAW_DATA={'0.8':{baseAmps:[60,120],baseVolts:[16,20],wfs:[3.0,6.0],gasFlow:[10,14]},'0.9':{baseAmps:[70,150],baseVolts:[17,22],wfs:[3.5,7.0],gasFlow:[10,15]},'1.0':{baseAmps:[90,180],baseVolts:[18,24],wfs:[4.0,8.0],gasFlow:[12,16]},'1.2':{baseAmps:[120,260],baseVolts:[20,28],wfs:[5.0,10.0],gasFlow:[14,18]},'1.6':{baseAmps:[180,350],baseVolts:[23,32],wfs:[6.0,12.0],gasFlow:[15,20]}};
 const POSITION_FACTOR={flat:1.00,horizontal:0.95,vertical:0.85,overhead:0.80};
@@ -251,73 +267,176 @@ const MATERIAL_FACTOR_STICK={carbon:1.00,stainless:0.90,cast:1.10};
 const VOLTAGE_POS_FACTOR={flat:1.00,horizontal:0.97,vertical:0.94,overhead:0.92};
 
 /* ============================================================
-   MACHINE DB — con constraints por máquina
-   gaslessFCAW: true → FCAW sin gas (hilo con fundente)
-   supportedWires: [...] → solo esos Ø de hilo
-   supportedStickDia: [...] → solo esos Ø de electrodo
+   MACHINE DB — con materials, recommendedElectrodes, notes
    ============================================================ */
 const MACHINE_DB={
-'deko-140':{name:'DEKO 140A MMA',maxAmps:140,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:25},weight:'2.3 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'kotsy-300':{name:'Kotsy ARC-300',maxAmps:300,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'5 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0','5.0']},
-'feifanke-135':{name:'FEIFANKE MIG135',maxAmps:135,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'5 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'hitbox-hbm200':{name:'HITBOX HBM200',maxAmps:140,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:30},weight:'6 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.8','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'cevik-promig130':{name:'Cevik ProMIG 130N',maxAmps:130,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'7 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2']},
+'deko-140':{name:'DEKO 140A MMA',maxAmps:140,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:25},weight:'2.3 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable','Acero galvanizado'],
+recommendedElectrodes:[{code:'E6013',note:'Recomendado para principiantes'},{code:'E7018',note:'Estructural, baja penetración'},{code:'E6011',note:'Todas posiciones'}]},
+'kotsy-300':{name:'Kotsy ARC-300',maxAmps:300,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'5 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0','5.0'],
+materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],
+recommendedElectrodes:[{code:'E6013',note:'Uso general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}]},
+'feifanke-135':{name:'FEIFANKE MIG135',maxAmps:135,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'5 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Para MMA (electrodo)'},{code:'E71T-GS',note:'Hilo FCAW sin gas'}]},
+'hitbox-hbm200':{name:'HITBOX HBM200',maxAmps:140,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:30},weight:'6 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.8','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E71T-GS',note:'Hilo FCAW sin gas'}]},
+'cevik-promig130':{name:'Cevik ProMIG 130N',maxAmps:130,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'7 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E71T-GS',note:'Hilo FCAW sin gas'}]},
 
-'parkside-pifds120al':{name:'Parkside PIFDS 120AL',maxAmps:120,inputVolts:'230 V',processes:['fcaw'],dutyRef:{amps:100,duty:20},weight:'4.4 kg',category:'Parkside (Lidl)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:2,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0']},
-'parkside-pisg120':{name:'Parkside PISG 120 D5',maxAmps:120,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'3 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'parkside-pisg80':{name:'Parkside PISG 80 D7',maxAmps:80,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:80,duty:20},weight:'2.8 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:2,supportedStickDia:['1.6','2.0','2.5']},
-'parkside-pmsg200':{name:'Parkside PMSG 200 A2',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:140,duty:20},weight:'8 kg',category:'Parkside (Lidl)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:4,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2']},
+'parkside-pifds120al':{name:'Parkside PIFDS 120AL',maxAmps:120,inputVolts:'230 V',processes:['fcaw'],dutyRef:{amps:100,duty:20},weight:'4.4 kg',category:'Parkside (Lidl)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:2,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0'],
+materials:['Acero al carbono (0,8–3 mm)','Chapa fina'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo tubular sin gas, autoprotegido'}],
+notes:'Máquina exclusiva FCAW sin gas. Hilo tubular con fundente interno. Ideal para chapa fina (0,8–3 mm).'},
+'parkside-pisg120':{name:'Parkside PISG 120 D5',maxAmps:120,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'3 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo, ideal principiantes'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'}]},
+'parkside-pisg80':{name:'Parkside PISG 80 D7',maxAmps:80,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:80,duty:20},weight:'2.8 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:2,supportedStickDia:['1.6','2.0','2.5'],
+materials:['Acero al carbono (1–3 mm)'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo, Ø 1,6–2,5 mm'},{code:'E6011',note:'Celulósico'}],
+notes:'Máquina ligera para trabajos pequeños. Incluye electrodos 1,6, 2,0 y 2,5 mm.'},
+'parkside-pmsg200':{name:'Parkside PMSG 200 A2',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:140,duty:20},weight:'8 kg',category:'Parkside (Lidl)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:4,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'}]},
 
-'einhell-tciw150':{name:'Einhell TC-IW 150',maxAmps:130,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:100,duty:25},weight:'3.5 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:4,supportedStickDia:['1.6','2.0','2.5']},
-'einhell-tciw170':{name:'Einhell TC-IW 170',maxAmps:170,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:25},weight:'4 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'einhell-iw160wig':{name:'Einhell IW 160 Wig',maxAmps:160,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:120,duty:25},weight:'4.5 kg',category:'Einhell',defaultProcess:'tig',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'einhell-tcew160d':{name:'Einhell TC-EW 160 D',maxAmps:160,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:120,duty:25},weight:'6 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'einhell-btew200':{name:'Einhell BT-EW 200',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'9 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'4.0',defaultThickness:8,supportedStickDia:['2.0','2.5','3.2','4.0']},
+'einhell-tciw150':{name:'Einhell TC-IW 150',maxAmps:130,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:100,duty:25},weight:'3.5 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:4,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo, ideal principiantes'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'},{code:'TIG WC20',note:'Electrodo tungsteno (TIG)'}]},
+'einhell-tciw170':{name:'Einhell TC-IW 170',maxAmps:170,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:25},weight:'4 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'}]},
+'einhell-iw160wig':{name:'Einhell IW 160 Wig',maxAmps:160,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:120,duty:25},weight:'4.5 kg',category:'Einhell',defaultProcess:'tig',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'einhell-tcew160d':{name:'Einhell TC-EW 160 D',maxAmps:160,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:120,duty:25},weight:'6 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
+'einhell-btew200':{name:'Einhell BT-EW 200',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'9 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'4.0',defaultThickness:8,supportedStickDia:['2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural, baja penetración'},{code:'E308L',note:'Inoxidable'}]},
 
-'stayer-potenza200':{name:'Stayer Potenza 200 GEK',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:60},weight:'4.9 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'stayer-citywork160':{name:'Stayer CityWork 160 GEK',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:160,duty:25},weight:'3.5 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'stayer-progress1600':{name:'Stayer Progress 1600 GEK',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:130,duty:25},weight:'4 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'stayer-mig131':{name:'Stayer MIG131 MULTI',maxAmps:120,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'6 kg',category:'Stayer',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5']},
+'stayer-potenza200':{name:'Stayer Potenza 200 GEK',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:60},weight:'4.9 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable','Hierro fundido','Acero celulósico'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo, uso general'},{code:'E7018',note:'Básico, estructural'},{code:'E6010',note:'Celulósico, penetración'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}],
+notes:'Apto para electrodos de rutilo, básico, celulósico, inox, alto rendimiento y fundición.'},
+'stayer-citywork160':{name:'Stayer CityWork 160 GEK',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:160,duty:25},weight:'3.5 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo, recomendado por Stayer'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'}]},
+'stayer-progress1600':{name:'Stayer Progress 1600 GEK',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:130,duty:25},weight:'4 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
+'stayer-mig131':{name:'Stayer MIG131 MULTI',maxAmps:120,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'6 kg',category:'Stayer',defaultProcess:'fcaw',defaultWire:'0.9',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW 0,9 mm sin gas'},{code:'E6013',note:'MMA general'}]},
 
-'viladepot-mig200':{name:'Viladepot MIG200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['fcaw','mig','stick'],dutyRef:{amps:150,duty:25},weight:'8 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:5,gaslessFCAW:true,supportedWires:['0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'hzxvogen-mig145':{name:'HZXVOGEN MIG145',maxAmps:145,inputVolts:'220 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'4.5 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5']},
-'andeli-tig200':{name:'ANDELI TIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:30},weight:'9 kg',category:'Online (AliExpress)',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'succebuy-200':{name:'SucceBuy MIG 200A 4-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','fcaw','stick'],dutyRef:{amps:150,duty:25},weight:'8 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:5,gaslessFCAW:true,supportedWires:['0.8','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'gzguozhi-200':{name:'GZ GUOZHI 200A',maxAmps:200,inputVolts:'220 V',processes:['stick','tig'],dutyRef:{amps:140,duty:25},weight:'6 kg',category:'Online (AliExpress)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
+'viladepot-mig200':{name:'Viladepot MIG200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['fcaw','mig','stick'],dutyRef:{amps:150,duty:25},weight:'8 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:5,gaslessFCAW:true,supportedWires:['0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'},{code:'ER70S-6',note:'Hilo MIG con gas'}]},
+'hzxvogen-mig145':{name:'HZXVOGEN MIG145',maxAmps:145,inputVolts:'220 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'4.5 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'}]},
+'andeli-tig200':{name:'ANDELI TIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:30},weight:'9 kg',category:'Online (AliExpress)',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio (AC)'],
+recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'succebuy-200':{name:'SucceBuy MIG 200A 4-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','fcaw','stick'],dutyRef:{amps:150,duty:25},weight:'8 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:5,gaslessFCAW:true,supportedWires:['0.8','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'},{code:'E6013',note:'MMA general'}]},
+'gzguozhi-200':{name:'GZ GUOZHI 200A',maxAmps:200,inputVolts:'220 V',processes:['stick','tig'],dutyRef:{amps:140,duty:25},weight:'6 kg',category:'Online (AliExpress)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
 
-'vevor-mig200':{name:'Vevor MIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:60},weight:'8.4 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'vevor-mig250':{name:'Vevor MIG-250 3-in-1',maxAmps:250,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'12 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,supportedWires:['0.8','1.0','1.2'],supportedStickDia:['2.0','2.5','3.2','4.0']},
-'vevor-tig205':{name:'Vevor TIG-205 3-in-1',maxAmps:205,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:20},weight:'8.5 kg',category:'Online (Vevor)',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'vevor-mma140':{name:'Vevor MMA-140 4-in-1',maxAmps:140,inputVolts:'220 V',processes:['stick','tig'],dutyRef:{amps:100,duty:20},weight:'5.45 kg',category:'Online (Vevor)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:4,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'vevor-ct520d':{name:'Vevor CT520D 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:20},weight:'13 kg',category:'Online (Vevor)',defaultProcess:'tig',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2']},
+'vevor-mig200':{name:'Vevor MIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:60},weight:'8.4 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero dulce','Acero inoxidable','Hierro fundido','Cobre','Aleaciones'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'vevor-mig250':{name:'Vevor MIG-250 3-in-1',maxAmps:250,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'12 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,supportedWires:['0.8','1.0','1.2'],supportedStickDia:['2.0','2.5','3.2','4.0'],
+materials:['Acero dulce','Acero inoxidable','Hierro fundido','Cobre','Aleaciones'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
+'vevor-tig205':{name:'Vevor TIG-205 3-in-1',maxAmps:205,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:20},weight:'8.5 kg',category:'Online (Vevor)',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Cobre','Acero inoxidable','Titanio','Aluminio (1/4")'],
+recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'},{code:'E6010',note:'MMA celulósico'}],
+notes:'Compatible con electrodos E6010, E6013 y E7018. Puede soldar aluminio de 1/4" y acero bajo carbono de 3/8".'},
+'vevor-mma140':{name:'Vevor MMA-140 4-in-1',maxAmps:140,inputVolts:'220 V',processes:['stick','tig'],dutyRef:{amps:100,duty:20},weight:'5.45 kg',category:'Online (Vevor)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:4,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero inoxidable','Acero dulce','Cobre','Titanio'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Básico estructural'},{code:'E6011',note:'Celulósico'},{code:'E6010',note:'Penetración profunda'}]},
+'vevor-ct520d':{name:'Vevor CT520D 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:20},weight:'13 kg',category:'Online (Vevor)',defaultProcess:'tig',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable','Cobre','Titanio'],
+recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
 
-'arccaptain-200':{name:'ARCCAPTAIN 200A 6-in-1',maxAmps:200,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:150,duty:25},weight:'9 kg',category:'Online (Amazon)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,gaslessFCAW:true,supportedWires:['0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'yeswelder-135':{name:'YESWELDER 135A',maxAmps:135,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'5 kg',category:'Online (Amazon)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5']},
-'haixiaoer-160':{name:'haixiaoer 160A 4-in-1',maxAmps:160,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:120,duty:25},weight:'8 kg',category:'Online (Amazon)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'mecaje-200':{name:'Mecaje 200A Inverter',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:140,duty:25},weight:'5 kg',category:'Online (Amazon)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'reboot-arc200':{name:'Reboot ARC200 MMA',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:25},weight:'4.8 kg',category:'Online (Amazon)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
+'arccaptain-200':{name:'ARCCAPTAIN 200A 6-in-1',maxAmps:200,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:150,duty:25},weight:'9 kg',category:'Online (Amazon)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,gaslessFCAW:true,supportedWires:['0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Hierro (Fe)','Aluminio (Al)','Magnesio (Mg)','Cromo-Níquel (CrNi)'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'yeswelder-135':{name:'YESWELDER 135A',maxAmps:135,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'5 kg',category:'Online (Amazon)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'}]},
+'haixiaoer-160':{name:'haixiaoer 160A 4-in-1',maxAmps:160,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:120,duty:25},weight:'8 kg',category:'Online (Amazon)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'},{code:'E6013',note:'MMA general'}]},
+'mecaje-200':{name:'Mecaje 200A Inverter',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:140,duty:25},weight:'5 kg',category:'Online (Amazon)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'reboot-arc200':{name:'Reboot ARC200 MMA',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:25},weight:'4.8 kg',category:'Online (Amazon)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
 
-'hyundai-hywd160':{name:'Hyundai HYWD-160',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:30},weight:'4 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'cecotec-soldi200':{name:'Cecotec Soldi 200',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:150,duty:25},weight:'4.5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'greencut-mma200':{name:'GREENCUT MMA200',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:160,duty:25},weight:'5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'vector-arc200k':{name:'Vector Welding ARC200K',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:25},weight:'5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'stahlwerk-arc200':{name:'Stahlwerk ARC 200 Puls Pro',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:35},weight:'5.2 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'total-tool-tw214166':{name:'Total Tools TW214166',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:140,duty:30},weight:'4.8 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
+'hyundai-hywd160':{name:'Hyundai HYWD-160',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:30},weight:'4 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
+'cecotec-soldi200':{name:'Cecotec Soldi 200',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:150,duty:25},weight:'4.5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
+'greencut-mma200':{name:'GREENCUT MMA200',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:160,duty:25},weight:'5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
+'vector-arc200k':{name:'Vector Welding ARC200K',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:25},weight:'5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
+'stahlwerk-arc200':{name:'Stahlwerk ARC 200 Puls Pro',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:35},weight:'5.2 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
+'total-tool-tw214166':{name:'Total Tools TW214166',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:140,duty:30},weight:'4.8 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
 
-'solter-practico160':{name:'Solter PRACTICO MIG 160 LD',maxAmps:160,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:160,duty:35},weight:'7.6 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:5,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2']},
-'solter-practico200':{name:'Solter PRACTICO MIG 200 LD',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'paton-standardmig200':{name:'Paton StandardMIG-200',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:40},weight:'10 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'telwin-bimax140i':{name:'Telwin Bimax 140i Synergic',maxAmps:140,inputVolts:'230 V',processes:['mig','fcaw'],dutyRef:{amps:100,duty:30},weight:'8 kg',category:'Multiproceso doméstica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9']},
-'telwin-bimax150i':{name:'Telwin Bimax 150i Synergic',maxAmps:150,inputVolts:'230 V',processes:['mig','fcaw'],dutyRef:{amps:120,duty:25},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0']},
-'telwin-technomig260':{name:'Telwin Technomig 260 Dual',maxAmps:250,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:200,duty:30},weight:'18 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0','1.2'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
+'solter-practico160':{name:'Solter PRACTICO MIG 160 LD',maxAmps:160,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:160,duty:35},weight:'7.6 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:5,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E6013',note:'MMA general'}]},
+'solter-practico200':{name:'Solter PRACTICO MIG 200 LD',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
+'paton-standardmig200':{name:'Paton StandardMIG-200',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:40},weight:'10 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio y aleaciones'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero (82% Ar + 18% CO₂)'},{code:'ER308L/316L',note:'Hilo MIG inox'},{code:'ER4043',note:'Hilo aluminio-silicio'},{code:'E7018',note:'MMA estructural'}]},
+'telwin-bimax140i':{name:'Telwin Bimax 140i Synergic',maxAmps:140,inputVolts:'230 V',processes:['mig','fcaw'],dutyRef:{amps:100,duty:30},weight:'8 kg',category:'Multiproceso doméstica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW 0,8–0,9 mm sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'}]},
+'telwin-bimax150i':{name:'Telwin Bimax 150i Synergic',maxAmps:150,inputVolts:'230 V',processes:['mig','fcaw'],dutyRef:{amps:120,duty:25},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio'],
+recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'}]},
+'telwin-technomig260':{name:'Telwin Technomig 260 Dual',maxAmps:250,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:200,duty:30},weight:'18 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0','1.2'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio','CuSi3 (latón)','CuAl8 (bronce)'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA rutilo, ácido, básico'},{code:'E6013',note:'MMA general'}]},
 
-'solter-aerotig200':{name:'Solter AEROTIG AC/DC 200A',maxAmps:200,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:200,duty:35},weight:'12 kg',category:'TIG doméstica',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
-'stahlwerk-tig200':{name:'Stahlwerk AC/DC TIG 200 ST',maxAmps:200,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:150,duty:30},weight:'10 kg',category:'TIG doméstica',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2']},
+'solter-aerotig200':{name:'Solter AEROTIG AC/DC 200A',maxAmps:200,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:200,duty:35},weight:'12 kg',category:'TIG doméstica',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio (AC)'],
+recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'stahlwerk-tig200':{name:'Stahlwerk AC/DC TIG 200 ST',maxAmps:200,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:150,duty:30},weight:'10 kg',category:'TIG doméstica',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio (AC)'],
+recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
 
-'lincoln-ac225':{name:'Lincoln AC-225',maxAmps:225,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'25 kg',category:'Profesional',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:8,supportedStickDia:['2.0','2.5','3.2','4.0','5.0','6.0']},
-'miller-multimatic215':{name:'Miller Multimatic 215',maxAmps:215,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:150,duty:20},weight:'15 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'esab-rebel205':{name:'ESAB Rebel EMP 205ic',maxAmps:205,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:25},weight:'12 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,supportedWires:['0.6','0.8','0.9','1.0','1.2'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0']},
-'euroweld-sprinter160s':{name:'Euroweld Sprinter 160S',maxAmps:160,inputVolts:'120/230 V',processes:['stick','tig'],dutyRef:{amps:160,duty:45},weight:'8.4 kg',category:'Profesional',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2','4.0']}};
+'lincoln-ac225':{name:'Lincoln AC-225',maxAmps:225,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'25 kg',category:'Profesional',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:8,supportedStickDia:['2.0','2.5','3.2','4.0','5.0','6.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'},{code:'E6011',note:'Celulósico'}]},
+'miller-multimatic215':{name:'Miller Multimatic 215',maxAmps:215,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:150,duty:20},weight:'15 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio (spool gun)'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
+'esab-rebel205':{name:'ESAB Rebel EMP 205ic',maxAmps:205,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:25},weight:'12 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,supportedWires:['0.6','0.8','0.9','1.0','1.2'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable','Aluminio (spool gun)'],
+recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
+'euroweld-sprinter160s':{name:'Euroweld Sprinter 160S',maxAmps:160,inputVolts:'120/230 V',processes:['stick','tig'],dutyRef:{amps:160,duty:45},weight:'8.4 kg',category:'Profesional',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
+materials:['Acero al carbono','Acero inoxidable'],
+recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]}};
 
 let units='metric',currentProcess='mig',currentRefProcess='mig',lastResult=null;
 let selectedMachine=null,customMachines=[];
@@ -325,9 +444,6 @@ let currentLang=(navigator.language||'es').slice(0,2);if(!['es','en'].includes(c
 const PREF_UNITS='soldaduraAR_units',PREF_LANG='soldaduraAR_lang',PREF_CUSTOM_MCH='soldaduraAR_customMch';
 const $=id=>document.getElementById(id);
 
-/* ============================================================
-   INIT
-   ============================================================ */
 document.addEventListener('DOMContentLoaded',()=>{
 const sU=localStorage.getItem(PREF_UNITS);if(sU)units=sU;
 const sL=localStorage.getItem(PREF_LANG);if(sL)currentLang=sL;
@@ -350,15 +466,12 @@ $('stickDiameter').innerHTML=Object.keys(STICK_BASE_AMPS).map(k=>`<option value=
 
 function normalize(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 
-/* ============================================================
-   POPULATE MACHINES WITH SEARCH
-   ============================================================ */
 function populateMachines(query){
 query=query||'';
 const nq=normalize(query);
 const grouped={};let count=0;
 Object.entries(MACHINE_DB).forEach(([k,v])=>{
-if(nq){const hay=normalize(v.name+' '+v.category+' '+(v.processes||[]).join(' '));if(!hay.includes(nq))return;}
+if(nq){const hay=normalize(v.name+' '+v.category+' '+(v.processes||[]).join(' ')+(v.materials||[]).join(' '));if(!hay.includes(nq))return;}
 if(!grouped[v.category])grouped[v.category]=[];
 grouped[v.category].push(`<option value="${k}">${v.name}</option>`);
 count++;
@@ -371,25 +484,13 @@ count++;
 });
 let html='';
 if(count===0){html='<option value="">— Sin resultados —</option>';}
-else{
-html='<option value="">— Selecciona una máquina —</option>';
-Object.entries(grouped).forEach(([cat,opts])=>{html+=`<optgroup label="${cat}">${opts.join('')}</optgroup>`;});
-}
+else{html='<option value="">— Selecciona una máquina —</option>';
+Object.entries(grouped).forEach(([cat,opts])=>{html+=`<optgroup label="${cat}">${opts.join('')}</optgroup>`;});}
 $('machine').innerHTML=html;
-if(selectedMachine){
-const key=selectedMachine._key||selectedMachine.id;
-if([...$('machine').options].some(o=>o.value===key))$('machine').value=key;
-}
+if(selectedMachine){const key=selectedMachine._key||selectedMachine.id;if([...$('machine').options].some(o=>o.value===key))$('machine').value=key;}
 const hint=$('searchHint');
-if(nq){
-hint.textContent=count===0?`Sin resultados para "${query}"`:`${count} máquina${count>1?'s':''} encontrada${count>1?'s':''}`;
-hint.style.color=count===0?'var(--danger)':'var(--ok)';
-$('machineSearchClear').classList.add('show');
-}else{
-hint.textContent='Escribe parte del nombre para filtrar';
-hint.style.color='var(--text-dim)';
-$('machineSearchClear').classList.remove('show');
-}
+if(nq){hint.textContent=count===0?`Sin resultados para "${query}"`:`${count} máquina${count>1?'s':''} encontrada${count>1?'s':''}`;hint.style.color=count===0?'var(--danger)':'var(--ok)';$('machineSearchClear').classList.add('show');}
+else{hint.textContent='Escribe parte del nombre para filtrar';hint.style.color='var(--text-dim)';$('machineSearchClear').classList.remove('show');}
 }
 
 function setupNav(){document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$('tab-'+btn.dataset.tab).classList.add('active');$('content').scrollTo({top:0,behavior:'instant'});if(btn.dataset.tab==='machine')updateDutyCycle();if(btn.dataset.tab==='reference')buildReference(currentRefProcess);});});}
@@ -399,335 +500,124 @@ function setupLangToggle(){document.querySelectorAll('#langToggle button').forEa
 function setupUnitToggle(){document.querySelectorAll('#unitToggle button').forEach(b=>b.addEventListener('click',()=>{units=b.dataset.unit;localStorage.setItem(PREF_UNITS,units);applyUnits();if(lastResult)calculate();}));}
 function applyUnits(){document.querySelectorAll('#unitToggle button').forEach(b=>b.classList.toggle('active',b.dataset.unit===units));document.querySelectorAll('.unit-label').forEach(el=>el.textContent=units==='metric'?'mm':'in');}
 
-/* ============================================================
-   MACHINE TAB
-   ============================================================ */
 function setupMachineTab(){
 const search=$('machineSearch');let searchTimer;
 search.addEventListener('input',e=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>populateMachines(e.target.value),120);});
 $('machineSearchClear').addEventListener('click',()=>{search.value='';populateMachines('');search.focus();});
 $('machine').addEventListener('change',()=>{
 const key=$('machine').value;
-if(!key){
-selectedMachine=null;
-$('machineBanner').classList.remove('show');
-$('constraintNote').classList.remove('show');
-resetMachineConstraints();
-highlightGuideProcess(null);
-return;
-}
-let m=MACHINE_DB[key];
-if(m){m._key=key;}else{m=customMachines.find(x=>x.id===key);}
-if(!m)return;
-selectedMachine=m;
-applyMachineConstraints(m);
-applyMachinePreset(m);
+if(!key){selectedMachine=null;$('machineBanner').classList.remove('show');$('constraintNote').classList.remove('show');$('materialPanel').classList.remove('show');$('electrodePanel').classList.remove('show');resetMachineConstraints();highlightGuideProcess(null);return;}
+let m=MACHINE_DB[key];if(m){m._key=key;}else{m=customMachines.find(x=>x.id===key);}
+if(!m)return;selectedMachine=m;applyMachineConstraints(m);applyMachinePreset(m);updateMaterialPanel(m);updateElectrodePanel(m);
 });
 $('dutyAmps').addEventListener('input',updateDutyCycle);
 renderCustomMachines();
 }
 
 /* ============================================================
-   MACHINE CONSTRAINTS — oculta lo que la máquina no soporta
+   MATERIAL & ELECTRODE PANELS
    ============================================================ */
+function updateMaterialPanel(m){
+const panel=$('materialPanel');
+if(!m.materials||!m.materials.length){panel.classList.remove('show');return;}
+panel.classList.add('show');
+panel.innerHTML=`<h4>🔩 Materiales soldables con ${m.name}</h4>
+<div class="material-chips">${m.materials.map(mat=>`<span class="material-chip">${mat}</span>`).join('')}</div>
+${m.notes?`<div style="font-size:0.72rem;color:#86efac;margin-top:6px;line-height:1.5">📝 ${m.notes}</div>`:''}`;
+}
+
+function updateElectrodePanel(m){
+const panel=$('electrodePanel');
+if(!m.recommendedElectrodes||!m.recommendedElectrodes.length){panel.classList.remove('show');return;}
+panel.classList.add('show');
+panel.innerHTML=`<h4>⚡ Electrodos / Hilos recomendados</h4>
+<ul class="electrode-list">${m.recommendedElectrodes.map(e=>`<li><span class="code">${e.code}</span><span class="note">${e.note}</span></li>`).join('')}</ul>`;
+if(m.notes)panel.innerHTML+=`<div class="electrode-notes">📝 ${m.notes}</div>`;
+}
+
 function resetMachineConstraints(){
-// Restore all process tabs
 document.querySelectorAll('#processTabs .process-tab').forEach(t=>{t.style.display='';});
-// Restore all wire options
 [...$('migWire').options].forEach(o=>o.style.display='');
 [...$('fcawWire').options].forEach(o=>o.style.display='');
 [...$('stickDiameter').options].forEach(o=>o.style.display='');
-// Show all gas selectors
-$('migGasGroup').style.display='';
-$('fcawGasGroup').style.display='';
-$('fcawGaslessNote').style.display='none';
+$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';
 }
 
 function updateGasVisibility(){
-// Called when process tab changes — shows/hides gas based on selected machine
-if(!selectedMachine){
-$('migGasGroup').style.display='';
-$('fcawGasGroup').style.display='';
-$('fcawGaslessNote').style.display='none';
-return;
-}
-// MIG gas: only if machine does MIG with gas
-if(currentProcess==='mig'){
-$('migGasGroup').style.display='';
-}
-// FCAW gas: hidden if gaslessFCAW
-if(currentProcess==='fcaw'){
-if(selectedMachine.gaslessFCAW){
-$('fcawGasGroup').style.display='none';
-$('fcawGaslessNote').style.display='block';
-}else{
-$('fcawGasGroup').style.display='';
-$('fcawGaslessNote').style.display='none';
-}
-}
+if(!selectedMachine){$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';return;}
+if(currentProcess==='mig'){$('migGasGroup').style.display='';}
+if(currentProcess==='fcaw'){if(selectedMachine.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}
 }
 
 function applyMachineConstraints(m){
 const procs=m.processes||[];
-
-// 1) Hide unsupported process tabs
-document.querySelectorAll('#processTabs .process-tab').forEach(tab=>{
-tab.style.display=procs.includes(tab.dataset.process)?'':'none';
-});
-
-// 2) Filter wire options for MIG
-if(procs.includes('mig')){
-if(m.supportedWires){
-[...$('migWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});
-if(!m.supportedWires.includes($('migWire').value))$('migWire').value=m.supportedWires[0];
-}
-$('migGasGroup').style.display='';
-}
-
-// 3) Filter wire options for FCAW + gas visibility
-if(procs.includes('fcaw')){
-if(m.supportedWires){
-[...$('fcawWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});
-if(!m.supportedWires.includes($('fcawWire').value))$('fcawWire').value=m.supportedWires[0];
-}
-if(m.gaslessFCAW){
-$('fcawGasGroup').style.display='none';
-$('fcawGaslessNote').style.display='block';
-}else{
-$('fcawGasGroup').style.display='';
-$('fcawGaslessNote').style.display='none';
-}
-}
-
-// 4) Filter stick electrode diameters
-if(procs.includes('stick')&&m.supportedStickDia){
-[...$('stickDiameter').options].forEach(o=>{o.style.display=m.supportedStickDia.includes(o.value)?'':'none';});
-if(!m.supportedStickDia.includes($('stickDiameter').value))$('stickDiameter').value=m.supportedStickDia[0];
-}
-
-// 5) Constraint note
+document.querySelectorAll('#processTabs .process-tab').forEach(tab=>{tab.style.display=procs.includes(tab.dataset.process)?'':'none';});
+if(procs.includes('mig')){if(m.supportedWires){[...$('migWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('migWire').value))$('migWire').value=m.supportedWires[0];}$('migGasGroup').style.display='';}
+if(procs.includes('fcaw')){if(m.supportedWires){[...$('fcawWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('fcawWire').value))$('fcawWire').value=m.supportedWires[0];}if(m.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}
+if(procs.includes('stick')&&m.supportedStickDia){[...$('stickDiameter').options].forEach(o=>{o.style.display=m.supportedStickDia.includes(o.value)?'':'none';});if(!m.supportedStickDia.includes($('stickDiameter').value))$('stickDiameter').value=m.supportedStickDia[0];}
 const notes=[];
 if(m.gaslessFCAW)notes.push('🟣 FCAW sin gas — hilo tubular con fundente interno');
 if(m.supportedWires)notes.push(`🔵 Hilos soportados: ${m.supportedWires.join(', ')} mm`);
 if(m.supportedStickDia)notes.push(`🟠 Electrodos soportados: ${m.supportedStickDia.join(', ')} mm`);
 const noteEl=$('constraintNote');
-if(notes.length){
-noteEl.classList.add('show');
-noteEl.innerHTML=`<strong>Restricciones de ${m.name}</strong>`+notes.map(n=>`<div>${n}</div>`).join('');
-}else{
-noteEl.classList.remove('show');
-}
+if(notes.length){noteEl.classList.add('show');noteEl.innerHTML=`<strong>Restricciones de ${m.name}</strong>`+notes.map(n=>`<div>${n}</div>`).join('');}
+else{noteEl.classList.remove('show');}
 }
 
-/* ============================================================
-   MACHINE PRESET
-   ============================================================ */
 function applyMachinePreset(m){
 const proc=m.defaultProcess||(m.processes&&m.processes[0])||'stick';
 currentProcess=proc;
 document.querySelectorAll('#processTabs .process-tab').forEach(b=>{b.classList.toggle('active',b.dataset.process===proc);});
 document.querySelectorAll('.process-inputs').forEach(el=>el.style.display='none');
-$(proc+'Inputs').style.display='block';
-updateGasVisibility();
-
-if(proc==='mig'||proc==='fcaw'){
-const d=m.defaultWire||(m.supportedWires?m.supportedWires[0]:'0.8');
-const sel=proc==='mig'?$('migWire'):$('fcawWire');
-if([...sel.options].some(o=>o.value===d))sel.value=d;
-}
-if(proc==='stick'){
-const d=m.defaultStickDia||(m.supportedStickDia?m.supportedStickDia[0]:'3.2');
-const sel=$('stickDiameter');
-if([...sel.options].some(o=>o.value===d))sel.value=d;
-}
-
+$(proc+'Inputs').style.display='block';updateGasVisibility();
+if(proc==='mig'||proc==='fcaw'){const d=m.defaultWire||(m.supportedWires?m.supportedWires[0]:'0.8');const sel=proc==='mig'?$('migWire'):$('fcawWire');if([...sel.options].some(o=>o.value===d))sel.value=d;}
+if(proc==='stick'){const d=m.defaultStickDia||(m.supportedStickDia?m.supportedStickDia[0]:'3.2');const sel=$('stickDiameter');if([...sel.options].some(o=>o.value===d))sel.value=d;}
 const th=m.defaultThickness||4;
-if(proc==='mig')$('migThickness').value=th;
-else if(proc==='tig')$('tigThickness').value=th;
-else if(proc==='stick')$('stickThickness').value=th;
-else if(proc==='fcaw')$('fcawThickness').value=th;
-
-// Auto-set reference table
-currentRefProcess=proc;
-document.querySelectorAll('#refProcessTabs .process-tab').forEach(b=>b.classList.toggle('active',b.dataset.refprocess===proc));
-buildReference(proc);
-
-// Highlight guide
+if(proc==='mig')$('migThickness').value=th;else if(proc==='tig')$('tigThickness').value=th;else if(proc==='stick')$('stickThickness').value=th;else if(proc==='fcaw')$('fcawThickness').value=th;
+currentRefProcess=proc;document.querySelectorAll('#refProcessTabs .process-tab').forEach(b=>b.classList.toggle('active',b.dataset.refprocess===proc));buildReference(proc);
 highlightGuideProcess(proc);
-
-// Duty
-$('dutyAmps').value=m.dutyRef?m.dutyRef.amps:100;
-updateDutyCycle();
-
-// Banner
-const banner=$('machineBanner');
-banner.classList.add('show');
+$('dutyAmps').value=m.dutyRef?m.dutyRef.amps:100;updateDutyCycle();
+const banner=$('machineBanner');banner.classList.add('show');
 const dia=m.defaultWire?m.defaultWire+' mm':(m.defaultStickDia?m.defaultStickDia+' mm':'—');
 banner.innerHTML=`✅ <strong>${m.name}</strong><br><span style="font-size:0.75rem;opacity:0.9">Proceso: ${proc.toUpperCase()} · Ø: ${dia} · Espesor: ${th} mm · Máx: ${m.maxAmps} A</span>`;
-
 setTimeout(()=>calculate(),100);
 }
 
-/* ============================================================
-   GUIDE HIGHLIGHT
-   ============================================================ */
-function highlightGuideProcess(process){
-document.querySelectorAll('.guide-card').forEach(card=>{
-card.classList.toggle('highlighted',process&&card.dataset.process===process);
-});
-}
+function highlightGuideProcess(process){document.querySelectorAll('.guide-card').forEach(card=>{card.classList.toggle('highlighted',process&&card.dataset.process===process);});}
 
-/* ============================================================
-   CUSTOM MACHINES
-   ============================================================ */
 function setupCustomMachineForm(){
 $('btnAddMachine').addEventListener('click',()=>{$('addMachineForm').classList.toggle('show');});
 $('btnCancelMachine').addEventListener('click',()=>{$('addMachineForm').classList.remove('show');});
 $('btnSaveMachine').addEventListener('click',()=>{
 const name=$('newMchName').value.trim();if(!name)return showToast('Introduce un nombre');
-const maxAmps=parseFloat($('newMchAmps').value)||160;
-const volts=$('newMchVolts').value;
-const processes=[];
-if($('newMchMIG').checked)processes.push('mig');
-if($('newMchTIG').checked)processes.push('tig');
-if($('newMchStick').checked)processes.push('stick');
-if($('newMchFCAW').checked)processes.push('fcaw');
-if(!processes.length)processes.push('stick');
-const duty=parseFloat($('newMchDuty').value)||25;
-const dutyAmps=parseFloat($('newMchDutyAmps').value)||100;
-const gasless=$('newMchGasless').checked;
-const custom={id:'custom-'+Date.now(),name,maxAmps,inputVolts:volts,processes,dutyRef:{amps:dutyAmps,duty},weight:'—',category:'Mis máquinas',defaultProcess:processes[0],defaultThickness:4,gaslessFCAW:gasless&&processes.includes('fcaw')};
-if(processes.includes('mig'))custom.defaultWire='0.8';
-if(processes.includes('stick'))custom.defaultStickDia='3.2';
-customMachines.push(custom);
-localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));
+const maxAmps=parseFloat($('newMchAmps').value)||160;const volts=$('newMchVolts').value;
+const processes=[];if($('newMchMIG').checked)processes.push('mig');if($('newMchTIG').checked)processes.push('tig');if($('newMchStick').checked)processes.push('stick');if($('newMchFCAW').checked)processes.push('fcaw');if(!processes.length)processes.push('stick');
+const duty=parseFloat($('newMchDuty').value)||25;const dutyAmps=parseFloat($('newMchDutyAmps').value)||100;const gasless=$('newMchGasless').checked;
+const custom={id:'custom-'+Date.now(),name,maxAmps,inputVolts:volts,processes,dutyRef:{amps:dutyAmps,duty},weight:'—',category:'Mis máquinas',defaultProcess:processes[0],defaultThickness:4,gaslessFCAW:gasless&&processes.includes('fcaw'),materials:['Acero al carbono'],recommendedElectrodes:[]};
+if(processes.includes('mig'))custom.defaultWire='0.8';if(processes.includes('stick'))custom.defaultStickDia='3.2';
+customMachines.push(custom);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));
 $('newMchName').value='';$('newMchGasless').checked=false;$('addMachineForm').classList.remove('show');
-renderCustomMachines();populateMachines($('machineSearch').value);
-showToast('✓ Máquina guardada');
-});
-}
-function renderCustomMachines(){
-const list=$('customMachinesList');
-if(!customMachines.length){list.innerHTML='<div style="font-size:0.82rem;color:var(--text-dim);padding:8px 0">No hay máquinas personalizadas.</div>';return;}
-list.innerHTML=customMachines.map(m=>`<div class="custom-machine-item"><div><strong style="color:var(--accent)">${m.name}</strong><br><span style="font-size:0.72rem;color:var(--text-dim)">${m.maxAmps}A · ${m.processes.join(', ').toUpperCase()}${m.gaslessFCAW?' · Sin gas':''}</span></div><button data-id="${m.id}">🗑</button></div>`).join('');
-list.querySelectorAll('button[data-id]').forEach(btn=>{btn.addEventListener('click',()=>{customMachines=customMachines.filter(x=>x.id!==btn.dataset.id);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina eliminada');});});
-}
+renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina guardada');
+});}
+function renderCustomMachines(){const list=$('customMachinesList');if(!customMachines.length){list.innerHTML='<div style="font-size:0.82rem;color:var(--text-dim);padding:8px 0">No hay máquinas personalizadas.</div>';return;}list.innerHTML=customMachines.map(m=>`<div class="custom-machine-item"><div><strong style="color:var(--accent)">${m.name}</strong><br><span style="font-size:0.72rem;color:var(--text-dim)">${m.maxAmps}A · ${m.processes.join(', ').toUpperCase()}${m.gaslessFCAW?' · Sin gas':''}</span></div><button data-id="${m.id}">🗑</button></div>`).join('');list.querySelectorAll('button[data-id]').forEach(btn=>{btn.addEventListener('click',()=>{customMachines=customMachines.filter(x=>x.id!==btn.dataset.id);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina eliminada');});});}
 
-function updateDutyCycle(){
-const key=$('machine').value;if(!key)return;
-let m=MACHINE_DB[key]||customMachines.find(x=>x.id===key);if(!m)return;
-const amps=parseFloat($('dutyAmps').value)||100;
-const refDuty=m.dutyRef.duty/100,ratio=m.dutyRef.amps/amps;
-let duty=Math.max(5,Math.min(100,refDuty*ratio*ratio*100));
-$('dutyPercent').textContent=duty.toFixed(0)+'%';
-const bar=$('dutyBar');bar.style.width=duty+'%';bar.style.background=duty>=60?'#22c55e':duty>=30?'#eab308':'#ef4444';
-const w=$('machineWarning');
-if(duty<20){w.textContent='🚨 Ciclo muy bajo — riesgo de sobrecalentamiento.';w.className='warning danger';}
-else if(duty<40){w.textContent='⚠️ Ciclo moderado — permite enfriamientos.';w.className='warning';}
-else{w.textContent='✅ Ciclo saludable para trabajo continuo.';w.className='warning ok';}
-$('machineDetails').innerHTML=`
-<div class="detail-row"><span class="detail-label">Salida Máx.</span><span class="detail-value">${m.maxAmps} A</span></div>
-<div class="detail-row"><span class="detail-label">Ciclo @ Referencia</span><span class="detail-value">${m.dutyRef.duty}% @ ${m.dutyRef.amps} A</span></div>
-<div class="detail-row"><span class="detail-label">Voltaje Entrada</span><span class="detail-value">${m.inputVolts}</span></div>
-<div class="detail-row"><span class="detail-label">Procesos</span><span class="detail-value">${m.processes.join(', ').toUpperCase()}</span></div>
-<div class="detail-row"><span class="detail-label">Peso</span><span class="detail-value">${m.weight||'—'}</span></div>`;
-}
+function updateDutyCycle(){const key=$('machine').value;if(!key)return;let m=MACHINE_DB[key]||customMachines.find(x=>x.id===key);if(!m)return;const amps=parseFloat($('dutyAmps').value)||100;const refDuty=m.dutyRef.duty/100,ratio=m.dutyRef.amps/amps;let duty=Math.max(5,Math.min(100,refDuty*ratio*ratio*100));$('dutyPercent').textContent=duty.toFixed(0)+'%';const bar=$('dutyBar');bar.style.width=duty+'%';bar.style.background=duty>=60?'#22c55e':duty>=30?'#eab308':'#ef4444';const w=$('machineWarning');if(duty<20){w.textContent='🚨 Ciclo muy bajo — riesgo de sobrecalentamiento.';w.className='warning danger';}else if(duty<40){w.textContent='⚠️ Ciclo moderado — permite enfriamientos.';w.className='warning';}else{w.textContent='✅ Ciclo saludable para trabajo continuo.';w.className='warning ok';}$('machineDetails').innerHTML=`<div class="detail-row"><span class="detail-label">Salida Máx.</span><span class="detail-value">${m.maxAmps} A</span></div><div class="detail-row"><span class="detail-label">Ciclo @ Referencia</span><span class="detail-value">${m.dutyRef.duty}% @ ${m.dutyRef.amps} A</span></div><div class="detail-row"><span class="detail-label">Voltaje Entrada</span><span class="detail-value">${m.inputVolts}</span></div><div class="detail-row"><span class="detail-label">Procesos</span><span class="detail-value">${m.processes.join(', ').toUpperCase()}</span></div><div class="detail-row"><span class="detail-label">Peso</span><span class="detail-value">${m.weight||'—'}</span></div>`;}
 
-/* ============================================================
-   CALCULATE
-   ============================================================ */
 function setupCalcButton(){$('btnCalc').addEventListener('click',()=>{calculate();setTimeout(()=>$('result').scrollIntoView({behavior:'smooth',block:'start'}),100);});}
-function calculate(){
-if(currentProcess==='mig')calcMIG();
-else if(currentProcess==='tig')calcTIG();
-else if(currentProcess==='stick')calcStick();
-else if(currentProcess==='fcaw')calcFCAW();
-$('result').classList.add('show');
-}
+function calculate(){if(currentProcess==='mig')calcMIG();else if(currentProcess==='tig')calcTIG();else if(currentProcess==='stick')calcStick();else if(currentProcess==='fcaw')calcFCAW();$('result').classList.add('show');}
 function getThicknessMM(id){const v=parseFloat($(id).value)||0;return units==='metric'?v:v*MM_PER_INCH;}
 
-function calcMIG(){
-const wire=$('migWire').value;const thickness=getThicknessMM('migThickness');
-const joint=$('migJoint').value,position=$('migPosition').value,gas=$('migGas').value;
-if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');
-const d=MIG_DATA[wire];const tRatio=Math.min(1,thickness/d.thicknessMax);
-let ampsMin=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.max(0,tRatio-0.15);
-let ampsMax=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.min(1,tRatio+0.15);
-let voltsMin=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.max(0,tRatio-0.15);
-let voltsMax=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.min(1,tRatio+0.15);
-const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];
-ampsMin*=posF*jointF;ampsMax*=posF*jointF;
-const vPosF=VOLTAGE_POS_FACTOR[position];voltsMin*=vPosF;voltsMax*=vPosF;
-let gasFlow=d.gasFlow.slice();
-if(gas==='co2'){voltsMax*=1.05;gasFlow[0]+=2;gasFlow[1]+=3;}else if(gas==='ar'){voltsMax*=1.03;}
-ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);voltsMin=Math.round(voltsMin);voltsMax=Math.round(voltsMax);
-const wfsMin=(d.wfs[0]*posF*jointF).toFixed(1);const wfsMax=(d.wfs[1]*posF*jointF).toFixed(1);
-const passes=Math.max(1,Math.ceil(thickness/(d.thicknessMax*0.6)));
-lastResult={process:'MIG',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity:'DC+ (DCEP)',gasFlow:`${gasFlow[0]}–${gasFlow[1]} l/min`,wireSpeed:`${wfsMin}–${wfsMax} m/min`,passes,thickness,position,material:null};
-renderResult(lastResult);$('wireSpeedLabel').style.display='flex';$('resultProcessLabel').textContent='MIG/MAG — Amperaje Recomendado';}
+function calcMIG(){const wire=$('migWire').value;const thickness=getThicknessMM('migThickness');const joint=$('migJoint').value,position=$('migPosition').value,gas=$('migGas').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const d=MIG_DATA[wire];const tRatio=Math.min(1,thickness/d.thicknessMax);let ampsMin=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.max(0,tRatio-0.15);let ampsMax=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.min(1,tRatio+0.15);let voltsMin=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.max(0,tRatio-0.15);let voltsMax=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.min(1,tRatio+0.15);const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];ampsMin*=posF*jointF;ampsMax*=posF*jointF;const vPosF=VOLTAGE_POS_FACTOR[position];voltsMin*=vPosF;voltsMax*=vPosF;let gasFlow=d.gasFlow.slice();if(gas==='co2'){voltsMax*=1.05;gasFlow[0]+=2;gasFlow[1]+=3;}else if(gas==='ar'){voltsMax*=1.03;}ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);voltsMin=Math.round(voltsMin);voltsMax=Math.round(voltsMax);const wfsMin=(d.wfs[0]*posF*jointF).toFixed(1);const wfsMax=(d.wfs[1]*posF*jointF).toFixed(1);const passes=Math.max(1,Math.ceil(thickness/(d.thicknessMax*0.6)));lastResult={process:'MIG',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity:'DC+ (DCEP)',gasFlow:`${gasFlow[0]}–${gasFlow[1]} l/min`,wireSpeed:`${wfsMin}–${wfsMax} m/min`,passes,thickness,position,material:null};renderResult(lastResult);$('wireSpeedLabel').style.display='flex';$('resultProcessLabel').textContent='MIG/MAG — Amperaje Recomendado';}
 
-function calcTIG(){
-const material=$('tigMaterial').value;const thickness=getThicknessMM('tigThickness');
-const joint=$('tigJoint').value,position=$('tigPosition').value;
-if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');
-const d=TIG_DATA[material];const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];
-let ampsMin=thickness*d.ampsPerMM[0]*posF*jointF;let ampsMax=thickness*d.ampsPerMM[1]*posF*jointF;
-ampsMin=Math.max(10,Math.round(ampsMin));ampsMax=Math.max(15,Math.round(ampsMax));
-const voltsMin=material==='aluminum'?12:10;const voltsMax=material==='aluminum'?16:14;
-const passes=Math.max(1,Math.ceil(thickness/4));
-lastResult={process:'TIG',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity:d.currentType,gasFlow:`${d.gasFlow[0]}–${d.gasFlow[1]} l/min (Argón)`,wireSpeed:'—',passes,thickness,position,material};
-renderResult(lastResult);$('wireSpeedLabel').style.display='none';$('resultProcessLabel').textContent='TIG — Amperaje Recomendado';}
+function calcTIG(){const material=$('tigMaterial').value;const thickness=getThicknessMM('tigThickness');const joint=$('tigJoint').value,position=$('tigPosition').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const d=TIG_DATA[material];const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];let ampsMin=thickness*d.ampsPerMM[0]*posF*jointF;let ampsMax=thickness*d.ampsPerMM[1]*posF*jointF;ampsMin=Math.max(10,Math.round(ampsMin));ampsMax=Math.max(15,Math.round(ampsMax));const voltsMin=material==='aluminum'?12:10;const voltsMax=material==='aluminum'?16:14;const passes=Math.max(1,Math.ceil(thickness/4));lastResult={process:'TIG',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity:d.currentType,gasFlow:`${d.gasFlow[0]}–${d.gasFlow[1]} l/min (Argón)`,wireSpeed:'—',passes,thickness,position,material};renderResult(lastResult);$('wireSpeedLabel').style.display='none';$('resultProcessLabel').textContent='TIG — Amperaje Recomendado';}
 
-function calcStick(){
-const electrode=$('stickElectrode').value;const diameter=$('stickDiameter').value;
-const thickness=getThicknessMM('stickThickness');const joint=$('stickJoint').value,position=$('stickPosition').value,material=$('stickMaterial').value;
-if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');
-const e=STICK_ELECTRODES[electrode];const[baseMin,baseMax]=STICK_BASE_AMPS[diameter]||STICK_BASE_AMPS['3.2'];
-const posF=POSITION_FACTOR[position],matF=MATERIAL_FACTOR_STICK[material],jointF=JOINT_FACTOR[joint];
-const thickF=thickness<=3?0.85:thickness<=6?0.95:thickness<=10?1.00:thickness<=20?1.05:1.10;
-let ampsMin=baseMin*e.factor*posF*thickF*matF*jointF;let ampsMax=baseMax*e.factor*posF*thickF*matF*jointF;
-if(thickness<2)ampsMax*=0.9;
-ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);
-const passes=Math.max(1,Math.ceil((thickness/3.5)*({butt:1,lap:1.2,tee:1.3,corner:1.1}[joint]||1)));
-lastResult={process:'Electrodo',ampsMin,ampsMax,voltage:`${e.volts} V`,polarity:e.polarity,gasFlow:'— (electrodo revestido)',wireSpeed:'—',passes,thickness,position,material};
-renderResult(lastResult);$('wireSpeedLabel').style.display='none';$('resultProcessLabel').textContent='Electrodo — Amperaje Recomendado';}
+function calcStick(){const electrode=$('stickElectrode').value;const diameter=$('stickDiameter').value;const thickness=getThicknessMM('stickThickness');const joint=$('stickJoint').value,position=$('stickPosition').value,material=$('stickMaterial').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const e=STICK_ELECTRODES[electrode];const[baseMin,baseMax]=STICK_BASE_AMPS[diameter]||STICK_BASE_AMPS['3.2'];const posF=POSITION_FACTOR[position],matF=MATERIAL_FACTOR_STICK[material],jointF=JOINT_FACTOR[joint];const thickF=thickness<=3?0.85:thickness<=6?0.95:thickness<=10?1.00:thickness<=20?1.05:1.10;let ampsMin=baseMin*e.factor*posF*thickF*matF*jointF;let ampsMax=baseMax*e.factor*posF*thickF*matF*jointF;if(thickness<2)ampsMax*=0.9;ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);const passes=Math.max(1,Math.ceil((thickness/3.5)*({butt:1,lap:1.2,tee:1.3,corner:1.1}[joint]||1)));lastResult={process:'Electrodo',ampsMin,ampsMax,voltage:`${e.volts} V`,polarity:e.polarity,gasFlow:'— (electrodo revestido)',wireSpeed:'—',passes,thickness,position,material,electrodeNote:e.note};renderResult(lastResult);$('wireSpeedLabel').style.display='none';$('resultProcessLabel').textContent='Electrodo — Amperaje Recomendado';}
 
-function calcFCAW(){
-const wire=$('fcawWire').value;const thickness=getThicknessMM('fcawThickness');
-const joint=$('fcawJoint').value,position=$('fcawPosition').value;
-const isGasless=selectedMachine&&selectedMachine.gaslessFCAW;
-const gas=isGasless?null:$('fcawGas').value;
-if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');
-const d=FCAW_DATA[wire];const tRatio=Math.min(1,thickness/15);
-let ampsMin=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.max(0,tRatio-0.15);
-let ampsMax=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.min(1,tRatio+0.15);
-let voltsMin=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.max(0,tRatio-0.15);
-let voltsMax=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.min(1,tRatio+0.15);
-const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];
-ampsMin*=posF*jointF;ampsMax*=posF*jointF;
-const vPosF=VOLTAGE_POS_FACTOR[position];voltsMin*=vPosF;voltsMax*=vPosF;
-let gasFlow=d.gasFlow.slice();let gasText;
-if(isGasless){
-gasText='Sin gas (fundente interno)';
-}else{
-if(gas==='mix'){gasFlow[0]+=1;gasFlow[1]+=2;}
-gasText=`${gasFlow[0]}–${gasFlow[1]} l/min`;
-}
-ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);voltsMin=Math.round(voltsMin);voltsMax=Math.round(voltsMax);
-const wfsMin=(d.wfs[0]*posF*jointF).toFixed(1);const wfsMax=(d.wfs[1]*posF*jointF).toFixed(1);
-const passes=Math.max(1,Math.ceil(thickness/5));
-// Gasless FCAW uses DCEN (electrode negative) typically
-const polarity=isGasless?'DC- (DCEN)':'DC+ (DCEP)';
-lastResult={process:'FCAW',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity,gasFlow:gasText,wireSpeed:`${wfsMin}–${wfsMax} m/min`,passes,thickness,position,material:null};
-renderResult(lastResult);$('wireSpeedLabel').style.display='flex';$('resultProcessLabel').textContent=isGasless?'FCAW (sin gas) — Amperaje Recomendado':'FCAW — Amperaje Recomendado';}
+function calcFCAW(){const wire=$('fcawWire').value;const thickness=getThicknessMM('fcawThickness');const joint=$('fcawJoint').value,position=$('fcawPosition').value;const isGasless=selectedMachine&&selectedMachine.gaslessFCAW;const gas=isGasless?null:$('fcawGas').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const d=FCAW_DATA[wire];const tRatio=Math.min(1,thickness/15);let ampsMin=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.max(0,tRatio-0.15);let ampsMax=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.min(1,tRatio+0.15);let voltsMin=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.max(0,tRatio-0.15);let voltsMax=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.min(1,tRatio+0.15);const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];ampsMin*=posF*jointF;ampsMax*=posF*jointF;const vPosF=VOLTAGE_POS_FACTOR[position];voltsMin*=vPosF;voltsMax*=vPosF;let gasFlow=d.gasFlow.slice();let gasText;if(isGasless){gasText='Sin gas (fundente interno)';}else{if(gas==='mix'){gasFlow[0]+=1;gasFlow[1]+=2;}gasText=`${gasFlow[0]}–${gasFlow[1]} l/min`;}ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);voltsMin=Math.round(voltsMin);voltsMax=Math.round(voltsMax);const wfsMin=(d.wfs[0]*posF*jointF).toFixed(1);const wfsMax=(d.wfs[1]*posF*jointF).toFixed(1);const passes=Math.max(1,Math.ceil(thickness/5));const polarity=isGasless?'DC- (DCEN)':'DC+ (DCEP)';lastResult={process:'FCAW',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity,gasFlow:gasText,wireSpeed:`${wfsMin}–${wfsMax} m/min`,passes,thickness,position,material:null};renderResult(lastResult);$('wireSpeedLabel').style.display='flex';$('resultProcessLabel').textContent=isGasless?'FCAW (sin gas) — Amperaje Recomendado':'FCAW — Amperaje Recomendado';}
 
 function renderResult(r){
-if(selectedMachine&&r.ampsMax>selectedMachine.maxAmps){
-r.ampsMax=selectedMachine.maxAmps;
-if(r.ampsMin>selectedMachine.maxAmps)r.ampsMin=selectedMachine.maxAmps;
-}
-$('currentRange').textContent=`${r.ampsMin} – ${r.ampsMax} A`;
-$('voltageOut').textContent=r.voltage;
+if(selectedMachine&&r.ampsMax>selectedMachine.maxAmps){r.ampsMax=selectedMachine.maxAmps;if(r.ampsMin>selectedMachine.maxAmps)r.ampsMin=selectedMachine.maxAmps;}
+$('currentRange').textContent=`${r.ampsMin} – ${r.ampsMax} A`;$('voltageOut').textContent=r.voltage;
 const polCls=(r.polarity||'').includes('DC+')?'dc\\+':(r.polarity||'').includes('DC-')?'dc-':'ac';
 $('polarityOut').innerHTML=`<span class="polarity-badge ${polCls}">${r.polarity}</span>`;
 $('gasFlowOut').textContent=r.gasFlow;$('wireSpeedOut').textContent=r.wireSpeed;
@@ -742,73 +632,56 @@ else if(r.material==='aluminum')warn='⚠️ Aluminio: usa AC y limpia la superf
 else if(r.material==='cast')warn='⚠️ Fundición: precalienta 200–400°C.';
 else if(r.position==='vertical')warn='⚠️ Vertical: reduce amperaje un 10–15%.';
 else if(r.position==='overhead')warn='⚠️ Sobre cabeza: reduce amperaje un 15–20%.';
-$('warning').textContent=warn;
+if(r.electrodeNote)warn+=`<br><span style="color:#fdba74">📝 Electrodo E${r.electrodeCode||''}: ${r.electrodeNote}</span>`;
+$('warning').innerHTML=warn;
 }
 
-function updateHeatInput(){
-const amps=parseFloat($('heatAmps').value)||0;let volts=24;
-if(lastResult&&lastResult.voltage){const m=lastResult.voltage.match(/(\d+)/);if(m)volts=parseInt(m[1]);}
-const speed=parseFloat($('travelSpeed').value)||200;
-const heat=(amps*volts*60)/(speed*1000);const heatIP=heat*25.4;
-const el=$('heatOut');el.textContent=units==='metric'?`${heat.toFixed(2)} kJ/mm`:`${heatIP.toFixed(2)} kJ/in`;
-el.style.color=heat>2.5?'#fca5a5':heat<0.5?'#86efac':'#f1f5f9';
-}
+function updateHeatInput(){const amps=parseFloat($('heatAmps').value)||0;let volts=24;if(lastResult&&lastResult.voltage){const m=lastResult.voltage.match(/(\d+)/);if(m)volts=parseInt(m[1]);}const speed=parseFloat($('travelSpeed').value)||200;const heat=(amps*volts*60)/(speed*1000);const heatIP=heat*25.4;const el=$('heatOut');el.textContent=units==='metric'?`${heat.toFixed(2)} kJ/mm`:`${heatIP.toFixed(2)} kJ/in`;el.style.color=heat>2.5?'#fca5a5':heat<0.5?'#86efac':'#f1f5f9';}
 
-function buildReference(process){
-const c=$('refContent');let html='';
+function buildReference(process){const c=$('refContent');let html='';
 if(process==='mig'){html+=`<div class="ref-section-title">🔵 MIG/MAG — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th><th>Espesor Máx.</th></tr></thead><tbody>`;
-Object.entries(MIG_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td><td>${d.thicknessMax} mm</td></tr>`;});
-html+=`</tbody></table></div>`;}
+Object.entries(MIG_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td><td>${d.thicknessMax} mm</td></tr>`;});html+=`</tbody></table></div>`;}
 else if(process==='tig'){html+=`<div class="ref-section-title">🟢 TIG — Parámetros por Material</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Material</th><th>Corriente</th><th>A/mm</th></tr></thead><tbody>`;
-Object.entries(TIG_DATA).forEach(([k,d])=>{const n={carbon:'Acero Carbono',stainless:'Inoxidable',aluminum:'Aluminio'};html+=`<tr><td>${n[k]||k}</td><td>${d.currentType}</td><td>${d.ampsPerMM[0]}–${d.ampsPerMM[1]} A/mm</td></tr>`;});
-html+=`</tbody></table></div>`;}
+Object.entries(TIG_DATA).forEach(([k,d])=>{const n={carbon:'Acero Carbono',stainless:'Inoxidable',aluminum:'Aluminio'};html+=`<tr><td>${n[k]||k}</td><td>${d.currentType}</td><td>${d.ampsPerMM[0]}–${d.ampsPerMM[1]} A/mm</td></tr>`;});html+=`</tbody></table></div>`;}
 else if(process==='stick'){html+=`<div class="ref-section-title">🟠 Electrodo — Amperaje por Ø</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Ø</th><th>Rango (A)</th></tr></thead><tbody>`;
-Object.entries(STICK_BASE_AMPS).forEach(([k,v])=>{html+=`<tr><td>${k} mm</td><td>${v[0]}–${v[1]} A</td></tr>`;});
-html+=`</tbody></table></div><div class="ref-section-title">🟠 Electrodo — Polaridad</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Electrodo</th><th>Polaridad</th></tr></thead><tbody>`;
-Object.entries(STICK_ELECTRODES).forEach(([k,d])=>{html+=`<tr><td>E${k}</td><td>${d.polarity}</td></tr>`;});
-html+=`</tbody></table></div>`;}
+Object.entries(STICK_BASE_AMPS).forEach(([k,v])=>{html+=`<tr><td>${k} mm</td><td>${v[0]}–${v[1]} A</td></tr>`;});html+=`</tbody></table></div><div class="ref-section-title">🟠 Electrodo — Polaridad</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Electrodo</th><th>Polaridad</th><th>Nota</th></tr></thead><tbody>`;
+Object.entries(STICK_ELECTRODES).forEach(([k,d])=>{html+=`<tr><td>E${k}</td><td>${d.polarity}</td><td>${d.note||''}</td></tr>`;});html+=`</tbody></table></div>`;}
 else if(process==='fcaw'){html+=`<div class="ref-section-title">🟣 FCAW — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th></tr></thead><tbody>`;
-Object.entries(FCAW_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td></tr>`;});
-html+=`</tbody></table></div>
+Object.entries(FCAW_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td></tr>`;});html+=`</tbody></table></div>
 <div class="ref-section-title">🟣 FCAW — Con gas vs sin gas</div>
 <div class="table-wrap"><table class="ref-table"><thead><tr><th>Tipo</th><th>Polaridad</th><th>Uso</th></tr></thead><tbody>
 <tr><td>Con gas (M21/CO₂)</td><td>DC+</td><td>Alta calidad, taller</td></tr>
 <tr><td>Sin gas (fundente interno)</td><td>DC-</td><td>Exterior, portátil</td></tr>
 </tbody></table></div>`;}
-c.innerHTML=html;
-}
+c.innerHTML=html;}
 
 function setupGuide(){buildGuide();}
-function buildGuide(){
-$('guideContent').innerHTML=`
+function buildGuide(){$('guideContent').innerHTML=`
 <div class="guide-card" data-process="mig"><h3>🔵 MIG/MAG <span class="active-badge">Tu máquina</span></h3>
 <p><strong>Hilo continuo con gas.</strong> Ideal para chapa fina a media. Polaridad DC+. Gas: Ar+CO₂ (M21) para acero, Argón puro para aluminio.</p>
-<p>Ajusta el <strong>voltaje</strong> para la longitud de arco y la <strong>velocidad de hilo</strong> para la corriente.</p></div>
-
+<p><strong>Materiales:</strong> Acero al carbono, inoxidable, aluminio (con gas adecuado).</p>
+<p><strong>Hilos:</strong> ER70S-6 (acero), ER308L/316L (inox), ER4043 (aluminio).</p></div>
 <div class="guide-card" data-process="tig"><h3>🟢 TIG <span class="active-badge">Tu máquina</span></h3>
 <p><strong>Electrodo de tungsteno no consumible.</strong> Máxima calidad y control. DCEN para acero e inox, AC para aluminio.</p>
-<p>Rango típico: <strong>30–40 A/mm</strong> en acero, 25–35 A/mm en inox, 35–50 A/mm en aluminio. Gas: argón puro.</p></div>
-
+<p><strong>Materiales:</strong> Acero carbono, inoxidable, aluminio (AC), titanio, cobre.</p>
+<p><strong>Tungsteno:</strong> WC20 (cerio, gris), WL15 (lantano, dorado). Gas: argón puro.</p></div>
 <div class="guide-card" data-process="stick"><h3>🟠 Electrodo (SMAW) <span class="active-badge">Tu máquina</span></h3>
-<p><strong>Electrodo revestido consumible.</strong> Versátil, funciona con viento. E6013 uso general, E7018 estructural (bajo hidrógeno).</p>
-<p>Polaridad según tipo: <strong>DC+</strong> para 6010/7018, <strong>AC/DC-</strong> para 6013/7024.</p></div>
-
+<p><strong>Electrodo revestido consumible.</strong> Versátil, funciona con viento.</p>
+<p><strong>Electrodos por material:</strong></p>
+<p>• <strong>Acero al carbono:</strong> E6013 (rutilo, fácil), E7018 (básico, estructural), E6010/E6011 (celulósico, penetración)</p>
+<p>• <strong>Inoxidable:</strong> E308L, E316L</p>
+<p>• <strong>Fundición:</strong> ENi-Cl, ENiFe-Cl</p>
+<p>• <strong>Aluminio:</strong> E4043 (raro en electrodo)</p></div>
 <div class="guide-card" data-process="fcaw"><h3>🟣 FCAW <span class="active-badge">Tu máquina</span></h3>
 <p><strong>Hilo tubular con fundente interno.</strong> Alta deposición. Puede usarse con o sin gas.</p>
-<p><strong>Con gas (DC+):</strong> mayor calidad, taller.<br><strong>Sin gas (DC-, self-shielded):</strong> exterior, portátil, ideal para máquinas domésticas como Parkside PIFDS 120AL.</p></div>
-
+<p><strong>Con gas (DC+):</strong> mayor calidad, taller. Hilo E70T-1, E71T-1.</p>
+<p><strong>Sin gas (DC-, self-shielded):</strong> exterior, portátil, ideal para máquinas domésticas. Hilo E71T-GS.</p></div>
 <div class="guide-card"><h3>📐 Reglas generales</h3>
 <p><strong>Amperaje aproximado:</strong> 30–40 A por mm de espesor para electrodo revestido, 25–35 A/mm para TIG en acero, 35–50 A/mm para TIG en aluminio.</p>
 <p><strong>Aporte térmico:</strong> Heat Input (kJ/mm) = (A × V × 60) / (Vel × 1000). Valores típicos: 0,5–2,5 kJ/mm. Inoxidables: &lt;1,5 kJ/mm.</p></div>
-
 <div class="guide-card"><h3>⚠️ Seguridad</h3>
 <p>Usa siempre <strong>careta homologada</strong>, guantes de cuero, delantal y ventilación adecuada. Nunca sueldes en espacios confinados sin extracción.</p></div>`;
-
-if(selectedMachine){
-const proc=selectedMachine.defaultProcess||(selectedMachine.processes&&selectedMachine.processes[0]);
-if(proc)highlightGuideProcess(proc);
-}
-}
+if(selectedMachine){const proc=selectedMachine.defaultProcess||(selectedMachine.processes&&selectedMachine.processes[0]);if(proc)highlightGuideProcess(proc);}}
 
 let toastTimer=null;
 function showToast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500);}
