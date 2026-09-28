@@ -106,7 +106,45 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 .guide-card.highlighted .active-badge{display:inline-block;animation:pulseBadge 2s infinite}
 .guide-card.highlighted h3{color:#fbbf24}
 @keyframes pulseBadge{0%,100%{opacity:1}50%{opacity:0.7}}
-@media(min-width:768px){body{align-items:flex-start;padding:20px}.app{border-radius:20px;max-height:calc(100vh - 40px)}.bottom-nav{position:sticky;transform:none;left:auto}}
+
+/* ── WIZARD / HELPER ── */
+.wizard-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.95);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.wizard-overlay.show{display:flex}
+.wizard{width:100%;max-width:560px;max-height:92vh;background:var(--panel);border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;animation:slideUpWizard 0.35s cubic-bezier(0.16,1,0.3,1)}
+@keyframes slideUpWizard{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.wizard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.wizard-header h2{font-size:1rem;color:var(--accent);font-weight:700}
+.wizard-close{background:transparent;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;padding:6px;min-width:40px;min-height:40px}
+.wizard-progress{display:flex;gap:4px;margin-bottom:18px}
+.wizard-progress-dot{flex:1;height:4px;background:#334155;border-radius:2px;transition:background 0.3s}
+.wizard-progress-dot.active{background:var(--accent)}
+.wizard-step{display:none}
+.wizard-step.active{display:block;animation:fadeIn 0.25s}
+.wizard-step h3{font-size:0.95rem;margin-bottom:6px;color:var(--text);font-weight:700;line-height:1.3}
+.wizard-step .hint{font-size:0.75rem;color:var(--text-dim);margin-bottom:14px;line-height:1.5}
+.wizard-option{display:block;width:100%;padding:14px;background:var(--panel-2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:0.88rem;text-align:left;cursor:pointer;margin-bottom:8px;transition:all 0.15s;font-family:inherit;min-height:52px}
+.wizard-option:hover,.wizard-option.selected{border-color:var(--accent);background:rgba(249,115,22,0.08)}
+.wizard-option:active{transform:scale(0.98)}
+.wizard-option strong{color:var(--accent)}
+.wizard-option small{display:block;color:var(--text-dim);font-size:0.72rem;margin-top:2px}
+.wizard-nav{display:flex;gap:8px;margin-top:16px}
+.wizard-nav button{flex:1;padding:13px;border-radius:var(--radius-sm);font-size:0.88rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
+.wizard-nav .back{background:transparent;border:1.5px solid var(--border);color:var(--text-dim)}
+.wizard-nav .next{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;color:white}
+.wizard-result{padding:16px;background:rgba(34,197,94,0.08);border-left:4px solid var(--ok);border-radius:8px;margin-bottom:14px}
+.wizard-result h4{font-size:0.72rem;color:var(--ok);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700}
+.wizard-result .reco{font-size:1.4rem;color:var(--ok);font-weight:800;margin-bottom:4px}
+.wizard-result .detail{font-size:0.82rem;color:var(--text);line-height:1.6}
+.wizard-result .reason{margin-top:8px;padding:8px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:0.75rem;color:var(--text-dim);line-height:1.5}
+
+/* ── JOINT GUIDE ── */
+.joint-diagram{padding:14px;background:var(--panel-2);border-radius:8px;margin-bottom:10px;text-align:center}
+.joint-diagram svg{max-width:100%;height:auto}
+.joint-diagram .caption{font-size:0.72rem;color:var(--text-dim);margin-top:8px;line-height:1.5}
+.joint-table td{white-space:normal;font-size:0.74rem}
+.dim-chip{display:inline-block;padding:2px 7px;background:rgba(249,115,22,0.15);border-radius:8px;font-size:0.68rem;color:var(--accent);font-weight:600;margin:2px}
+
+@media(min-width:768px){body{align-items:flex-start;padding:20px}.app{border-radius:20px;max-height:calc(100vh - 40px)}.bottom-nav{position:sticky;transform:none;left:auto}.wizard-overlay{align-items:center}.wizard{border-radius:20px;max-height:85vh}}
 </style>
 </head>
 <body>
@@ -150,7 +188,10 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 </div>
 
 <div id="stickInputs" class="process-inputs" style="display:none">
-<label for="stickElectrode">Electrodo</label><select id="stickElectrode"></select>
+<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:14px">
+<div style="flex:1"><label for="stickElectrode">Electrodo</label><select id="stickElectrode" style="margin-bottom:0"></select></div>
+<button class="btn-secondary" id="btnHelpChoose" style="margin-bottom:0;white-space:nowrap;min-height:48px">🧠 Ayúdame a elegir</button>
+</div>
 <div class="row"><div><label for="stickDiameter">Ø Electrodo</label><select id="stickDiameter"></select></div>
 <div><label for="stickThickness">Espesor (<span class="unit-label">mm</span>)</label><input type="number" id="stickThickness" value="6" min="0.5" max="50" step="0.5" inputmode="decimal"></div></div>
 <div class="row"><div><label for="stickJoint">Junta</label><select id="stickJoint"><option value="butt">A tope</option><option value="lap">Solape</option><option value="tee" selected>En T</option><option value="corner">Esquina</option></select></div>
@@ -252,6 +293,19 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 <button class="nav-btn" data-tab="guide"><span class="icon">📖</span><span>Guía</span></button>
 </nav>
 </div>
+
+<!-- WIZARD OVERLAY -->
+<div class="wizard-overlay" id="wizardOverlay">
+<div class="wizard" id="wizard">
+<div class="wizard-header">
+<h2>🧠 Asistente de Selección de Electrodo</h2>
+<button class="wizard-close" id="wizardClose" aria-label="Cerrar">✕</button>
+</div>
+<div class="wizard-progress" id="wizardProgress"></div>
+<div id="wizardBody"></div>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -266,177 +320,16 @@ const JOINT_FACTOR={butt:1.00,lap:1.03,tee:1.03,corner:0.97};
 const MATERIAL_FACTOR_STICK={carbon:1.00,stainless:0.90,cast:1.10};
 const VOLTAGE_POS_FACTOR={flat:1.00,horizontal:0.97,vertical:0.94,overhead:0.92};
 
-/* ============================================================
-   MACHINE DB — con materials, recommendedElectrodes, notes
-   ============================================================ */
 const MACHINE_DB={
-'deko-140':{name:'DEKO 140A MMA',maxAmps:140,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:25},weight:'2.3 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable','Acero galvanizado'],
-recommendedElectrodes:[{code:'E6013',note:'Recomendado para principiantes'},{code:'E7018',note:'Estructural, baja penetración'},{code:'E6011',note:'Todas posiciones'}]},
-'kotsy-300':{name:'Kotsy ARC-300',maxAmps:300,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'5 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0','5.0'],
-materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],
-recommendedElectrodes:[{code:'E6013',note:'Uso general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}]},
-'feifanke-135':{name:'FEIFANKE MIG135',maxAmps:135,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'5 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Para MMA (electrodo)'},{code:'E71T-GS',note:'Hilo FCAW sin gas'}]},
-'hitbox-hbm200':{name:'HITBOX HBM200',maxAmps:140,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:30},weight:'6 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.8','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E71T-GS',note:'Hilo FCAW sin gas'}]},
-'cevik-promig130':{name:'Cevik ProMIG 130N',maxAmps:130,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'7 kg',category:'Doméstica económica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E71T-GS',note:'Hilo FCAW sin gas'}]},
-
-'parkside-pifds120al':{name:'Parkside PIFDS 120AL',maxAmps:120,inputVolts:'230 V',processes:['fcaw'],dutyRef:{amps:100,duty:20},weight:'4.4 kg',category:'Parkside (Lidl)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:2,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0'],
-materials:['Acero al carbono (0,8–3 mm)','Chapa fina'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo tubular sin gas, autoprotegido'}],
-notes:'Máquina exclusiva FCAW sin gas. Hilo tubular con fundente interno. Ideal para chapa fina (0,8–3 mm).'},
-'parkside-pisg120':{name:'Parkside PISG 120 D5',maxAmps:120,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'3 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo, ideal principiantes'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'}]},
-'parkside-pisg80':{name:'Parkside PISG 80 D7',maxAmps:80,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:80,duty:20},weight:'2.8 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:2,supportedStickDia:['1.6','2.0','2.5'],
-materials:['Acero al carbono (1–3 mm)'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo, Ø 1,6–2,5 mm'},{code:'E6011',note:'Celulósico'}],
-notes:'Máquina ligera para trabajos pequeños. Incluye electrodos 1,6, 2,0 y 2,5 mm.'},
-'parkside-pmsg200':{name:'Parkside PMSG 200 A2',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:140,duty:20},weight:'8 kg',category:'Parkside (Lidl)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:4,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'}]},
-
-'einhell-tciw150':{name:'Einhell TC-IW 150',maxAmps:130,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:100,duty:25},weight:'3.5 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:4,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo, ideal principiantes'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'},{code:'TIG WC20',note:'Electrodo tungsteno (TIG)'}]},
-'einhell-tciw170':{name:'Einhell TC-IW 170',maxAmps:170,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:25},weight:'4 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'}]},
-'einhell-iw160wig':{name:'Einhell IW 160 Wig',maxAmps:160,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:120,duty:25},weight:'4.5 kg',category:'Einhell',defaultProcess:'tig',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-'einhell-tcew160d':{name:'Einhell TC-EW 160 D',maxAmps:160,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:120,duty:25},weight:'6 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-'einhell-btew200':{name:'Einhell BT-EW 200',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'9 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'4.0',defaultThickness:8,supportedStickDia:['2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural, baja penetración'},{code:'E308L',note:'Inoxidable'}]},
-
-'stayer-potenza200':{name:'Stayer Potenza 200 GEK',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:60},weight:'4.9 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable','Hierro fundido','Acero celulósico'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo, uso general'},{code:'E7018',note:'Básico, estructural'},{code:'E6010',note:'Celulósico, penetración'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}],
-notes:'Apto para electrodos de rutilo, básico, celulósico, inox, alto rendimiento y fundición.'},
-'stayer-citywork160':{name:'Stayer CityWork 160 GEK',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:160,duty:25},weight:'3.5 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo, recomendado por Stayer'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'}]},
-'stayer-progress1600':{name:'Stayer Progress 1600 GEK',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:130,duty:25},weight:'4 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-'stayer-mig131':{name:'Stayer MIG131 MULTI',maxAmps:120,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'6 kg',category:'Stayer',defaultProcess:'fcaw',defaultWire:'0.9',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW 0,9 mm sin gas'},{code:'E6013',note:'MMA general'}]},
-
-'viladepot-mig200':{name:'Viladepot MIG200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['fcaw','mig','stick'],dutyRef:{amps:150,duty:25},weight:'8 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:5,gaslessFCAW:true,supportedWires:['0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'},{code:'ER70S-6',note:'Hilo MIG con gas'}]},
-'hzxvogen-mig145':{name:'HZXVOGEN MIG145',maxAmps:145,inputVolts:'220 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'4.5 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'}]},
-'andeli-tig200':{name:'ANDELI TIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:30},weight:'9 kg',category:'Online (AliExpress)',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio (AC)'],
-recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-'succebuy-200':{name:'SucceBuy MIG 200A 4-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','fcaw','stick'],dutyRef:{amps:150,duty:25},weight:'8 kg',category:'Online (AliExpress)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:5,gaslessFCAW:true,supportedWires:['0.8','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'},{code:'E6013',note:'MMA general'}]},
-'gzguozhi-200':{name:'GZ GUOZHI 200A',maxAmps:200,inputVolts:'220 V',processes:['stick','tig'],dutyRef:{amps:140,duty:25},weight:'6 kg',category:'Online (AliExpress)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-
-'vevor-mig200':{name:'Vevor MIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:60},weight:'8.4 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero dulce','Acero inoxidable','Hierro fundido','Cobre','Aleaciones'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-'vevor-mig250':{name:'Vevor MIG-250 3-in-1',maxAmps:250,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'12 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,supportedWires:['0.8','1.0','1.2'],supportedStickDia:['2.0','2.5','3.2','4.0'],
-materials:['Acero dulce','Acero inoxidable','Hierro fundido','Cobre','Aleaciones'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
-'vevor-tig205':{name:'Vevor TIG-205 3-in-1',maxAmps:205,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:20},weight:'8.5 kg',category:'Online (Vevor)',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Cobre','Acero inoxidable','Titanio','Aluminio (1/4")'],
-recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'},{code:'E6010',note:'MMA celulósico'}],
-notes:'Compatible con electrodos E6010, E6013 y E7018. Puede soldar aluminio de 1/4" y acero bajo carbono de 3/8".'},
-'vevor-mma140':{name:'Vevor MMA-140 4-in-1',maxAmps:140,inputVolts:'220 V',processes:['stick','tig'],dutyRef:{amps:100,duty:20},weight:'5.45 kg',category:'Online (Vevor)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:4,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero inoxidable','Acero dulce','Cobre','Titanio'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Básico estructural'},{code:'E6011',note:'Celulósico'},{code:'E6010',note:'Penetración profunda'}]},
-'vevor-ct520d':{name:'Vevor CT520D 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['tig','stick'],dutyRef:{amps:150,duty:20},weight:'13 kg',category:'Online (Vevor)',defaultProcess:'tig',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable','Cobre','Titanio'],
-recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-
-'arccaptain-200':{name:'ARCCAPTAIN 200A 6-in-1',maxAmps:200,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:150,duty:25},weight:'9 kg',category:'Online (Amazon)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,gaslessFCAW:true,supportedWires:['0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Hierro (Fe)','Aluminio (Al)','Magnesio (Mg)','Cromo-Níquel (CrNi)'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-'yeswelder-135':{name:'YESWELDER 135A',maxAmps:135,inputVolts:'230 V',processes:['fcaw','stick'],dutyRef:{amps:100,duty:25},weight:'5 kg',category:'Online (Amazon)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],supportedStickDia:['1.6','2.0','2.5'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'E6013',note:'MMA general'}]},
-'haixiaoer-160':{name:'haixiaoer 160A 4-in-1',maxAmps:160,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:120,duty:25},weight:'8 kg',category:'Online (Amazon)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.8','0.9'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'},{code:'E6013',note:'MMA general'}]},
-'mecaje-200':{name:'Mecaje 200A Inverter',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:140,duty:25},weight:'5 kg',category:'Online (Amazon)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-'reboot-arc200':{name:'Reboot ARC200 MMA',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:25},weight:'4.8 kg',category:'Online (Amazon)',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-
-'hyundai-hywd160':{name:'Hyundai HYWD-160',maxAmps:160,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:30},weight:'4 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-'cecotec-soldi200':{name:'Cecotec Soldi 200',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:150,duty:25},weight:'4.5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-'greencut-mma200':{name:'GREENCUT MMA200',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:160,duty:25},weight:'5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-'vector-arc200k':{name:'Vector Welding ARC200K',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:25},weight:'5 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-'stahlwerk-arc200':{name:'Stahlwerk ARC 200 Puls Pro',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:35},weight:'5.2 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-'total-tool-tw214166':{name:'Total Tools TW214166',maxAmps:200,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:140,duty:30},weight:'4.8 kg',category:'Doméstica media',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]},
-
-'solter-practico160':{name:'Solter PRACTICO MIG 160 LD',maxAmps:160,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:160,duty:35},weight:'7.6 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:5,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E6013',note:'MMA general'}]},
-'solter-practico200':{name:'Solter PRACTICO MIG 200 LD',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
-'paton-standardmig200':{name:'Paton StandardMIG-200',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:40},weight:'10 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio y aleaciones'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero (82% Ar + 18% CO₂)'},{code:'ER308L/316L',note:'Hilo MIG inox'},{code:'ER4043',note:'Hilo aluminio-silicio'},{code:'E7018',note:'MMA estructural'}]},
-'telwin-bimax140i':{name:'Telwin Bimax 140i Synergic',maxAmps:140,inputVolts:'230 V',processes:['mig','fcaw'],dutyRef:{amps:100,duty:30},weight:'8 kg',category:'Multiproceso doméstica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:3,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW 0,8–0,9 mm sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'}]},
-'telwin-bimax150i':{name:'Telwin Bimax 150i Synergic',maxAmps:150,inputVolts:'230 V',processes:['mig','fcaw'],dutyRef:{amps:120,duty:25},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:4,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio'],
-recommendedElectrodes:[{code:'E71T-GS',note:'Hilo FCAW sin gas'},{code:'ER70S-6',note:'Hilo MIG con gas'}]},
-'telwin-technomig260':{name:'Telwin Technomig 260 Dual',maxAmps:250,inputVolts:'230 V',processes:['mig','fcaw','stick'],dutyRef:{amps:200,duty:30},weight:'18 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0','1.2'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio','CuSi3 (latón)','CuAl8 (bronce)'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA rutilo, ácido, básico'},{code:'E6013',note:'MMA general'}]},
-
-'solter-aerotig200':{name:'Solter AEROTIG AC/DC 200A',maxAmps:200,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:200,duty:35},weight:'12 kg',category:'TIG doméstica',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio (AC)'],
-recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-'stahlwerk-tig200':{name:'Stahlwerk AC/DC TIG 200 ST',maxAmps:200,inputVolts:'230 V',processes:['tig','stick'],dutyRef:{amps:150,duty:30},weight:'10 kg',category:'TIG doméstica',defaultProcess:'tig',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio (AC)'],
-recommendedElectrodes:[{code:'TIG WC20',note:'Tungsteno cerio (TIG)'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
-
-'lincoln-ac225':{name:'Lincoln AC-225',maxAmps:225,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'25 kg',category:'Profesional',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:8,supportedStickDia:['2.0','2.5','3.2','4.0','5.0','6.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'},{code:'E6011',note:'Celulósico'}]},
-'miller-multimatic215':{name:'Miller Multimatic 215',maxAmps:215,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:150,duty:20},weight:'15 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio (spool gun)'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
-'esab-rebel205':{name:'ESAB Rebel EMP 205ic',maxAmps:205,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:25},weight:'12 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'1.0',defaultThickness:8,supportedWires:['0.6','0.8','0.9','1.0','1.2'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable','Aluminio (spool gun)'],
-recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
-'euroweld-sprinter160s':{name:'Euroweld Sprinter 160S',maxAmps:160,inputVolts:'120/230 V',processes:['stick','tig'],dutyRef:{amps:160,duty:45},weight:'8.4 kg',category:'Profesional',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],
-materials:['Acero al carbono','Acero inoxidable'],
-recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'}]}};
+'deko-140':{name:'DEKO 140A MMA',maxAmps:140,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:25},weight:'2.3 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],materials:['Acero al carbono','Acero inoxidable','Acero galvanizado'],recommendedElectrodes:[{code:'E6013',note:'Recomendado para principiantes'},{code:'E7018',note:'Estructural'},{code:'E6011',note:'Todas posiciones'}]},
+'kotsy-300':{name:'Kotsy ARC-300',maxAmps:300,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'5 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0','5.0'],materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],recommendedElectrodes:[{code:'E6013',note:'Uso general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}]},
+'parkside-pifds120al':{name:'Parkside PIFDS 120AL',maxAmps:120,inputVolts:'230 V',processes:['fcaw'],dutyRef:{amps:100,duty:20},weight:'4.4 kg',category:'Parkside (Lidl)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:2,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0'],materials:['Acero al carbono (0,8–3 mm)','Chapa fina'],recommendedElectrodes:[{code:'E71T-GS',note:'Hilo tubular sin gas, autoprotegido'}],notes:'Máquina exclusiva FCAW sin gas. Hilo tubular con fundente interno. Ideal para chapa fina (0,8–3 mm).'},
+'parkside-pisg120':{name:'Parkside PISG 120 D5',maxAmps:120,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'3 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],recommendedElectrodes:[{code:'E6013',note:'Rutilo, ideal principiantes'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'}]},
+'stayer-potenza200':{name:'Stayer Potenza 200 GEK',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:60},weight:'4.9 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable','Hierro fundido','Acero celulósico'],recommendedElectrodes:[{code:'E6013',note:'Rutilo, uso general'},{code:'E7018',note:'Básico, estructural'},{code:'E6010',note:'Celulósico, penetración'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}]},
+'einhell-tciw170':{name:'Einhell TC-IW 170',maxAmps:170,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:25},weight:'4 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable'],recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'}]},
+'solter-practico200':{name:'Solter PRACTICO MIG 200 LD',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
+'vevor-mig200':{name:'Vevor MIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:60},weight:'8.4 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],materials:['Acero dulce','Acero inoxidable','Hierro fundido','Cobre','Aleaciones'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'miller-multimatic215':{name:'Miller Multimatic 215',maxAmps:215,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:150,duty:20},weight:'15 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable','Aluminio (spool gun)'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]}};
 
 let units='metric',currentProcess='mig',currentRefProcess='mig',lastResult=null;
 let selectedMachine=null,customMachines=[];
@@ -444,13 +337,21 @@ let currentLang=(navigator.language||'es').slice(0,2);if(!['es','en'].includes(c
 const PREF_UNITS='soldaduraAR_units',PREF_LANG='soldaduraAR_lang',PREF_CUSTOM_MCH='soldaduraAR_customMch';
 const $=id=>document.getElementById(id);
 
+/* ============================================================
+   WIZARD STATE
+   ============================================================ */
+const wizardState={step:0,answers:{metal1:null,metal2:null,thickness1:null,thickness2:null,joint:null,position:null,structural:null}};
+
+/* ============================================================
+   INIT
+   ============================================================ */
 document.addEventListener('DOMContentLoaded',()=>{
 const sU=localStorage.getItem(PREF_UNITS);if(sU)units=sU;
 const sL=localStorage.getItem(PREF_LANG);if(sL)currentLang=sL;
 const sC=localStorage.getItem(PREF_CUSTOM_MCH);if(sC)customMachines=JSON.parse(sC);
 populateAllSelects();populateMachines('');
 setupNav();setupLangToggle();setupUnitToggle();setupProcessTabs();setupRefTabs();
-setupCalcButton();setupGuide();setupMachineTab();setupCustomMachineForm();
+setupCalcButton();setupGuide();setupMachineTab();setupCustomMachineForm();setupWizard();
 applyUnits();buildReference('mig');updateDutyCycle();
 ['migThickness','tigThickness','stickThickness','fcawThickness'].forEach(id=>{const el=$(id);if(!el)return;let timer;const h=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(lastResult)calculate();},400);};el.addEventListener('input',h);});
 $('dutyAmps').addEventListener('input',updateDutyCycle);
@@ -466,33 +367,225 @@ $('stickDiameter').innerHTML=Object.keys(STICK_BASE_AMPS).map(k=>`<option value=
 
 function normalize(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 
-function populateMachines(query){
-query=query||'';
-const nq=normalize(query);
-const grouped={};let count=0;
-Object.entries(MACHINE_DB).forEach(([k,v])=>{
-if(nq){const hay=normalize(v.name+' '+v.category+' '+(v.processes||[]).join(' ')+(v.materials||[]).join(' '));if(!hay.includes(nq))return;}
-if(!grouped[v.category])grouped[v.category]=[];
-grouped[v.category].push(`<option value="${k}">${v.name}</option>`);
-count++;
+/* ============================================================
+   WIZARD / HELPER
+   ============================================================ */
+function setupWizard(){
+$('btnHelpChoose').addEventListener('click',()=>{
+wizardState.step=0;
+wizardState.answers={metal1:null,metal2:null,thickness1:null,thickness2:null,joint:null,position:null,structural:null};
+renderWizardStep();
+$('wizardOverlay').classList.add('show');
 });
-customMachines.forEach(m=>{
-if(nq){const hay=normalize(m.name+' '+(m.processes||[]).join(' '));if(!hay.includes(nq))return;}
-if(!grouped['Mis máquinas'])grouped['Mis máquinas']=[];
-grouped['Mis máquinas'].push(`<option value="${m.id}">${m.name}</option>`);
-count++;
-});
-let html='';
-if(count===0){html='<option value="">— Sin resultados —</option>';}
-else{html='<option value="">— Selecciona una máquina —</option>';
-Object.entries(grouped).forEach(([cat,opts])=>{html+=`<optgroup label="${cat}">${opts.join('')}</optgroup>`;});}
-$('machine').innerHTML=html;
-if(selectedMachine){const key=selectedMachine._key||selectedMachine.id;if([...$('machine').options].some(o=>o.value===key))$('machine').value=key;}
-const hint=$('searchHint');
-if(nq){hint.textContent=count===0?`Sin resultados para "${query}"`:`${count} máquina${count>1?'s':''} encontrada${count>1?'s':''}`;hint.style.color=count===0?'var(--danger)':'var(--ok)';$('machineSearchClear').classList.add('show');}
-else{hint.textContent='Escribe parte del nombre para filtrar';hint.style.color='var(--text-dim)';$('machineSearchClear').classList.remove('show');}
+$('wizardClose').addEventListener('click',()=>{$('wizardOverlay').classList.remove('show');});
+$('wizardOverlay').addEventListener('click',e=>{if(e.target===$('wizardOverlay'))$('wizardOverlay').classList.remove('show');});
 }
 
+const WIZARD_STEPS=[
+{key:'metal1',title:'¿Qué material vas a soldar?',hint:'Selecciona el tipo de metal de la primera pieza. Si no estás seguro, usa la guía inferior.',options:[
+{value:'carbon',label:'Acero común (acero al carbono)',sub:'El más habitual: rejas, perfiles, tuberías, chapa'},
+{value:'stainless',label:'Acero inoxidable',sub:'Brillante, no se oxida fácilmente'},
+{value:'cast',label:'Hierro fundido',sub:'Piezas gruesas y pesadas, se rompe con fractura granulada'},
+{value:'aluminum',label:'Aluminio',sub:'Ligero, no magnético, color plateado mate'},
+{value:'unsure',label:'No estoy seguro',sub:'Te ayudamos a identificarlo'}]},
+{key:'metal2',title:'¿Y la segunda pieza?',hint:'¿Es del mismo material que la primera?',options:[
+{value:'same',label:'Sí, es el mismo material',sub:'Lo más común'},
+{value:'carbon',label:'Acero común',sub:''},{value:'stainless',label:'Acero inoxidable',sub:''},
+{value:'cast',label:'Hierro fundido',sub:''},{value:'aluminum',label:'Aluminio',sub:''},
+{value:'unsure',label:'No estoy seguro',sub:''}]},
+{key:'thickness1',title:'¿Qué grosor tiene la primera pieza?',hint:'Selecciona el grosor aproximado en milímetros.',options:[
+{value:'1',label:'Muy fina (1–2 mm)',sub:'Como una chapa de carrocería'},
+{value:'2.5',label:'Fina (2–3 mm)',sub:'Como un tubo cuadrado delgado'},
+{value:'4',label:'Media (3–6 mm)',sub:'Como un perfil estructural'},
+{value:'8',label:'Gruesa (6–12 mm)',sub:'Como una pletina o plancha'},
+{value:'15',label:'Muy gruesa (>12 mm)',sub:'Como una brida o bloque'}]},
+{key:'thickness2',title:'¿Y el grosor de la segunda pieza?',hint:'Si son iguales, selecciona la misma opción.',options:[
+{value:'1',label:'Muy fina (1–2 mm)',sub:''},{value:'2.5',label:'Fina (2–3 mm)',sub:''},
+{value:'4',label:'Media (3–6 mm)',sub:''},{value:'8',label:'Gruesa (6–12 mm)',sub:''},
+{value:'15',label:'Muy gruesa (>12 mm)',sub:''},{value:'same',label:'Igual que la primera',sub:'Lo más común'}]},
+{key:'joint',title:'¿Cómo van unidas las piezas?',hint:'Mira las piezas y elige la forma que mejor las describa.',options:[
+{value:'butt',label:'A tope (butt)',sub:'Las dos piezas alineadas, un borde contra el otro'},
+{value:'lap',label:'Solape (lap)',sub:'Una pieza encima de la otra, solapadas'},
+{value:'tee',label:'En T (tee)',sub:'Una pieza perpendicular a la otra, formando una T'},
+{value:'corner',label:'Esquina (corner)',sub:'Las dos piezas formando una L o ángulo'}]},
+{key:'position',title:'¿En qué posición vas a soldar?',hint:'La posición afecta al amperaje y al tipo de electrodo.',options:[
+{value:'flat',label:'Plana',sub:'La pieza está horizontal y sueldas por encima'},
+{value:'horizontal',label:'Horizontal',sub:'La soldadura es horizontal sobre una pared'},
+{value:'vertical',label:'Vertical',sub:'Sueldas de abajo hacia arriba o de arriba hacia abajo'},
+{value:'overhead',label:'Sobre cabeza',sub:'Sueldas por encima de tu cabeza'}]},
+{key:'structural',title:'¿Es un trabajo estructural o crítico?',hint:'¿La pieza va a soportar peso, vibración o es de seguridad?',options:[
+{value:'no',label:'No, es un trabajo general o decorativo',sub:'Reja, mueble, reparación casera'},
+{value:'yes',label:'Sí, es estructural o de seguridad',sub:'Vigas, remolques, barandillas, soportes'}]}
+];
+
+function renderWizardStep(){
+const s=wizardState.step;
+const body=$('wizardBody');
+const progress=$('wizardProgress');
+progress.innerHTML=WIZARD_STEPS.map((_,i)=>`<div class="wizard-progress-dot ${i<=s?'active':''}"></div>`).join('');
+
+if(s>=WIZARD_STEPS.length){
+renderWizardResult();return;
+}
+const step=WIZARD_STEPS[s];
+let html=`<div class="wizard-step active"><h3>${step.title}</h3><p class="hint">${step.hint}</p>`;
+step.options.forEach(opt=>{
+html+=`<button class="wizard-option ${wizardState.answers[step.key]===opt.value?'selected':''}" data-value="${opt.value}"><strong>${opt.label}</strong>${opt.sub?`<small>${opt.sub}</small>`:''}</button>`;
+});
+html+=`</div><div class="wizard-nav">`;
+if(s>0)html+=`<button class="back" id="wizBack">← Atrás</button>`;
+html+=`<button class="next" id="wizNext">${s===WIZARD_STEPS.length-1?'Ver recomendación →':'Siguiente →'}</button>`;
+html+=`</div>`;
+body.innerHTML=html;
+
+body.querySelectorAll('.wizard-option').forEach(btn=>{
+btn.addEventListener('click',()=>{
+wizardState.answers[step.key]=btn.dataset.value;
+body.querySelectorAll('.wizard-option').forEach(b=>b.classList.remove('selected'));
+btn.classList.add('selected');
+});
+});
+const back=$('wizBack');if(back)back.addEventListener('click',()=>{wizardState.step--;renderWizardStep();});
+$('wizNext').addEventListener('click',()=>{
+if(!wizardState.answers[step.key]){showToast('Selecciona una opción para continuar');return;}
+wizardState.step++;renderWizardStep();
+});
+}
+
+function renderWizardResult(){
+const a=wizardState.answers;
+const m1=a.metal1==='unsure'?'carbon':a.metal1;
+const m2=(a.metal2==='same'||a.metal2==='unsure')?m1:a.metal2;
+const t1=parseFloat(a.thickness1)||4;
+const t2=a.thickness2==='same'?t1:(parseFloat(a.thickness2)||t1);
+const maxT=Math.max(t1,t2);
+
+// Logic
+let electrode='6013',dia='2.5',reason='';
+if(m1==='cast'||m2==='cast'){electrode='ENi-Cl';dia='3.2';reason='Hierro fundido requiere electrodo de níquel (ENi-Cl) y precalentamiento 200–400°C.';}
+else if(m1==='stainless'||m2==='stainless'){
+if(m1!==m2){electrode='309L';dia=maxT<=3?'2.5':'3.2';reason='Unión de acero inoxidable con otro metal → electrodo 309L.';}
+else{electrode='308L';dia=maxT<=3?'2.5':'3.2';reason='Acero inoxidable con inoxidable → electrodo 308L (o 316L si es 316).';}
+}
+else if(m1==='aluminum'||m2==='aluminum'){electrode='—';dia='—';reason='El aluminio no se suelda bien con electrodo revestido. Usa TIG (AC) o MIG con gas argón.';}
+else{
+// Carbon steel
+if(a.structural==='yes'){electrode='7018';dia=maxT<=3?'2.5':maxT<=6?'3.2':'4.0';reason='Trabajo estructural → electrodo básico de bajo hidrógeno E7018 para máxima resistencia y ductilidad.';}
+else if(a.position==='vertical'||a.position==='overhead'){electrode='6013';dia=maxT<=3?'2.5':'3.2';reason='Posición vertical/sobre cabeza → E6013 rutilo, fácil de controlar y menos propenso a chorrear.';}
+else if(maxT<=3){electrode='6013';dia='2.5';reason='Chapa fina → E6013 rutilo, arco suave y fácil encendido, ideal para principiantes.';}
+else if(maxT<=6){electrode='6013';dia='3.2';reason='Espesor medio → E6013 rutilo, uso general y buena relación facilidad/rendimiento.';}
+else if(maxT<=12){electrode='7018';dia='4.0';reason='Espesor grueso → E7018 básico, mayor penetración y resistencia para materiales gruesos.';}
+else{electrode='7018';dia='5.0';reason='Material muy grueso → E7018 Ø4,0–5,0 mm con múltiples pasadas y posible precalentamiento.';}
+}
+
+// Position adjustment
+let posNote='';
+if(a.position==='vertical'||a.position==='overhead'){posNote='Posición '+a.position+': reduce amperaje un 10–15% respecto a plana.';}
+
+// Joint note
+let jointNote='';
+if(a.joint==='butt')jointNote='Junta a tope: si el espesor >4 mm, prepara bisel en V (60–75°) con root gap de 1,5–3 mm y root face de 1,5–2 mm.';
+else if(a.joint==='lap')jointNote='Junta a solape: filete en uno o ambos bordes. Asegura al menos 3–5 mm de solape.';
+else if(a.joint==='tee')jointNote='Junta en T: filete simple o doble. Para penetración total, prepara bisel si el espesor lo permite.';
+else if(a.joint==='corner')jointNote='Junta en esquina: filete o bisel según acceso. Ángulo típico de 90°.';
+
+const body=$('wizardBody');
+const progress=$('wizardProgress');
+progress.innerHTML=WIZARD_STEPS.map(()=>`<div class="wizard-progress-dot active"></div>`).join('');
+
+let html=`<div class="wizard-result">
+<h4>✅ Electrodo recomendado</h4>
+<div class="reco">${electrode==='—'?'No aplica':'E'+electrode}</div>
+<div class="detail"><strong>Diámetro:</strong> ${dia==='—'?'—':dia+' mm'}</div>
+<div class="reason">📝 ${reason}</div>
+</div>`;
+
+if(electrode!=='—'){
+html+=`<div class="wizard-result" style="border-left-color:var(--warn);background:rgba(234,179,8,0.08)">
+<h4 style="color:var(--warn)">🔧 Preparación de la junta</h4>
+<div class="detail">${jointNote}</div>
+</div>`;
+}
+if(posNote){html+=`<div class="warning" style="margin-bottom:14px">${posNote}</div>`;}
+if(a.structural==='yes'){html+=`<div class="warning" style="margin-bottom:14px">⚠️ Trabajo estructural: limpia la junta, elimina óxido/grasa, y considera precalentamiento si el espesor supera los 20 mm.</div>`;}
+
+html+=`<div class="wizard-nav">
+<button class="back" id="wizRestart">🔄 Empezar de nuevo</button>
+<button class="next" id="wizApply">✓ Aplicar y calcular</button>
+</div>`;
+body.innerHTML=html;
+
+$('wizRestart').addEventListener('click',()=>{wizardState.step=0;wizardState.answers={};renderWizardStep();});
+$('wizApply').addEventListener('click',()=>{
+if(electrode!=='—'){
+$('stickElectrode').value=electrode;
+if(dia!=='—'&&[...$('stickDiameter').options].some(o=>o.value===dia))$('stickDiameter').value=dia;
+$('stickThickness').value=maxT;
+$('stickJoint').value=a.joint||'tee';
+$('stickPosition').value=a.position||'flat';
+$('stickMaterial').value=m1==='stainless'?'stainless':m1==='cast'?'cast':'carbon';
+}
+$('wizardOverlay').classList.remove('show');
+calculate();
+setTimeout(()=>$('result').scrollIntoView({behavior:'smooth',block:'start'}),150);
+});
+}
+
+/* ============================================================
+   JOINT GUIDE RENDERING
+   ============================================================ */
+function buildJointGuide(){
+return `<div class="ref-section-title">🔩 Tipos de Junta — Descripción y Dimensiones</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="20" y="40" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="180" y="40" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="30" text-anchor="middle" fill="#94a3b8" font-size="10">A tope (Butt)</text>
+<line x1="140" y1="45" x2="180" y2="45" stroke="#f97316" stroke-width="1" stroke-dasharray="3,2"/>
+<text x="160" y="70" text-anchor="middle" fill="#f97316" font-size="9">root gap</text>
+<text x="160" y="100" text-anchor="middle" fill="#94a3b8" font-size="8">0–4 mm: square butt · 4–22 mm: V</text>
+</svg>
+<div class="caption"><strong>A tope (Butt):</strong> dos piezas alineadas, borde contra borde. La más común para tuberías y chapas.</div>
+</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="40" y="30" width="100" height="30" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="40" y="60" width="180" height="30" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="20" text-anchor="middle" fill="#94a3b8" font-size="10">Solape (Lap)</text>
+<text x="220" y="75" text-anchor="middle" fill="#f97316" font-size="9">filete</text>
+</svg>
+<div class="caption"><strong>Solape (Lap):</strong> una pieza encima de la otra. Filete en uno o ambos bordes.</div>
+</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="140" y="20" width="40" height="90" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="180" y="70" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="15" text-anchor="middle" fill="#94a3b8" font-size="10">En T (Tee)</text>
+<text x="200" y="60" text-anchor="middle" fill="#f97316" font-size="9">filete</text>
+</svg>
+<div class="caption"><strong>En T (Tee):</strong> una pieza perpendicular a la otra. Filete simple o doble.</div>
+</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="40" y="30" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="140" y="70" width="40" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="20" text-anchor="middle" fill="#94a3b8" font-size="10">Esquina (Corner)</text>
+</svg>
+<div class="caption"><strong>Esquina (Corner):</strong> dos piezas formando una L o ángulo. Filete o bisel según acceso.</div>
+</div>
+<div class="ref-section-title">📐 Dimensiones de preparación por espesor (junta a tope)</div>
+<div class="table-wrap"><table class="ref-table joint-table"><thead><tr><th>Espesor</th><th>Tipo</th><th>Ángulo</th><th>Root gap</th><th>Root face</th></tr></thead><tbody>
+<tr><td>≤4 mm</td><td>Square butt</td><td>0°</td><td>1,5–2,5 mm</td><td>Todo el espesor</td></tr>
+<tr><td>4–8 mm</td><td>V simple</td><td>60–75°</td><td>2,0–3,0 mm</td><td>1,0–1,5 mm</td></tr>
+<tr><td>8–22 mm</td><td>V simple</td><td>60–75°</td><td>2,5–3,0 mm</td><td>1,5–2,0 mm</td></tr>
+<tr><td>>22 mm</td><td>Bisel compuesto / U</td><td>10–20° + landing</td><td>2,0–3,0 mm</td><td>1,5–3,0 mm</td></tr>
+</tbody></table></div>
+<div class="warning" style="margin-top:10px">📝 <strong>Root gap</strong> = separación entre bordes antes de soldar. <strong>Root face</strong> = parte sin biselar al fondo del chaflán. <strong>Ángulo</strong> = ángulo total del bisel (incluido).</div>`;
+}
+
+/* ============================================================
+   NAV / TABS
+   ============================================================ */
 function setupNav(){document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$('tab-'+btn.dataset.tab).classList.add('active');$('content').scrollTo({top:0,behavior:'instant'});if(btn.dataset.tab==='machine')updateDutyCycle();if(btn.dataset.tab==='reference')buildReference(currentRefProcess);});});}
 function setupProcessTabs(){document.querySelectorAll('#processTabs .process-tab').forEach(btn=>{btn.addEventListener('click',()=>{currentProcess=btn.dataset.process;document.querySelectorAll('#processTabs .process-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.process-inputs').forEach(el=>el.style.display='none');$(currentProcess+'Inputs').style.display='block';updateGasVisibility();$('result').classList.remove('show');});});}
 function setupRefTabs(){document.querySelectorAll('#refProcessTabs .process-tab').forEach(btn=>{btn.addEventListener('click',()=>{currentRefProcess=btn.dataset.refprocess;document.querySelectorAll('#refProcessTabs .process-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildReference(currentRefProcess);});});}
@@ -514,91 +607,17 @@ $('dutyAmps').addEventListener('input',updateDutyCycle);
 renderCustomMachines();
 }
 
-/* ============================================================
-   MATERIAL & ELECTRODE PANELS
-   ============================================================ */
-function updateMaterialPanel(m){
-const panel=$('materialPanel');
-if(!m.materials||!m.materials.length){panel.classList.remove('show');return;}
-panel.classList.add('show');
-panel.innerHTML=`<h4>🔩 Materiales soldables con ${m.name}</h4>
-<div class="material-chips">${m.materials.map(mat=>`<span class="material-chip">${mat}</span>`).join('')}</div>
-${m.notes?`<div style="font-size:0.72rem;color:#86efac;margin-top:6px;line-height:1.5">📝 ${m.notes}</div>`:''}`;
-}
+function updateMaterialPanel(m){const panel=$('materialPanel');if(!m.materials||!m.materials.length){panel.classList.remove('show');return;}panel.classList.add('show');panel.innerHTML=`<h4>🔩 Materiales soldables con ${m.name}</h4><div class="material-chips">${m.materials.map(mat=>`<span class="material-chip">${mat}</span>`).join('')}</div>${m.notes?`<div style="font-size:0.72rem;color:#86efac;margin-top:6px;line-height:1.5">📝 ${m.notes}</div>`:''}`;}
+function updateElectrodePanel(m){const panel=$('electrodePanel');if(!m.recommendedElectrodes||!m.recommendedElectrodes.length){panel.classList.remove('show');return;}panel.classList.add('show');panel.innerHTML=`<h4>⚡ Electrodos / Hilos recomendados</h4><ul class="electrode-list">${m.recommendedElectrodes.map(e=>`<li><span class="code">${e.code}</span><span class="note">${e.note}</span></li>`).join('')}</ul>`;if(m.notes)panel.innerHTML+=`<div class="electrode-notes">📝 ${m.notes}</div>`;}
 
-function updateElectrodePanel(m){
-const panel=$('electrodePanel');
-if(!m.recommendedElectrodes||!m.recommendedElectrodes.length){panel.classList.remove('show');return;}
-panel.classList.add('show');
-panel.innerHTML=`<h4>⚡ Electrodos / Hilos recomendados</h4>
-<ul class="electrode-list">${m.recommendedElectrodes.map(e=>`<li><span class="code">${e.code}</span><span class="note">${e.note}</span></li>`).join('')}</ul>`;
-if(m.notes)panel.innerHTML+=`<div class="electrode-notes">📝 ${m.notes}</div>`;
-}
+function resetMachineConstraints(){document.querySelectorAll('#processTabs .process-tab').forEach(t=>{t.style.display='';});[...$('migWire').options].forEach(o=>o.style.display='');[...$('fcawWire').options].forEach(o=>o.style.display='');[...$('stickDiameter').options].forEach(o=>o.style.display='');$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}
+function updateGasVisibility(){if(!selectedMachine){$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';return;}if(currentProcess==='mig'){$('migGasGroup').style.display='';}if(currentProcess==='fcaw'){if(selectedMachine.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}}
+function applyMachineConstraints(m){const procs=m.processes||[];document.querySelectorAll('#processTabs .process-tab').forEach(tab=>{tab.style.display=procs.includes(tab.dataset.process)?'':'none';});if(procs.includes('mig')){if(m.supportedWires){[...$('migWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('migWire').value))$('migWire').value=m.supportedWires[0];}$('migGasGroup').style.display='';}if(procs.includes('fcaw')){if(m.supportedWires){[...$('fcawWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('fcawWire').value))$('fcawWire').value=m.supportedWires[0];}if(m.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}if(procs.includes('stick')&&m.supportedStickDia){[...$('stickDiameter').options].forEach(o=>{o.style.display=m.supportedStickDia.includes(o.value)?'':'none';});if(!m.supportedStickDia.includes($('stickDiameter').value))$('stickDiameter').value=m.supportedStickDia[0];}const notes=[];if(m.gaslessFCAW)notes.push('🟣 FCAW sin gas — hilo tubular con fundente interno');if(m.supportedWires)notes.push(`🔵 Hilos soportados: ${m.supportedWires.join(', ')} mm`);if(m.supportedStickDia)notes.push(`🟠 Electrodos soportados: ${m.supportedStickDia.join(', ')} mm`);const noteEl=$('constraintNote');if(notes.length){noteEl.classList.add('show');noteEl.innerHTML=`<strong>Restricciones de ${m.name}</strong>`+notes.map(n=>`<div>${n}</div>`).join('');}else{noteEl.classList.remove('show');}}
 
-function resetMachineConstraints(){
-document.querySelectorAll('#processTabs .process-tab').forEach(t=>{t.style.display='';});
-[...$('migWire').options].forEach(o=>o.style.display='');
-[...$('fcawWire').options].forEach(o=>o.style.display='');
-[...$('stickDiameter').options].forEach(o=>o.style.display='');
-$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';
-}
-
-function updateGasVisibility(){
-if(!selectedMachine){$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';return;}
-if(currentProcess==='mig'){$('migGasGroup').style.display='';}
-if(currentProcess==='fcaw'){if(selectedMachine.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}
-}
-
-function applyMachineConstraints(m){
-const procs=m.processes||[];
-document.querySelectorAll('#processTabs .process-tab').forEach(tab=>{tab.style.display=procs.includes(tab.dataset.process)?'':'none';});
-if(procs.includes('mig')){if(m.supportedWires){[...$('migWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('migWire').value))$('migWire').value=m.supportedWires[0];}$('migGasGroup').style.display='';}
-if(procs.includes('fcaw')){if(m.supportedWires){[...$('fcawWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('fcawWire').value))$('fcawWire').value=m.supportedWires[0];}if(m.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}
-if(procs.includes('stick')&&m.supportedStickDia){[...$('stickDiameter').options].forEach(o=>{o.style.display=m.supportedStickDia.includes(o.value)?'':'none';});if(!m.supportedStickDia.includes($('stickDiameter').value))$('stickDiameter').value=m.supportedStickDia[0];}
-const notes=[];
-if(m.gaslessFCAW)notes.push('🟣 FCAW sin gas — hilo tubular con fundente interno');
-if(m.supportedWires)notes.push(`🔵 Hilos soportados: ${m.supportedWires.join(', ')} mm`);
-if(m.supportedStickDia)notes.push(`🟠 Electrodos soportados: ${m.supportedStickDia.join(', ')} mm`);
-const noteEl=$('constraintNote');
-if(notes.length){noteEl.classList.add('show');noteEl.innerHTML=`<strong>Restricciones de ${m.name}</strong>`+notes.map(n=>`<div>${n}</div>`).join('');}
-else{noteEl.classList.remove('show');}
-}
-
-function applyMachinePreset(m){
-const proc=m.defaultProcess||(m.processes&&m.processes[0])||'stick';
-currentProcess=proc;
-document.querySelectorAll('#processTabs .process-tab').forEach(b=>{b.classList.toggle('active',b.dataset.process===proc);});
-document.querySelectorAll('.process-inputs').forEach(el=>el.style.display='none');
-$(proc+'Inputs').style.display='block';updateGasVisibility();
-if(proc==='mig'||proc==='fcaw'){const d=m.defaultWire||(m.supportedWires?m.supportedWires[0]:'0.8');const sel=proc==='mig'?$('migWire'):$('fcawWire');if([...sel.options].some(o=>o.value===d))sel.value=d;}
-if(proc==='stick'){const d=m.defaultStickDia||(m.supportedStickDia?m.supportedStickDia[0]:'3.2');const sel=$('stickDiameter');if([...sel.options].some(o=>o.value===d))sel.value=d;}
-const th=m.defaultThickness||4;
-if(proc==='mig')$('migThickness').value=th;else if(proc==='tig')$('tigThickness').value=th;else if(proc==='stick')$('stickThickness').value=th;else if(proc==='fcaw')$('fcawThickness').value=th;
-currentRefProcess=proc;document.querySelectorAll('#refProcessTabs .process-tab').forEach(b=>b.classList.toggle('active',b.dataset.refprocess===proc));buildReference(proc);
-highlightGuideProcess(proc);
-$('dutyAmps').value=m.dutyRef?m.dutyRef.amps:100;updateDutyCycle();
-const banner=$('machineBanner');banner.classList.add('show');
-const dia=m.defaultWire?m.defaultWire+' mm':(m.defaultStickDia?m.defaultStickDia+' mm':'—');
-banner.innerHTML=`✅ <strong>${m.name}</strong><br><span style="font-size:0.75rem;opacity:0.9">Proceso: ${proc.toUpperCase()} · Ø: ${dia} · Espesor: ${th} mm · Máx: ${m.maxAmps} A</span>`;
-setTimeout(()=>calculate(),100);
-}
-
+function applyMachinePreset(m){const proc=m.defaultProcess||(m.processes&&m.processes[0])||'stick';currentProcess=proc;document.querySelectorAll('#processTabs .process-tab').forEach(b=>{b.classList.toggle('active',b.dataset.process===proc);});document.querySelectorAll('.process-inputs').forEach(el=>el.style.display='none');$(proc+'Inputs').style.display='block';updateGasVisibility();if(proc==='mig'||proc==='fcaw'){const d=m.defaultWire||(m.supportedWires?m.supportedWires[0]:'0.8');const sel=proc==='mig'?$('migWire'):$('fcawWire');if([...sel.options].some(o=>o.value===d))sel.value=d;}if(proc==='stick'){const d=m.defaultStickDia||(m.supportedStickDia?m.supportedStickDia[0]:'3.2');const sel=$('stickDiameter');if([...sel.options].some(o=>o.value===d))sel.value=d;}const th=m.defaultThickness||4;if(proc==='mig')$('migThickness').value=th;else if(proc==='tig')$('tigThickness').value=th;else if(proc==='stick')$('stickThickness').value=th;else if(proc==='fcaw')$('fcawThickness').value=th;currentRefProcess=proc;document.querySelectorAll('#refProcessTabs .process-tab').forEach(b=>b.classList.toggle('active',b.dataset.refprocess===proc));buildReference(proc);highlightGuideProcess(proc);$('dutyAmps').value=m.dutyRef?m.dutyRef.amps:100;updateDutyCycle();const banner=$('machineBanner');banner.classList.add('show');const dia=m.defaultWire?m.defaultWire+' mm':(m.defaultStickDia?m.defaultStickDia+' mm':'—');banner.innerHTML=`✅ <strong>${m.name}</strong><br><span style="font-size:0.75rem;opacity:0.9">Proceso: ${proc.toUpperCase()} · Ø: ${dia} · Espesor: ${th} mm · Máx: ${m.maxAmps} A</span>`;setTimeout(()=>calculate(),100);}
 function highlightGuideProcess(process){document.querySelectorAll('.guide-card').forEach(card=>{card.classList.toggle('highlighted',process&&card.dataset.process===process);});}
 
-function setupCustomMachineForm(){
-$('btnAddMachine').addEventListener('click',()=>{$('addMachineForm').classList.toggle('show');});
-$('btnCancelMachine').addEventListener('click',()=>{$('addMachineForm').classList.remove('show');});
-$('btnSaveMachine').addEventListener('click',()=>{
-const name=$('newMchName').value.trim();if(!name)return showToast('Introduce un nombre');
-const maxAmps=parseFloat($('newMchAmps').value)||160;const volts=$('newMchVolts').value;
-const processes=[];if($('newMchMIG').checked)processes.push('mig');if($('newMchTIG').checked)processes.push('tig');if($('newMchStick').checked)processes.push('stick');if($('newMchFCAW').checked)processes.push('fcaw');if(!processes.length)processes.push('stick');
-const duty=parseFloat($('newMchDuty').value)||25;const dutyAmps=parseFloat($('newMchDutyAmps').value)||100;const gasless=$('newMchGasless').checked;
-const custom={id:'custom-'+Date.now(),name,maxAmps,inputVolts:volts,processes,dutyRef:{amps:dutyAmps,duty},weight:'—',category:'Mis máquinas',defaultProcess:processes[0],defaultThickness:4,gaslessFCAW:gasless&&processes.includes('fcaw'),materials:['Acero al carbono'],recommendedElectrodes:[]};
-if(processes.includes('mig'))custom.defaultWire='0.8';if(processes.includes('stick'))custom.defaultStickDia='3.2';
-customMachines.push(custom);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));
-$('newMchName').value='';$('newMchGasless').checked=false;$('addMachineForm').classList.remove('show');
-renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina guardada');
-});}
+function setupCustomMachineForm(){$('btnAddMachine').addEventListener('click',()=>{$('addMachineForm').classList.toggle('show');});$('btnCancelMachine').addEventListener('click',()=>{$('addMachineForm').classList.remove('show');});$('btnSaveMachine').addEventListener('click',()=>{const name=$('newMchName').value.trim();if(!name)return showToast('Introduce un nombre');const maxAmps=parseFloat($('newMchAmps').value)||160;const volts=$('newMchVolts').value;const processes=[];if($('newMchMIG').checked)processes.push('mig');if($('newMchTIG').checked)processes.push('tig');if($('newMchStick').checked)processes.push('stick');if($('newMchFCAW').checked)processes.push('fcaw');if(!processes.length)processes.push('stick');const duty=parseFloat($('newMchDuty').value)||25;const dutyAmps=parseFloat($('newMchDutyAmps').value)||100;const gasless=$('newMchGasless').checked;const custom={id:'custom-'+Date.now(),name,maxAmps,inputVolts:volts,processes,dutyRef:{amps:dutyAmps,duty},weight:'—',category:'Mis máquinas',defaultProcess:processes[0],defaultThickness:4,gaslessFCAW:gasless&&processes.includes('fcaw'),materials:['Acero al carbono'],recommendedElectrodes:[]};if(processes.includes('mig'))custom.defaultWire='0.8';if(processes.includes('stick'))custom.defaultStickDia='3.2';customMachines.push(custom);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));$('newMchName').value='';$('newMchGasless').checked=false;$('addMachineForm').classList.remove('show');renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina guardada');});}
 function renderCustomMachines(){const list=$('customMachinesList');if(!customMachines.length){list.innerHTML='<div style="font-size:0.82rem;color:var(--text-dim);padding:8px 0">No hay máquinas personalizadas.</div>';return;}list.innerHTML=customMachines.map(m=>`<div class="custom-machine-item"><div><strong style="color:var(--accent)">${m.name}</strong><br><span style="font-size:0.72rem;color:var(--text-dim)">${m.maxAmps}A · ${m.processes.join(', ').toUpperCase()}${m.gaslessFCAW?' · Sin gas':''}</span></div><button data-id="${m.id}">🗑</button></div>`).join('');list.querySelectorAll('button[data-id]').forEach(btn=>{btn.addEventListener('click',()=>{customMachines=customMachines.filter(x=>x.id!==btn.dataset.id);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina eliminada');});});}
 
 function updateDutyCycle(){const key=$('machine').value;if(!key)return;let m=MACHINE_DB[key]||customMachines.find(x=>x.id===key);if(!m)return;const amps=parseFloat($('dutyAmps').value)||100;const refDuty=m.dutyRef.duty/100,ratio=m.dutyRef.amps/amps;let duty=Math.max(5,Math.min(100,refDuty*ratio*ratio*100));$('dutyPercent').textContent=duty.toFixed(0)+'%';const bar=$('dutyBar');bar.style.width=duty+'%';bar.style.background=duty>=60?'#22c55e':duty>=30?'#eab308':'#ef4444';const w=$('machineWarning');if(duty<20){w.textContent='🚨 Ciclo muy bajo — riesgo de sobrecalentamiento.';w.className='warning danger';}else if(duty<40){w.textContent='⚠️ Ciclo moderado — permite enfriamientos.';w.className='warning';}else{w.textContent='✅ Ciclo saludable para trabajo continuo.';w.className='warning ok';}$('machineDetails').innerHTML=`<div class="detail-row"><span class="detail-label">Salida Máx.</span><span class="detail-value">${m.maxAmps} A</span></div><div class="detail-row"><span class="detail-label">Ciclo @ Referencia</span><span class="detail-value">${m.dutyRef.duty}% @ ${m.dutyRef.amps} A</span></div><div class="detail-row"><span class="detail-label">Voltaje Entrada</span><span class="detail-value">${m.inputVolts}</span></div><div class="detail-row"><span class="detail-label">Procesos</span><span class="detail-value">${m.processes.join(', ').toUpperCase()}</span></div><div class="detail-row"><span class="detail-label">Peso</span><span class="detail-value">${m.weight||'—'}</span></div>`;}
@@ -615,67 +634,34 @@ function calcStick(){const electrode=$('stickElectrode').value;const diameter=$(
 
 function calcFCAW(){const wire=$('fcawWire').value;const thickness=getThicknessMM('fcawThickness');const joint=$('fcawJoint').value,position=$('fcawPosition').value;const isGasless=selectedMachine&&selectedMachine.gaslessFCAW;const gas=isGasless?null:$('fcawGas').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const d=FCAW_DATA[wire];const tRatio=Math.min(1,thickness/15);let ampsMin=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.max(0,tRatio-0.15);let ampsMax=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.min(1,tRatio+0.15);let voltsMin=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.max(0,tRatio-0.15);let voltsMax=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.min(1,tRatio+0.15);const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];ampsMin*=posF*jointF;ampsMax*=posF*jointF;const vPosF=VOLTAGE_POS_FACTOR[position];voltsMin*=vPosF;voltsMax*=vPosF;let gasFlow=d.gasFlow.slice();let gasText;if(isGasless){gasText='Sin gas (fundente interno)';}else{if(gas==='mix'){gasFlow[0]+=1;gasFlow[1]+=2;}gasText=`${gasFlow[0]}–${gasFlow[1]} l/min`;}ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);voltsMin=Math.round(voltsMin);voltsMax=Math.round(voltsMax);const wfsMin=(d.wfs[0]*posF*jointF).toFixed(1);const wfsMax=(d.wfs[1]*posF*jointF).toFixed(1);const passes=Math.max(1,Math.ceil(thickness/5));const polarity=isGasless?'DC- (DCEN)':'DC+ (DCEP)';lastResult={process:'FCAW',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity,gasFlow:gasText,wireSpeed:`${wfsMin}–${wfsMax} m/min`,passes,thickness,position,material:null};renderResult(lastResult);$('wireSpeedLabel').style.display='flex';$('resultProcessLabel').textContent=isGasless?'FCAW (sin gas) — Amperaje Recomendado':'FCAW — Amperaje Recomendado';}
 
-function renderResult(r){
-if(selectedMachine&&r.ampsMax>selectedMachine.maxAmps){r.ampsMax=selectedMachine.maxAmps;if(r.ampsMin>selectedMachine.maxAmps)r.ampsMin=selectedMachine.maxAmps;}
-$('currentRange').textContent=`${r.ampsMin} – ${r.ampsMax} A`;$('voltageOut').textContent=r.voltage;
-const polCls=(r.polarity||'').includes('DC+')?'dc\\+':(r.polarity||'').includes('DC-')?'dc-':'ac';
-$('polarityOut').innerHTML=`<span class="polarity-badge ${polCls}">${r.polarity}</span>`;
-$('gasFlowOut').textContent=r.gasFlow;$('wireSpeedOut').textContent=r.wireSpeed;
-$('passesOut').textContent=r.passes+' '+(r.passes>1?'pasadas':'pasada');
-$('heatAmps').value=Math.round((r.ampsMin+r.ampsMax)/2);updateHeatInput();
-let warn='⚠️ Verifica con probeta. Ajusta ±10–15% según el arco.';
-if(selectedMachine&&r.ampsMax>=selectedMachine.maxAmps)warn=`⚠️ Tu máquina alcanza máx ${selectedMachine.maxAmps}A. La app ha limitado el resultado.`;
-else if(r.thickness<2)warn='⚠️ Material delgado: reduce amperaje y aumenta velocidad.';
-else if(r.thickness>15)warn='⚠️ Material grueso: considera precalentamiento.';
-else if(r.material==='stainless')warn='⚠️ Inox: mantén interpass bajo 150°C.';
-else if(r.material==='aluminum')warn='⚠️ Aluminio: usa AC y limpia la superficie.';
-else if(r.material==='cast')warn='⚠️ Fundición: precalienta 200–400°C.';
-else if(r.position==='vertical')warn='⚠️ Vertical: reduce amperaje un 10–15%.';
-else if(r.position==='overhead')warn='⚠️ Sobre cabeza: reduce amperaje un 15–20%.';
-if(r.electrodeNote)warn+=`<br><span style="color:#fdba74">📝 Electrodo E${r.electrodeCode||''}: ${r.electrodeNote}</span>`;
-$('warning').innerHTML=warn;
-}
+function renderResult(r){if(selectedMachine&&r.ampsMax>selectedMachine.maxAmps){r.ampsMax=selectedMachine.maxAmps;if(r.ampsMin>selectedMachine.maxAmps)r.ampsMin=selectedMachine.maxAmps;}$('currentRange').textContent=`${r.ampsMin} – ${r.ampsMax} A`;$('voltageOut').textContent=r.voltage;const polCls=(r.polarity||'').includes('DC+')?'dc\\+':(r.polarity||'').includes('DC-')?'dc-':'ac';$('polarityOut').innerHTML=`<span class="polarity-badge ${polCls}">${r.polarity}</span>`;$('gasFlowOut').textContent=r.gasFlow;$('wireSpeedOut').textContent=r.wireSpeed;$('passesOut').textContent=r.passes+' '+(r.passes>1?'pasadas':'pasada');$('heatAmps').value=Math.round((r.ampsMin+r.ampsMax)/2);updateHeatInput();let warn='⚠️ Verifica con probeta. Ajusta ±10–15% según el arco.';if(selectedMachine&&r.ampsMax>=selectedMachine.maxAmps)warn=`⚠️ Tu máquina alcanza máx ${selectedMachine.maxAmps}A. La app ha limitado el resultado.`;else if(r.thickness<2)warn='⚠️ Material delgado: reduce amperaje y aumenta velocidad.';else if(r.thickness>15)warn='⚠️ Material grueso: considera precalentamiento.';else if(r.material==='stainless')warn='⚠️ Inox: mantén interpass bajo 150°C.';else if(r.material==='aluminum')warn='⚠️ Aluminio: usa AC y limpia la superficie.';else if(r.material==='cast')warn='⚠️ Fundición: precalienta 200–400°C.';else if(r.position==='vertical')warn='⚠️ Vertical: reduce amperaje un 10–15%.';else if(r.position==='overhead')warn='⚠️ Sobre cabeza: reduce amperaje un 15–20%.';if(r.electrodeNote)warn+=`<br><span style="color:#fdba74">📝 Electrodo E${r.electrodeCode||''}: ${r.electrodeNote}</span>`;$('warning').innerHTML=warn;}
 
 function updateHeatInput(){const amps=parseFloat($('heatAmps').value)||0;let volts=24;if(lastResult&&lastResult.voltage){const m=lastResult.voltage.match(/(\d+)/);if(m)volts=parseInt(m[1]);}const speed=parseFloat($('travelSpeed').value)||200;const heat=(amps*volts*60)/(speed*1000);const heatIP=heat*25.4;const el=$('heatOut');el.textContent=units==='metric'?`${heat.toFixed(2)} kJ/mm`:`${heatIP.toFixed(2)} kJ/in`;el.style.color=heat>2.5?'#fca5a5':heat<0.5?'#86efac':'#f1f5f9';}
 
-function buildReference(process){const c=$('refContent');let html='';
-if(process==='mig'){html+=`<div class="ref-section-title">🔵 MIG/MAG — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th><th>Espesor Máx.</th></tr></thead><tbody>`;
-Object.entries(MIG_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td><td>${d.thicknessMax} mm</td></tr>`;});html+=`</tbody></table></div>`;}
-else if(process==='tig'){html+=`<div class="ref-section-title">🟢 TIG — Parámetros por Material</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Material</th><th>Corriente</th><th>A/mm</th></tr></thead><tbody>`;
-Object.entries(TIG_DATA).forEach(([k,d])=>{const n={carbon:'Acero Carbono',stainless:'Inoxidable',aluminum:'Aluminio'};html+=`<tr><td>${n[k]||k}</td><td>${d.currentType}</td><td>${d.ampsPerMM[0]}–${d.ampsPerMM[1]} A/mm</td></tr>`;});html+=`</tbody></table></div>`;}
-else if(process==='stick'){html+=`<div class="ref-section-title">🟠 Electrodo — Amperaje por Ø</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Ø</th><th>Rango (A)</th></tr></thead><tbody>`;
-Object.entries(STICK_BASE_AMPS).forEach(([k,v])=>{html+=`<tr><td>${k} mm</td><td>${v[0]}–${v[1]} A</td></tr>`;});html+=`</tbody></table></div><div class="ref-section-title">🟠 Electrodo — Polaridad</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Electrodo</th><th>Polaridad</th><th>Nota</th></tr></thead><tbody>`;
-Object.entries(STICK_ELECTRODES).forEach(([k,d])=>{html+=`<tr><td>E${k}</td><td>${d.polarity}</td><td>${d.note||''}</td></tr>`;});html+=`</tbody></table></div>`;}
-else if(process==='fcaw'){html+=`<div class="ref-section-title">🟣 FCAW — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th></tr></thead><tbody>`;
-Object.entries(FCAW_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td></tr>`;});html+=`</tbody></table></div>
-<div class="ref-section-title">🟣 FCAW — Con gas vs sin gas</div>
-<div class="table-wrap"><table class="ref-table"><thead><tr><th>Tipo</th><th>Polaridad</th><th>Uso</th></tr></thead><tbody>
-<tr><td>Con gas (M21/CO₂)</td><td>DC+</td><td>Alta calidad, taller</td></tr>
-<tr><td>Sin gas (fundente interno)</td><td>DC-</td><td>Exterior, portátil</td></tr>
-</tbody></table></div>`;}
-c.innerHTML=html;}
+function buildReference(process){const c=$('refContent');let html='';if(process==='mig'){html+=`<div class="ref-section-title">🔵 MIG/MAG — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th><th>Espesor Máx.</th></tr></thead><tbody>`;Object.entries(MIG_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td><td>${d.thicknessMax} mm</td></tr>`;});html+=`</tbody></table></div>`;}else if(process==='tig'){html+=`<div class="ref-section-title">🟢 TIG — Parámetros por Material</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Material</th><th>Corriente</th><th>A/mm</th></tr></thead><tbody>`;Object.entries(TIG_DATA).forEach(([k,d])=>{const n={carbon:'Acero Carbono',stainless:'Inoxidable',aluminum:'Aluminio'};html+=`<tr><td>${n[k]||k}</td><td>${d.currentType}</td><td>${d.ampsPerMM[0]}–${d.ampsPerMM[1]} A/mm</td></tr>`;});html+=`</tbody></table></div>`;}else if(process==='stick'){html+=`<div class="ref-section-title">🟠 Electrodo — Amperaje por Ø</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Ø</th><th>Rango (A)</th></tr></thead><tbody>`;Object.entries(STICK_BASE_AMPS).forEach(([k,v])=>{html+=`<tr><td>${k} mm</td><td>${v[0]}–${v[1]} A</td></tr>`;});html+=`</tbody></table></div><div class="ref-section-title">🟠 Electrodo — Polaridad y Aplicación</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Electrodo</th><th>Polaridad</th><th>Aplicación</th></tr></thead><tbody>`;Object.entries(STICK_ELECTRODES).forEach(([k,d])=>{html+=`<tr><td>E${k}</td><td>${d.polarity}</td><td>${d.note||''}</td></tr>`;});html+=`</tbody></table></div>`;html+=`<div class="warning" style="margin-top:10px">📐 <strong>Regla rápida de diámetro:</strong> ≤1,5 mm→Ø2,0 · 1,5–2 mm→Ø2,5 · 2–5 mm→Ø3,2 · 5–8 mm→Ø4,0 · >8 mm→Ø5,0</div>`;}else if(process==='fcaw'){html+=`<div class="ref-section-title">🟣 FCAW — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th></tr></thead><tbody>`;Object.entries(FCAW_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td></tr>`;});html+=`</tbody></table></div><div class="ref-section-title">🟣 FCAW — Con gas vs sin gas</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Tipo</th><th>Polaridad</th><th>Uso</th></tr></thead><tbody><tr><td>Con gas (M21/CO₂)</td><td>DC+</td><td>Alta calidad, taller</td></tr><tr><td>Sin gas (fundente interno)</td><td>DC-</td><td>Exterior, portátil</td></tr></tbody></table></div>`;}c.innerHTML=html;}
 
 function setupGuide(){buildGuide();}
 function buildGuide(){$('guideContent').innerHTML=`
 <div class="guide-card" data-process="mig"><h3>🔵 MIG/MAG <span class="active-badge">Tu máquina</span></h3>
 <p><strong>Hilo continuo con gas.</strong> Ideal para chapa fina a media. Polaridad DC+. Gas: Ar+CO₂ (M21) para acero, Argón puro para aluminio.</p>
-<p><strong>Materiales:</strong> Acero al carbono, inoxidable, aluminio (con gas adecuado).</p>
+<p><strong>Materiales:</strong> Acero al carbono, inoxidable, aluminio.</p>
 <p><strong>Hilos:</strong> ER70S-6 (acero), ER308L/316L (inox), ER4043 (aluminio).</p></div>
 <div class="guide-card" data-process="tig"><h3>🟢 TIG <span class="active-badge">Tu máquina</span></h3>
 <p><strong>Electrodo de tungsteno no consumible.</strong> Máxima calidad y control. DCEN para acero e inox, AC para aluminio.</p>
 <p><strong>Materiales:</strong> Acero carbono, inoxidable, aluminio (AC), titanio, cobre.</p>
-<p><strong>Tungsteno:</strong> WC20 (cerio, gris), WL15 (lantano, dorado). Gas: argón puro.</p></div>
+<p><strong>Tungsteno:</strong> WC20 (cerio), WL15 (lantano). Gas: argón puro.</p></div>
 <div class="guide-card" data-process="stick"><h3>🟠 Electrodo (SMAW) <span class="active-badge">Tu máquina</span></h3>
 <p><strong>Electrodo revestido consumible.</strong> Versátil, funciona con viento.</p>
 <p><strong>Electrodos por material:</strong></p>
 <p>• <strong>Acero al carbono:</strong> E6013 (rutilo, fácil), E7018 (básico, estructural), E6010/E6011 (celulósico, penetración)</p>
-<p>• <strong>Inoxidable:</strong> E308L, E316L</p>
+<p>• <strong>Inoxidable:</strong> E308L, E316L, E309L (uniones mixtas)</p>
 <p>• <strong>Fundición:</strong> ENi-Cl, ENiFe-Cl</p>
-<p>• <strong>Aluminio:</strong> E4043 (raro en electrodo)</p></div>
+<p>• <strong>Aluminio:</strong> No recomendado con electrodo revestido (usar TIG/MIG)</p></div>
 <div class="guide-card" data-process="fcaw"><h3>🟣 FCAW <span class="active-badge">Tu máquina</span></h3>
 <p><strong>Hilo tubular con fundente interno.</strong> Alta deposición. Puede usarse con o sin gas.</p>
 <p><strong>Con gas (DC+):</strong> mayor calidad, taller. Hilo E70T-1, E71T-1.</p>
-<p><strong>Sin gas (DC-, self-shielded):</strong> exterior, portátil, ideal para máquinas domésticas. Hilo E71T-GS.</p></div>
+<p><strong>Sin gas (DC-, self-shielded):</strong> exterior, portátil. Hilo E71T-GS.</p></div>
+${buildJointGuide()}
 <div class="guide-card"><h3>📐 Reglas generales</h3>
 <p><strong>Amperaje aproximado:</strong> 30–40 A por mm de espesor para electrodo revestido, 25–35 A/mm para TIG en acero, 35–50 A/mm para TIG en aluminio.</p>
 <p><strong>Aporte térmico:</strong> Heat Input (kJ/mm) = (A × V × 60) / (Vel × 1000). Valores típicos: 0,5–2,5 kJ/mm. Inoxidables: &lt;1,5 kJ/mm.</p></div>
