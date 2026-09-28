@@ -145,13 +145,14 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 .dim-chip{display:inline-block;padding:2px 7px;background:rgba(249,115,22,0.15);border-radius:8px;font-size:0.68rem;color:var(--accent);font-weight:600;margin:2px}
 
 @media(min-width:768px){body{align-items:flex-start;padding:20px}.app{border-radius:20px;max-height:calc(100vh - 40px)}.bottom-nav{position:sticky;transform:none;left:auto}.wizard-overlay{align-items:center}.wizard{border-radius:20px;max-height:85vh}}
+.reset-btn{background:rgba(0,0,0,0.25);border:none;color:#fff;border-radius:8px;min-width:36px;min-height:36px;font-size:1.15rem;font-weight:700;cursor:pointer}.reset-btn:active{background:rgba(0,0,0,0.45)}
 </style>
 </head>
 <body>
 <div class="app">
 <header>
 <h1>⚡ Soldadura<br><span style="font-size:0.75rem;opacity:0.9">Anthony Rostron</span></h1>
-<div class="header-controls">
+<div class="header-controls"><button class="reset-btn" id="btnReset" aria-label="Restablecer filtros" title="Restablecer filtros">↻</button>
 <div class="lang-toggle" id="langToggle"><button data-lang="es" class="active">ES</button><button data-lang="en">EN</button></div>
 <div class="unit-toggle" id="unitToggle"><button data-unit="metric" class="active">mm</button><button data-unit="imperial">in</button></div>
 </div>
@@ -330,6 +331,147 @@ const MACHINE_DB={
 'solter-practico200':{name:'Solter PRACTICO MIG 200 LD',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
 'vevor-mig200':{name:'Vevor MIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:60},weight:'8.4 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],materials:['Acero dulce','Acero inoxidable','Hierro fundido','Cobre','Aleaciones'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
 'miller-multimatic215':{name:'Miller Multimatic 215',maxAmps:215,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:150,duty:20},weight:'15 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable','Aluminio (spool gun)'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]}};
+
+/* ===== Máquinas ampliadas (datos aproximados: verifica en la ficha del fabricante) ===== */
+(function(){const P={m:'mig',t:'tig',s:'stick',f:'fcaw',g:'fcaw'};
+function add(cat,rows){rows.split('\n').forEach(r=>{r=r.trim();if(!r)return;const[n,a,v,p,da,d,w]=r.split('|');const pr=[...new Set([...p].map(c=>P[c]))],amps=+a,gl=p.includes('g');
+const id=n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');if(MACHINE_DB[id])return;
+const sd=amps<=100?['1.6','2.0','2.5']:amps<=160?['1.6','2.0','2.5','3.2']:amps<=220?['1.6','2.0','2.5','3.2','4.0']:['1.6','2.0','2.5','3.2','4.0','5.0'];
+const e={name:n,maxAmps:amps,inputVolts:(v||'230')+' V',processes:pr,dutyRef:{amps:+da,duty:+d},weight:w+' kg',category:cat,defaultProcess:pr[0],defaultThickness:amps<=120?2:amps<=170?4:6,gaslessFCAW:gl,materials:['Acero al carbono','Acero inoxidable'],recommendedElectrodes:[],notes:'Datos aproximados: verifica en la ficha del fabricante.'};
+if(pr.includes('mig')||pr.includes('fcaw')){e.defaultWire='0.8';e.supportedWires=['0.6','0.8','0.9','1.0'];}
+if(pr.includes('stick')){e.defaultStickDia=amps<=100?'2.5':'3.2';e.supportedStickDia=sd;e.recommendedElectrodes.push({code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'});}
+if(pr.includes('mig'))e.recommendedElectrodes.push({code:'ER70S-6',note:'Hilo MIG acero'});
+if(gl)e.recommendedElectrodes.push({code:'E71T-GS',note:'Hilo tubular sin gas'});
+if(pr.includes('tig'))e.recommendedElectrodes.push({code:'ER70S-2',note:'Varilla TIG acero'});
+if(/AC\/DC/.test(n))e.materials.push('Aluminio');
+MACHINE_DB[id]=e;});}
+add('Parkside (Lidl)',`Parkside PISG 100 A1|100||s|80|20|2.6
+Parkside PISG 120 B3|120||s|100|20|3
+Parkside PIFDS 120 B2|120||g|100|20|4.7
+Parkside PIFDS 120 A1|120||g|100|20|4.4`);
+add('Powerplus / Kreator',`Powerplus POWX480|160||s|120|20|6
+Powerplus POWX481 Inverter|160||s|120|20|3`);
+add('Stanley',`Stanley Top MIG 1800|160||ms|130|20|10`);
+add('DeWalt',`DeWalt DXWDMMA200E|200||s|200|35|4.5
+DeWalt DXWDMIG200E|200||mst|200|30|9`);
+add('Einhell',`Einhell TC-IW 110|110||s|80|20|2.6`);
+add('Telwin',`Telwin Force 125|120||s|100|20|2.9
+Telwin Force 145|140||s|110|20|3.2
+Telwin Force 165|160||s|130|20|3.4
+Telwin Technology 236 XT|230||s|190|35|4.9
+Telwin Technomig 210 Dual Synergic|200||mst|170|30|11
+Telwin Technomig 215 Dual Synergic|210||mst|180|30|12
+Telwin Technomig 260 Dual Synergic|250||mst|220|35|14
+Telwin Maxima 230 Synergic|230||mst|200|30|13
+Telwin Electromig 300 Synergic|290|400|mst|250|35|26`);
+add('Solter',`Solter Practico MIG 120 LD|120||mst|100|25|7
+Solter Practico MIG 160 LD|160||mst|130|25|8
+Solter Solpro 4en1|200||mst|200|30|9
+Solter Icontig 200 AC/DC|200||ts|180|35|13`);
+add('GYS',`GYS GYSMI 130|130||s|110|25|3
+GYS GYSMI 160P|160||s|140|25|3.5
+GYS GYSMI 200P|200||s|170|30|4
+GYS Neopulse 220C|220||mst|200|35|15`);
+add('Galagar',`Galagar Gala 2000 MP|200||mst|180|30|11
+Galagar TIG 1600|160||ts|140|35|4`);
+add('Cevik',`Cevik CE-EVOLUTION20X|200||s|160|35|3.5
+Cevik CE-TITANIM160|160||s|130|30|3`);
+add('Online (Stahlwerk)',`Stahlwerk FLUX 160 ST Digital|160||gst|130|30|7
+Stahlwerk AC/DC TIG 200 ST|200||ts|180|60|12
+Stahlwerk ARC 200 Synergic Pro Digital|200||st|160|60|4
+Stahlwerk ARC 200 MD|200||s|160|60|3.5`);
+add('Online (Vevor)',`Vevor MIG-130 3-in-1|130||gst|100|60|6
+Vevor MIG-250 5-in-1|250||mgst|200|60|12
+Vevor ARC-100|100||st|80|60|2.5`);
+add('Online (otras marcas)',`Mophorn MIG-200 3 en 1|200||mst|200|60|8
+SucceBuy MIG 130 3 en 1|130||gst|100|60|5
+YesWelder ARC-205DS|205|220|s|170|60|3.5
+ArcCaptain ARC200|200|220|st|170|60|3.5`);
+add('Profesional',`ESAB Rebel EMP 215ic|215||mts|190|40|18
+ESAB Rogue ES 180i|180||s|150|40|8
+Fronius TransPocket 180|180||st|150|35|7
+Fronius MagicWave 230i AC/DC|230||ts|200|40|20
+Kemppi Minarc Evo 180|180||s|150|40|6
+EWM Picomig 180 puls|180||ms|160|35|12
+EWM Tetrix 230 AC/DC|230||ts|200|45|18
+Lincoln Electric Powertec i250C|250||m|200|40|24`);
+add('Telwin',`Telwin Force 135|130||s|110|20|3
+Telwin Tecnica 141|140||s|110|20|3.5
+Telwin Tecnica 161|160||s|130|20|3.8
+Telwin Technology 186 XT|180||s|150|35|4.3
+Telwin Technology 216 XT|210||s|180|35|4.6
+Telwin Tig 222 AC/DC|220||ts|200|35|16
+Telwin Technomig 180 Dual Synergic|180||mst|150|30|10
+Telwin Technomig 230 Dual Synergic|220||mst|190|30|12`);
+add('Lincoln Electric',`Lincoln Electric Bester 175-C|170||m|130|20|30
+Lincoln Electric Bester 210-C|200||m|170|25|34
+Lincoln Electric Speedtec 180C|180||ms|150|30|11
+Lincoln Electric Speedtec 200C|200||ms|170|30|12
+Lincoln Electric Powertec i320C|320|400|m|280|40|34
+Lincoln Electric Invertec V205-T AC/DC|205||ts|180|35|16`);
+add('ESAB',`ESAB Rebel EMP 235ic|235||mts|200|40|20
+ESAB Rebel EMP 205ic AC/DC|205||mts|180|40|17
+ESAB Rogue ES 200i|200||s|170|40|9
+ESAB Buddy Arc 145|140||s|110|30|4
+ESAB Fabricator 211i|210||mst|180|35|15
+ESAB Warrior 400i|400|400|ms|400|100|30`);
+add('Kemppi',`Kemppi Minarc Evo 150|150||s|130|35|4
+Kemppi Minarc Evo 200|200||s|170|35|5
+Kemppi Minarc T 180|180||st|150|35|5
+Kemppi MasterTig MLS 2300 ACDC|230||ts|200|40|20
+Kemppi FastMig X 350|350|400|m|350|60|30`);
+add('Fronius',`Fronius TransPocket 150|150||st|130|35|6
+Fronius TransTig 2200|220||t|200|40|17
+Fronius MagicWave 2200 AC/DC|220||ts|200|40|20
+Fronius TransSteel 2200|220||m|190|35|21`);
+add('EWM',`EWM Picomig 225 puls|220||ms|190|35|14
+EWM Picotig 200 puls|200||ts|180|35|10
+EWM Taurus 355 Synergic|350|400|m|350|60|60
+EWM Tetrix 300 AC/DC|300|400|ts|300|60|30`);
+add('Miller',`Miller Millermatic 211|210||m|150|30|20
+Miller Millermatic 252|250||m|200|40|30
+Miller Multimatic 220 AC/DC|220||mts|170|30|17
+Miller Maxstar 161 STL|160||st|140|35|9
+Miller Dynasty 210 AC/DC|210||ts|170|40|20`);
+add('Jasic',`Jasic ARC 200|200||s|180|60|4.5
+Jasic TIG 200P AC/DC|200||ts|180|60|17`);
+add('Online (otras marcas)',`Lotos TIG200 AC/DC|200|220|ts|180|60|14
+Lotos MIG175|175|220|mst|140|30|20
+Hitbox HBM1000|200||mgst|160|60|8`);
+add('Solter',`Solter Practico 150|150||s|130|35|3.5`);
+add('Telwin',`Telwin Tig 222 DC-HF/Lift|220||ts|200|35|14`);
+add('Lincoln Electric',`Lincoln Electric Precision TIG 225 AC/DC|225||ts|200|40|20
+Lincoln Electric Power MIG 210 MP|210||mts|170|40|25
+Lincoln Electric Power MIG 260|260||m|200|40|33`);
+add('ESAB',`ESAB Fabricator 141i|140||mst|110|30|9
+ESAB Fabricator 252i|250||mst|200|40|26
+ESAB Renegade ES 300i|300|400|s|300|60|17
+ESAB Aristo 500ix|500|400|s|500|100|38`);
+add('Kemppi',`Kemppi FastMig X 450|450|400|m|450|60|33
+Kemppi MinarcMig Adaptive 180|180||ms|150|35|10`);
+add('Fronius',`Fronius TransSteel 3500|350|400|m|350|60|40
+Fronius TPS 320i|320|400|m|320|60|38
+Fronius TPS 400i|400|400|m|400|60|42
+Fronius MagicWave 4000 AC/DC|400|400|ts|400|60|50`);
+add('EWM',`EWM Picomig 305 puls|300|400|ms|270|40|30
+EWM Phoenix 355 Expert 2 puls|350|400|m|350|60|55`);
+add('Miller',`Miller Millermatic 190|190||m|130|30|20
+Miller Millermatic 350P|350|400|m|350|60|60
+Miller Multimatic 200|200||mts|150|30|17
+Miller Maxstar 150 STH|150||st|130|35|8
+Miller Syncrowave 210 AC/DC|210||ts|175|40|60
+Miller Dynasty 280 AC/DC|280|400|ts|250|60|55`);
+add('Jasic',`Jasic ARC 160|160||s|140|60|4`);
+add('Online (otras marcas)',`ArcCaptain MIG200|200|220|mgst|160|60|9
+ArcCaptain TIG200 AC/DC|200|220|ts|170|60|15
+YesWelder MIG-205DS|205|220|mgst|160|60|9
+YesWelder TIG-250P AC/DC|250|220|ts|200|60|17`);
+add('Online (AliExpress genéricas)',`ZX7-200 IGBT|200|220|s|160|60|4
+ZX7-250 IGBT|250|220|s|200|60|5
+WSM-200 TIG Lift|200|220|ts|160|60|6
+NBC-250 MIG|250|220|mst|200|60|14`);
+const rb=document.getElementById('btnReset');if(rb)rb.addEventListener('click',()=>{document.getElementById('machineSearch').value='';populateMachines('');const m=document.getElementById('machine');m.value='';m.dispatchEvent(new Event('change'));selectedMachine=null;document.querySelectorAll('.result.show').forEach(r=>r.classList.remove('show'));document.getElementById('content').scrollTo({top:0});showToast('↻ Filtros restablecidos');});
+})();
 
 let units='metric',currentProcess='mig',currentRefProcess='mig',lastResult=null;
 let selectedMachine=null,customMachines=[];
