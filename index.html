@@ -367,6 +367,32 @@ $('stickDiameter').innerHTML=Object.keys(STICK_BASE_AMPS).map(k=>`<option value=
 
 function normalize(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 
+function populateMachines(query){
+query=query||'';
+const nq=normalize(query);
+const grouped={};let count=0;
+Object.entries(MACHINE_DB).forEach(([k,v])=>{
+if(nq){const hay=normalize(v.name+' '+v.category+' '+(v.processes||[]).join(' ')+(v.materials||[]).join(' '));if(!hay.includes(nq))return;}
+if(!grouped[v.category])grouped[v.category]=[];
+grouped[v.category].push(`<option value="${k}">${v.name}</option>`);
+count++;
+});
+customMachines.forEach(m=>{
+if(nq){const hay=normalize(m.name+' '+(m.processes||[]).join(' '));if(!hay.includes(nq))return;}
+if(!grouped['Mis máquinas'])grouped['Mis máquinas']=[];
+grouped['Mis máquinas'].push(`<option value="${m.id}">${m.name}</option>`);
+count++;
+});
+let html='';
+if(count===0){html='<option value="">— Sin resultados —</option>';}
+else{html='<option value="">— Selecciona una máquina —</option>';
+Object.entries(grouped).forEach(([cat,opts])=>{html+=`<optgroup label="${cat}">${opts.join('')}</optgroup>`;});}
+$('machine').innerHTML=html;
+if(selectedMachine){const key=selectedMachine._key||selectedMachine.id;if([...$('machine').options].some(o=>o.value===key))$('machine').value=key;}
+const hint=$('searchHint');
+if(nq){hint.textContent=count===0?`Sin resultados para "${query}"`:`${count} máquina${count>1?'s':''} encontrada${count>1?'s':''}`;hint.style.color=count===0?'var(--danger)':'var(--ok)';$('machineSearchClear').classList.add('show');}
+else{hint.textContent='Escribe parte del nombre para filtrar';hint.style.color='var(--text-dim)';$('machineSearchClear').classList.remove('show');}
+}
 /* ============================================================
    WIZARD / HELPER
    ============================================================ */
