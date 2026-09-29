@@ -147,6 +147,7 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 @media(min-width:768px){body{align-items:flex-start;padding:20px}.app{border-radius:20px;max-height:calc(100vh - 40px)}.bottom-nav{position:sticky;transform:none;left:auto}.wizard-overlay{align-items:center}.wizard{border-radius:20px;max-height:85vh}}
 .reset-btn{background:rgba(0,0,0,0.25);border:none;color:#fff;border-radius:8px;min-width:36px;min-height:36px;font-size:1.15rem;font-weight:700;cursor:pointer}.reset-btn:active{background:rgba(0,0,0,0.45)}
 .safe-sec{background:var(--panel-2);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}.safe-sec>summary{cursor:pointer;font-weight:700;color:var(--accent);font-size:0.95rem}.safe-item{margin:10px 0 0;font-size:0.82rem;line-height:1.55}.safe-item b{display:block;color:var(--text)}.safe-note{font-size:0.75rem;color:var(--muted,#94a3b8);margin:6px 0 24px;line-height:1.5}
+.adv-h{font-weight:700;font-size:0.85rem;color:var(--accent);margin:8px 0}.adv-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0;font-size:0.8rem}.adv-row input[type=number],.adv-row select{width:130px;padding:6px;border-radius:8px;border:1px solid var(--border,#334155);background:var(--panel,#0f172a);color:var(--text)}.adv-row input[type=range]{width:130px}.adv-row.ro{background:rgba(56,189,248,0.08);border-radius:8px;padding:6px 8px}.adv-badge{font-size:0.78rem;text-align:right}.adv-badge.warn{color:#fdba74}.adv-badge.bad{color:#f87171}.adv-badge.ok{color:#86efac}.adv-tag{font-size:0.6rem;background:rgba(56,189,248,0.2);border-radius:4px;padding:1px 4px;margin-left:6px}
 </style>
 </head>
 <body>
@@ -209,6 +210,8 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(24
 <div id="fcawGasGroup"><label for="fcawGas">Gas</label><select id="fcawGas"><option value="co2" selected>CO₂ (100%)</option><option value="mix">Ar + CO₂ (M21)</option></select></div>
 <div id="fcawGaslessNote" style="display:none;padding:10px 12px;background:rgba(34,197,94,0.1);border-left:3px solid var(--ok);border-radius:6px;font-size:0.75rem;color:#86efac;margin-bottom:14px">✓ Sin gas — este modelo usa hilo tubular con fundente interno (self-shielded).</div>
 </div>
+
+<details class="safe-sec" id="advWrap"><summary id="advSummary"></summary><div id="advPanel"></div></details>
 
 <button class="btn-primary" id="btnCalc">Calcular Parámetros</button>
 
@@ -1007,7 +1010,109 @@ const SAFE=[
 ];
 function buildSafety(){const k=currentLang==='en'?1:0,el=document.getElementById('safetyContent');if(!el)return;
 el.innerHTML=SAFE.map((sec,n)=>`<details class="safe-sec"${n===0?' open':''}><summary>${sec.t[k]}</summary>`+sec.i.map(x=>`<div class="safe-item"><b>${x[k]}</b>${x[2+k]}</div>`).join('')+'</details>').join('')+`<p class="safe-note">${k?'Informational summary. It is not legal advice and regulations are updated regularly: check the current text on BOE, EUR-Lex and INSST, and the validity of any qualification with the issuing body.':'Resumen informativo. No es asesoramiento legal y la normativa se actualiza con frecuencia: consulta el texto vigente en el BOE, EUR-Lex y el INSST, y la validez de cada cualificación con el organismo emisor.'}</p>`;}
-function applyLang(){buildSafety();document.documentElement.lang=currentLang;document.querySelectorAll('#langToggle button').forEach(x=>x.classList.toggle('active',x.dataset.lang===currentLang));trWalk(document.body,currentLang==='en');}
+
+/* ── AJUSTES AVANZADOS (campos: id, etiqueta 'es|en', type, control_type, visibility_condition, opciones) ── */
+const STEELS={s235:['S235',[.14,.8,.05,0,0,.05,.1]],s355:['S355',[.18,1.4,.1,0,.02,.1,.2]],qt:['42CrMo4 (Q&T)',[.42,.75,1.05,.22,0,0,0]]};
+const TUNG={1:[80,60],1.6:[150,100],2.4:[250,170],3.2:[400,225],4:[500,300]};
+const ADV_TITLE={mig:'Controles avanzados MIG/MAG y física de transferencia|MIG/MAG Advanced Controls & Transfer Physics',tig:'TIG: alta frecuencia y dinámica del arco|TIG High-Frequency & Arc Dynamics',stick:'SMAW: opciones estructurales pesadas y de entorno|SMAW Heavy Structural & Environmental Options',fcaw:'FCAW: control de gas y extensión del hilo|FCAW Gas & Wire Extension Controls'};
+const A={unequal:false,t2:6,amb:20,env:'shop',gap:2,angle:60,steel:'s235',gas:'80_20',ind:50,ctwd:15,burn:0.1,ctype:'dcen',acbal:70,acfreq:80,pulse:false,pfreq:2,ppeak:100,pbase:30,tung:'ceria',tdia:'2.4',flow_pre:0.5,post:8,arcf:30,hot:40,hotT:0.3,moist:'sealed',sub:'G',eso:20,flow:18,depth:10,wtemp:15};
+const N=(u,min,max,st)=>({u,min,max,st});
+const ADV=[
+['unequal','Espesores desiguales|Unequal thickness','user_input','toggle','true'],
+['t2','Espesor 2 (t2)|Second thickness (t2)','user_input','number','A.unequal',N('mm',.5,100,.5)],
+['amb','Temperatura ambiente|Ambient temperature','user_input','number','true',N('°C',-40,60,1)],
+['env','Entorno|Environment','user_input','select','true',{o:[['shop','Taller / interior|Shop floor / indoors'],['out','Exterior / viento|Outdoor / wind exposed'],['wet','Hiperbárico / húmedo|Hyperbaric / underwater wet'],['dry','Hiperbárico / seco|Hyperbaric / underwater dry']]}],
+['gap','Separación de raíz|Root opening','user_input','number','true',N('mm',0,20,.5)],
+['angle','Ángulo incluido (0 = filete)|Included angle (0 = fillet)','user_input','number','true',N('°',0,120,5)],
+['steel','Composición del acero|Steel composition','user_input','select','true',{o:Object.keys(STEELS).map(k=>[k,STEELS[k][0]])}],
+['teq','Espesor equivalente (t_eq)|Equivalent thickness (t_eq)','calculated_readout','read_only_badge','true'],
+['cev','Carbono equivalente (CEV)|Carbon equivalent (CEV)','calculated_readout','read_only_badge','true'],
+['pre','Precalentamiento mín. / interpasada máx.|Min preheat / max interpass','calculated_readout','read_only_badge','true'],
+['area','Área de la junta|Weld cross-section area','calculated_readout','read_only_badge','true'],
+['passes','Pasadas estimadas|Estimated passes','calculated_readout','read_only_badge','true'],
+['gas','Gas de protección|Shielding gas','user_input','select','process==="mig"',{o:[['co2','100% CO₂'],['80_20','80/20 Ar/CO₂'],['90_10','90/10 Ar/CO₂'],['98_2','98/2 Ar/O₂'],['ar','Argón puro|Pure argon']]}],
+['ind','Inductancia / control de arco|Inductance / arc control','user_input','slider','process==="mig"',N('%',0,100,1)],
+['ctwd','Distancia tobera-pieza (CTWD)|Contact-tip-to-work distance','user_input','number','process==="mig"',N('mm',8,30,1)],
+['burn','Tiempo de burnback|Burnback time','user_input','number','process==="mig"',N('s',0,1,.05)],
+['mode','Modo de transferencia previsto|Predicted transfer mode','calculated_readout','read_only_badge','process==="mig"'],
+['dep','Tasa de deposición / WFS|Deposition rate / WFS','calculated_readout','read_only_badge','process==="mig"'],
+['ctype','Corriente y polaridad|Current type & polarity','user_input','select','process==="tig"',{o:[['dcen','DCEN'],['dcep','DCEP'],['ac','AC']]}],
+['acbal','Balance AC (% penetración)|AC balance (% penetration)','user_input','slider','process==="tig"&&A.ctype==="ac"',N('%',50,90,1)],
+['acfreq','Frecuencia AC|AC frequency','user_input','number','process==="tig"&&A.ctype==="ac"',N('Hz',40,250,5)],
+['pulse','Pulsado|Pulse','user_input','toggle','process==="tig"'],
+['pfreq','Frecuencia de pulso|Pulse frequency','user_input','number','process==="tig"&&A.pulse',N('Hz',.5,500,.5)],
+['ppeak','Corriente pico|Peak current','user_input','number','process==="tig"&&A.pulse',N('%',50,100,5)],
+['pbase','Corriente base|Background current','user_input','number','process==="tig"&&A.pulse',N('%',10,80,5)],
+['tung','Tipo de tungsteno|Tungsten type','user_input','select','process==="tig"',{o:[['thor','2% Torio (rojo)|2% Thoriated (red)'],['ceria','2% Cerio (gris)|2% Ceriated (grey)'],['lanth','Lantano (azul)|Lanthanated (blue)'],['pure','Puro (verde)|Pure (green)']]}],
+['tdia','Diámetro del tungsteno|Tungsten diameter','user_input','select','process==="tig"',{o:Object.keys(TUNG).map(k=>[k,k+' mm'])}],
+['flow_pre','Pre-flujo (s)|Pre-flow (s)','user_input','number','process==="tig"',N('s',0,5,.1)],
+['post','Post-flujo (s)|Post-flow (s)','user_input','number','process==="tig"',N('s',0,30,1)],
+['tcap','Capacidad del tungsteno|Tungsten current capacity','calculated_readout','read_only_badge','process==="tig"'],
+['arcf','Arc force / dig|Arc force / dig','user_input','slider','process==="stick"',N('%',0,100,1)],
+['hot','Hot start (intensidad)|Hot start intensity','user_input','number','process==="stick"',N('%',0,100,5)],
+['hotT','Hot start (duración)|Hot start duration','user_input','number','process==="stick"',N('s',0,2,.1)],
+['moist','Humedad del electrodo|Electrode moisture','user_input','select','process==="stick"',{o:[['sealed','Sellado o secado en horno|Factory sealed / baked'],['short','Expuesto < 4 h|Exposed < 4 hrs'],['damp','Expuesto > 4 h / húmedo|Exposed > 4 hrs / damp']]}],
+['h2','Riesgo de hidrógeno difusible|Diffusible hydrogen risk','calculated_readout','read_only_badge','process==="stick"'],
+['vcomp','Compensación de tensión de arco|Arc voltage compensation','calculated_readout','read_only_badge','process==="stick"'],
+['sub','Subproceso|Sub-process','user_input','radio','process==="fcaw"',{o:[['G','FCAW-G (con gas|gas-shielded)'],['S','FCAW-S (autoprotegido|self-shielded)']]}],
+['eso','Extensión eléctrica (ESO)|Electrical stick-out (ESO)','user_input','number','process==="fcaw"',N('mm',10,40,1)],
+['flow','Caudal de gas|Gas flow rate','user_input','number','process==="fcaw"',N('l/min',5,30,1)],
+['wind','Límite de viento|Wind velocity limit','calculated_readout','read_only_badge','process==="fcaw"'],
+['slag','Escoria y ajuste de velocidad|Slag factor & travel offset','calculated_readout','read_only_badge','process==="fcaw"'],
+['depth','Profundidad del agua|Water depth','user_input','number','A.env==="wet"||A.env==="dry"',N('m',0,300,1)],
+['wtemp','Temperatura del agua|Water temperature','user_input','number','A.env==="wet"||A.env==="dry"',N('°C',0,35,1)],
+['t85','Multiplicador de enfriamiento t8/5|Cooling multiplier t8/5','calculated_readout','read_only_badge','A.env==="wet"||A.env==="dry"'],
+['hvolt','Compensación de tensión hiperbárica|Hyperbaric voltage offset','calculated_readout','read_only_badge','A.env==="wet"||A.env==="dry"'],
+['q','Aporte térmico (Q)|Heat input (Q)','calculated_readout','read_only_badge','true']
+];
+const TA=x=>{const a=String(x).split('|');return a[currentLang==='en'&&a.length>1?1:0];};
+function advCalc(){const p=currentProcess,r=lastResult,o={};
+const t1=getThicknessMM({mig:'migThickness',tig:'tigThickness',stick:'stickThickness',fcaw:'fcawThickness'}[p])||0;
+const t2=A.unequal?(+A.t2||t1):t1,teq=(t1&&t2)?2*t1*t2/(t1+t2):0;
+o.teq=[teq?teq.toFixed(1)+' mm':'—'];
+const c=STEELS[A.steel][1],cev=c[0]+c[1]/6+(c[2]+c[3]+c[4])/5+(c[5]+c[6])/15,cet=c[0]+(c[1]+c[3])/10+(c[2]+c[6])/20+c[5]/40;
+o.cev=[cev.toFixed(2)+' (CET '+cet.toFixed(2)+')'];
+const eta={mig:.8,tig:.6,stick:.8,fcaw:.8}[p];let I=0,V=0,Q=0,W=0;
+if(r){I=(r.ampsMin+r.ampsMax)/2;const n=(r.voltage.match(/\d+(\.\d+)?/g)||[24]).map(Number);V=(n[0]+(n[1]||n[0]))/2;Q=eta*V*I*60/((parseFloat(document.getElementById('travelSpeed').value)||200)*1000);const w=(r.wireSpeed||'').match(/\d+(\.\d+)?/g);if(w)W=(+w[0]+(+w[1]||+w[0]))/2;}
+o.q=[I?Q.toFixed(2)+' kJ/mm (η '+eta+')':'—'];
+const HD=p==='stick'?{sealed:4,short:8,damp:16}[A.moist]:5,d=teq*2;
+let Tp=697*cet+160*Math.tanh(d/35)+62*Math.pow(HD,.35)+(53*cet-32)*(Q||1)-328;if(A.amb<5)Tp=Math.max(Tp,20);
+const nonSteel=r&&(r.material==='stainless'||r.material==='aluminum');
+o.pre=[nonSteel?'N/A':(Tp<=20?TA('No requerido|Not required'):'≥ '+Math.round(Tp/10)*10+' °C')+' / ≤ 250 °C',Tp>150&&!nonSteel?'warn':''];
+const g=+A.gap||0,ang=+A.angle||0,leg=Math.min(t1,t2)||0,area=ang>0?g*t1+t1*t1*Math.tan(ang*Math.PI/360):g*leg+leg*leg/2;
+o.area=[area?area.toFixed(0)+' mm²':'—'];o.passes=[area?'≈ '+Math.max(1,Math.ceil(area/{mig:30,tig:12,stick:20,fcaw:40}[p])):'—'];
+const dw=parseFloat(document.getElementById(p==='fcaw'?'fcawWire':'migWire').value)||1,J=I/(Math.PI*dw*dw/4);
+if(p==='mig'){let m='—';if(I){const thr={'80_20':195,'90_10':175,'98_2':160,ar:160}[A.gas];m=A.gas==='co2'?(V<22?'Cortocircuito|Short-circuit':'Globular'):(J>=thr&&V>=24?'Spray':V<22?'Cortocircuito|Short-circuit':J>=thr*.9?'Pulsado recomendado|Pulsed recommended':'Globular');}o.mode=[TA(m)];
+o.dep=[W?(W*60*7.85*Math.PI*dw*dw/4*.95/1000).toFixed(1)+' kg/h @ '+W.toFixed(1)+' m/min':'—'];}
+if(p==='tig'){const cap=TUNG[A.tdia][A.ctype==='ac'?1:0]*(A.ctype==='dcep'?.12:1)*(A.tung==='pure'?.85:1);const bad=r&&r.ampsMax>cap;o.tcap=[(bad?'⚠️ '+TA('Sobrecarga|Overload')+': ':'')+Math.round(cap)+' A '+TA('máx.|max.'),bad?'bad':'ok'];}
+if(p==='stick'){const h={sealed:['Bajo (H4)|Low (H4)','ok'],short:['Medio (H8)|Medium (H8)','warn'],damp:['Alto (H16): hornear o usar bajo hidrógeno|High (H16): bake or use low-hydrogen','bad']}[A.moist];o.h2=[TA(h[0]),h[1]];const v=20+.04*(I||100);o.vcomp=[Math.round(v*.9)+'–'+Math.round(v*1.1)+' V'];}
+if(p==='fcaw'){const bad=A.env==='out'&&A.sub==='G';o.wind=[bad?TA('⚠️ > 2 m/s: usa FCAW-S o protege|⚠️ > 2 m/s: use FCAW-S or shelter'):TA('OK (FCAW-G < 2 m/s)|OK (FCAW-G < 2 m/s)'),bad?'bad':'ok'];o.slag=[A.sub==='S'?'×1.20 · −10 %':'×1.10 · −5 %'];}
+if(A.env==='wet'||A.env==='dry'){const dep=+A.depth||0;o.t85=[A.env==='wet'?'×0.3 '+TA('(muy rápido: riesgo de martensita)|(very fast: martensite risk)'):'×0.7',(A.env==='wet'||cev>.35)?'bad':'warn'];o.hvolt=['+'+(10+15*Math.min(dep,100)/100).toFixed(0)+' % · '+(1+dep/10).toFixed(1)+' bar abs'];}
+return o;}
+function refreshAdv(){const o=advCalc();document.querySelectorAll('#advPanel [data-ro]').forEach(e=>{const v=o[e.dataset.ro]||['—'];e.textContent=v[0];e.className='adv-badge '+(v[1]||'');});}
+function renderAdv(){const el=document.getElementById('advPanel');if(!el)return;const p=currentProcess;
+document.getElementById('advSummary').textContent='⚙️ '+TA('Ajustes avanzados|Advanced Settings')+' — '+TA(ADV_TITLE[p]);
+const show=ADV.filter(f=>new Function('A','process','return '+f[4])(A,p));
+const row=f=>{const [id,lab,type,ctl,,x]=f,L=TA(lab);
+if(ctl==='read_only_badge')return `<div class="adv-row ro"><span>${L}<span class="adv-tag">${TA('calculado|calculated')}</span></span><b class="adv-badge" data-ro="${id}">—</b></div>`;
+let c='';
+if(ctl==='toggle')c=`<input type="checkbox" data-a="${id}" ${A[id]?'checked':''}>`;
+else if(ctl==='number')c=`<span><input type="number" data-a="${id}" data-n="1" value="${A[id]}" min="${x.min}" max="${x.max}" step="${x.st}"> ${x.u}</span>`;
+else if(ctl==='select')c=`<select data-a="${id}">`+x.o.map(o=>`<option value="${o[0]}" ${String(A[id])===o[0]?'selected':''}>${TA(o[1])}</option>`).join('')+`</select>`;
+else if(ctl==='slider')c=`<span><input type="range" data-a="${id}" data-n="1" min="${x.min}" max="${x.max}" step="${x.st}" value="${A[id]}"> <b>${A[id]}${x.u}</b></span>`;
+else if(ctl==='radio')c=`<span>`+x.o.map(o=>`<label><input type="radio" name="adv_${id}" data-a="${id}" value="${o[0]}" ${A[id]===o[0]?'checked':''}> ${TA(o[1])}</label>`).join(' ')+`</span>`;
+return `<div class="adv-row"><span>${L}</span>${c}</div>`;};
+const ins=show.filter(f=>f[2]==='user_input'),ro=show.filter(f=>f[2]!=='user_input');
+el.innerHTML=`<div class="adv-h">${TA('Parámetros del usuario|User inputs')}</div>`+ins.map(row).join('')+`<div class="adv-h">${TA('Lecturas calculadas (orientativas)|Calculated readouts (indicative)')}</div>`+ro.map(row).join('')+`<p class="safe-note">${TA('Estimaciones simplificadas (precalentamiento tipo EN 1011-2, CEV del IIW). Verifica siempre con el procedimiento (WPS) y la ficha del material.|Simplified estimates (EN 1011-2-style preheat, IIW CEV). Always verify against the welding procedure (WPS) and the material data sheet.')}</p>`;
+refreshAdv();}
+document.addEventListener('DOMContentLoaded',()=>{const el=document.getElementById('advPanel');
+const set=e=>{const t=e.target,k=t.dataset.a;if(!k)return false;A[k]=t.type==='checkbox'?t.checked:(t.dataset.n?parseFloat(t.value):t.value);return true;};
+el.addEventListener('input',e=>{if(set(e)){if(e.target.type==='range'&&e.target.nextElementSibling)e.target.nextElementSibling.textContent=e.target.value+(e.target.nextElementSibling.textContent.replace(/[\d.\-]+/,''));refreshAdv();}});
+el.addEventListener('change',e=>{if(set(e))renderAdv();});
+document.getElementById('processTabs').addEventListener('click',()=>setTimeout(renderAdv,0));
+document.getElementById('travelSpeed').addEventListener('input',refreshAdv);
+const _c=calculate;calculate=function(){_c();refreshAdv();};renderAdv();});
+function applyLang(){buildSafety();if(document.getElementById('advPanel')&&typeof lastResult!=='undefined')renderAdv();document.documentElement.lang=currentLang;document.querySelectorAll('#langToggle button').forEach(x=>x.classList.toggle('active',x.dataset.lang===currentLang));trWalk(document.body,currentLang==='en');}
 function setupLangToggle(){document.querySelectorAll('#langToggle button').forEach(b=>b.addEventListener('click',()=>{currentLang=b.dataset.lang;localStorage.setItem(PREF_LANG,currentLang);applyLang();}));
 new MutationObserver(ms=>{if(currentLang!=='en')return;ms.forEach(m=>{if(m.type==='characterData')trText(m.target,true);else if(m.type==='attributes')trAttrs(m.target,true);else m.addedNodes.forEach(n=>trWalk(n,true));});}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
 document.addEventListener('DOMContentLoaded',applyLang);if(document.readyState!=='loading')applyLang();}
