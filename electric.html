@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Soldadura - Anthony Rostron</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.5;font-size:16px;min-height:100dvh;display:flex;justify-content:center;overflow-x:hidden}
+:root{--panel:#1e293b;--panel-2:#0f172a;--border:#334155;--text:#e2e8f0;--text-dim:#94a3b8;--accent:#f97316;--accent-2:#ea580c;--ok:#22c55e;--warn:#eab308;--danger:#ef4444;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--bottom-nav-h:64px;--radius:12px;--radius-sm:8px}
+.app{width:100%;max-width:560px;background:var(--panel);display:flex;flex-direction:column;min-height:100dvh;overflow:hidden}
+header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 12px) 16px 12px;background:linear-gradient(135deg,#ea580c,#c2410c);display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+header h1{font-size:0.95rem;font-weight:700;color:white;line-height:1.2}
+.header-controls{display:flex;gap:6px}
+.unit-toggle,.lang-toggle{display:flex;background:rgba(0,0,0,0.25);border-radius:8px;padding:3px;font-size:0.72rem;font-weight:700}
+.unit-toggle button,.lang-toggle button{background:transparent;border:none;color:white;padding:6px 9px;border-radius:6px;cursor:pointer;opacity:0.65;font-family:inherit;font-weight:700;min-width:32px;min-height:28px}
+.unit-toggle button.active,.lang-toggle button.active{background:white;color:var(--accent-2);opacity:1}
+.content{flex:1;overflow-y:auto;padding-bottom:calc(var(--bottom-nav-h) + var(--safe-bottom) + 20px)}
+.panel{padding:18px 16px;display:none}
+.panel.active{display:block;animation:fadeIn 0.2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;height:calc(var(--bottom-nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(15,23,42,0.95);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;z-index:200}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;border:none;color:var(--text-dim);font-size:0.6rem;font-weight:600;cursor:pointer;min-height:48px;position:relative}
+.nav-btn .icon{font-size:1.35rem}
+.nav-btn.active{color:var(--accent)}
+.nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;background:var(--accent);border-radius:0 0 3px 3px}
+label{display:block;font-size:0.72rem;color:var(--text-dim);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+select,input[type="number"],input[type="text"]{width:100%;padding:13px 14px;background:var(--panel-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:16px;font-family:inherit;margin-bottom:14px;outline:none;-webkit-appearance:none;min-height:48px}
+select{background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='%2394a3b8' d='M6 8L0 0h12z'/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.15)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:360px){.row{grid-template-columns:1fr}}
+.btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;border:none;border-radius:var(--radius-sm);font-size:1rem;font-weight:700;min-height:52px;margin-top:8px;cursor:pointer}
+.btn-primary:active{transform:scale(0.97)}
+.btn-secondary{background:transparent;border:1.5px solid var(--border);color:var(--text-dim);padding:11px 14px;border-radius:var(--radius-sm);font-size:0.82rem;font-weight:600;min-height:44px;cursor:pointer}
+.btn-secondary:active{background:rgba(249,115,22,0.1);border-color:var(--accent);color:var(--accent)}
+.result{margin-top:18px;padding:18px;background:var(--panel-2);border-radius:var(--radius);border-left:4px solid var(--accent);display:none}
+.result.show{display:block;animation:slideUp 0.3s}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.current-range{font-size:clamp(2rem,9vw,2.6rem);font-weight:800;color:var(--accent);text-align:center;line-height:1.05}
+.current-label{text-align:center;color:var(--text-dim);font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;font-weight:600}
+.detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1e293b;font-size:0.88rem;gap:12px}
+.detail-row:last-child{border-bottom:none}
+.detail-label{color:var(--text-dim)}
+.detail-value{color:var(--text);font-weight:600;text-align:right}
+.polarity-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700}
+.dc-{background:#1e40af;color:#dbeafe}.dc\+{background:#991b1b;color:#fee2e2}.ac{background:#166534;color:#dcfce7}
+.warning{margin-top:14px;padding:12px 13px;background:rgba(234,179,8,0.1);border-left:3px solid var(--warn);border-radius:6px;font-size:0.8rem;color:#fde047;line-height:1.5}
+.warning.danger{background:rgba(239,68,68,0.1);border-left-color:var(--danger);color:#fca5a5}
+.warning.ok{background:rgba(34,197,94,0.1);border-left-color:var(--ok);color:#86efac}
+.heat-input{margin-top:14px;padding:14px;background:rgba(249,115,22,0.08);border-radius:var(--radius-sm);border:1px dashed rgba(249,115,22,0.4)}
+.heat-input h3{font-size:0.72rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:700}
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);margin-bottom:18px;border:1px solid var(--border)}
+.ref-table{width:100%;border-collapse:collapse;font-size:0.78rem;min-width:320px}
+.ref-table th{text-align:left;padding:10px 12px;color:var(--accent);font-weight:700;background:var(--panel-2);text-transform:uppercase;font-size:0.66rem;letter-spacing:0.5px;position:sticky;top:0}
+.ref-table td{padding:10px 12px;border-top:1px solid #1e293b;color:var(--text);white-space:nowrap}
+.ref-table td:last-child{text-align:right;color:var(--text-dim)}
+.ref-section-title{font-size:0.85rem;color:var(--text);font-weight:700;margin:18px 0 10px}
+.duty-bar{height:10px;background:#1e293b;border-radius:5px;overflow:hidden;margin-top:8px}
+.duty-bar-fill{height:100%;background:var(--ok);transition:width 0.4s,background 0.3s;border-radius:5px}
+.process-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:4px}
+.process-tab{flex:0 0 auto;padding:10px 16px;border-radius:10px;background:var(--panel-2);border:1.5px solid var(--border);color:var(--text-dim);font-size:0.8rem;font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.process-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:var(--accent);color:white}
+.toast{position:fixed;left:50%;bottom:calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);transform:translateX(-50%) translateY(20px);background:rgba(15,23,42,0.98);color:white;padding:12px 20px;border-radius:24px;font-size:0.85rem;font-weight:600;z-index:1000;opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;max-width:calc(100% - 40px);text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.machine-info{padding:12px 14px;background:rgba(34,197,94,0.08);border-left:3px solid var(--ok);border-radius:6px;font-size:0.8rem;color:#86efac;margin-bottom:14px;display:none}
+.machine-info.show{display:block}
+.constraint-note{padding:10px 12px;background:rgba(249,115,22,0.08);border-left:3px solid var(--accent);border-radius:6px;font-size:0.75rem;color:#fdba74;margin-bottom:14px;display:none;line-height:1.6}
+.constraint-note.show{display:block}
+.constraint-note strong{color:var(--accent);display:block;margin-bottom:4px;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px}
+.material-panel{padding:14px;background:rgba(34,197,94,0.06);border:1.5px solid rgba(34,197,94,0.3);border-radius:var(--radius-sm);margin-bottom:14px;display:none}
+.material-panel.show{display:block}
+.material-panel h4{font-size:0.72rem;color:var(--ok);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:700}
+.material-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.material-chip{padding:4px 10px;background:rgba(34,197,94,0.15);border-radius:12px;font-size:0.72rem;color:#86efac;font-weight:600}
+.electrode-panel{padding:14px;background:rgba(249,115,22,0.06);border:1.5px solid rgba(249,115,22,0.3);border-radius:var(--radius-sm);margin-bottom:14px;display:none}
+.electrode-panel.show{display:block}
+.electrode-panel h4{font-size:0.72rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:700}
+.electrode-list{list-style:none}
+.electrode-list li{padding:6px 0;font-size:0.78rem;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.electrode-list li:last-child{border-bottom:none}
+.electrode-list .code{color:var(--accent);font-weight:700;font-family:monospace}
+.electrode-list .note{font-size:0.7rem;color:var(--text-dim);text-align:right;flex:1}
+.electrode-notes{margin-top:8px;padding:8px 10px;background:rgba(234,179,8,0.08);border-radius:6px;font-size:0.72rem;color:#fde047;line-height:1.5}
+.machine-search-wrapper{position:relative;margin-bottom:14px}
+.machine-search-wrapper input{margin-bottom:0;padding-right:44px}
+.machine-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:8px;min-width:36px;min-height:36px;display:none}
+.machine-search-clear.show{display:block}
+.search-hint{font-size:0.7rem;color:var(--text-dim);margin-top:-8px;margin-bottom:14px;padding-left:4px}
+.custom-machines-list{margin-top:14px}
+.custom-machine-item{padding:10px 12px;background:var(--panel-2);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:0.85rem}
+.custom-machine-item button{background:transparent;border:none;color:var(--danger);font-size:1.1rem;cursor:pointer;padding:6px;min-width:40px;min-height:40px}
+.add-machine-form{display:none;margin-top:14px;padding:14px;background:var(--panel-2);border-radius:var(--radius-sm);border:1px solid var(--border)}
+.add-machine-form.show{display:block}
+.guide-card{padding:16px;background:var(--panel-2);border:2px solid transparent;border-radius:var(--radius);margin-bottom:14px;transition:all 0.35s cubic-bezier(0.16,1,0.3,1)}
+.guide-card h3{font-size:0.95rem;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:8px;font-weight:700;flex-wrap:wrap}
+.guide-card p{font-size:0.82rem;line-height:1.6;color:var(--text);margin-bottom:6px}
+.guide-card p:last-child{margin-bottom:0}
+.guide-card .active-badge{display:none;font-size:0.6rem;padding:3px 9px;background:var(--accent);color:white;border-radius:10px;text-transform:uppercase;letter-spacing:0.6px;font-weight:800}
+.guide-card.highlighted{border-color:var(--accent);background:linear-gradient(135deg,rgba(249,115,22,0.10),rgba(234,88,12,0.05));box-shadow:0 0 0 4px rgba(249,115,22,0.15),0 8px 24px rgba(249,115,22,0.15);transform:translateY(-1px)}
+.guide-card.highlighted .active-badge{display:inline-block;animation:pulseBadge 2s infinite}
+.guide-card.highlighted h3{color:#fbbf24}
+@keyframes pulseBadge{0%,100%{opacity:1}50%{opacity:0.7}}
+
+/* ── WIZARD / HELPER ── */
+.wizard-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.95);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.wizard-overlay.show{display:flex}
+.wizard{width:100%;max-width:560px;max-height:92vh;background:var(--panel);border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;animation:slideUpWizard 0.35s cubic-bezier(0.16,1,0.3,1)}
+@keyframes slideUpWizard{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.wizard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.wizard-header h2{font-size:1rem;color:var(--accent);font-weight:700}
+.wizard-close{background:transparent;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;padding:6px;min-width:40px;min-height:40px}
+.wizard-progress{display:flex;gap:4px;margin-bottom:18px}
+.wizard-progress-dot{flex:1;height:4px;background:#334155;border-radius:2px;transition:background 0.3s}
+.wizard-progress-dot.active{background:var(--accent)}
+.wizard-step{display:none}
+.wizard-step.active{display:block;animation:fadeIn 0.25s}
+.wizard-step h3{font-size:0.95rem;margin-bottom:6px;color:var(--text);font-weight:700;line-height:1.3}
+.wizard-step .hint{font-size:0.75rem;color:var(--text-dim);margin-bottom:14px;line-height:1.5}
+.wizard-option{display:block;width:100%;padding:14px;background:var(--panel-2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:0.88rem;text-align:left;cursor:pointer;margin-bottom:8px;transition:all 0.15s;font-family:inherit;min-height:52px}
+.wizard-option:hover,.wizard-option.selected{border-color:var(--accent);background:rgba(249,115,22,0.08)}
+.wizard-option:active{transform:scale(0.98)}
+.wizard-option strong{color:var(--accent)}
+.wizard-option small{display:block;color:var(--text-dim);font-size:0.72rem;margin-top:2px}
+.wizard-nav{display:flex;gap:8px;margin-top:16px}
+.wizard-nav button{flex:1;padding:13px;border-radius:var(--radius-sm);font-size:0.88rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
+.wizard-nav .back{background:transparent;border:1.5px solid var(--border);color:var(--text-dim)}
+.wizard-nav .next{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;color:white}
+.wizard-result{padding:16px;background:rgba(34,197,94,0.08);border-left:4px solid var(--ok);border-radius:8px;margin-bottom:14px}
+.wizard-result h4{font-size:0.72rem;color:var(--ok);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700}
+.wizard-result .reco{font-size:1.4rem;color:var(--ok);font-weight:800;margin-bottom:4px}
+.wizard-result .detail{font-size:0.82rem;color:var(--text);line-height:1.6}
+.wizard-result .reason{margin-top:8px;padding:8px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:0.75rem;color:var(--text-dim);line-height:1.5}
+
+/* ── JOINT GUIDE ── */
+.joint-diagram{padding:14px;background:var(--panel-2);border-radius:8px;margin-bottom:10px;text-align:center}
+.joint-diagram svg{max-width:100%;height:auto}
+.joint-diagram .caption{font-size:0.72rem;color:var(--text-dim);margin-top:8px;line-height:1.5}
+.joint-table td{white-space:normal;font-size:0.74rem}
+.dim-chip{display:inline-block;padding:2px 7px;background:rgba(249,115,22,0.15);border-radius:8px;font-size:0.68rem;color:var(--accent);font-weight:600;margin:2px}
+
+@media(min-width:768px){body{align-items:flex-start;padding:20px}.app{border-radius:20px;max-height:calc(100vh - 40px)}.bottom-nav{position:sticky;transform:none;left:auto}.wizard-overlay{align-items:center}.wizard{border-radius:20px;max-height:85vh}}
+.reset-btn{background:rgba(0,0,0,0.25);border:none;color:#fff;border-radius:8px;min-width:36px;min-height:36px;font-size:1.15rem;font-weight:700;cursor:pointer}.reset-btn:active{background:rgba(0,0,0,0.45)}
+.safe-sec{background:var(--panel-2);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}.safe-sec>summary{cursor:pointer;font-weight:700;color:var(--accent);font-size:0.95rem}.safe-item{margin:10px 0 0;font-size:0.82rem;line-height:1.55}.safe-item b{display:block;color:var(--text)}.safe-note{font-size:0.75rem;color:var(--muted,#94a3b8);margin:6px 0 24px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>⚡ Soldadura<br><span style="font-size:0.75rem;opacity:0.9">Anthony Rostron</span></h1>
+<div class="header-controls"><button class="reset-btn" id="btnReset" aria-label="Restablecer filtros" title="Restablecer filtros">↻</button>
+<div class="lang-toggle" id="langToggle"><button data-lang="es" class="active">ES</button><button data-lang="en">EN</button></div>
+<div class="unit-toggle" id="unitToggle"><button data-unit="metric" class="active">mm</button><button data-unit="imperial">in</button></div>
+</div>
+</header>
+<div class="content" id="content">
+
+<div class="panel active" id="tab-calc">
+<div id="machineBanner" class="machine-info"></div>
+<div id="constraintNote" class="constraint-note"></div>
+<div id="materialPanel" class="material-panel"></div>
+<div id="electrodePanel" class="electrode-panel"></div>
+
+<label>Proceso de Soldadura</label>
+<div class="process-tabs" id="processTabs">
+<button class="process-tab active" data-process="mig">MIG/MAG</button>
+<button class="process-tab" data-process="tig">TIG</button>
+<button class="process-tab" data-process="stick">Electrodo</button>
+<button class="process-tab" data-process="fcaw">FCAW</button>
+</div>
+
+<div id="migInputs" class="process-inputs">
+<div class="row"><div><label for="migWire">Ø Hilo</label><select id="migWire"></select></div>
+<div><label for="migThickness">Espesor (<span class="unit-label">mm</span>)</label><input type="number" id="migThickness" value="6" min="0.5" max="50" step="0.5" inputmode="decimal"></div></div>
+<div class="row"><div><label for="migJoint">Junta</label><select id="migJoint"><option value="butt">A tope</option><option value="lap">Solape</option><option value="tee" selected>En T</option><option value="corner">Esquina</option></select></div>
+<div><label for="migPosition">Posición</label><select id="migPosition"><option value="flat" selected>Plana</option><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option><option value="overhead">Sobre cabeza</option></select></div></div>
+<div id="migGasGroup"><label for="migGas">Gas</label><select id="migGas"><option value="mix" selected>Ar + CO₂ (M21)</option><option value="co2">CO₂ (100%)</option><option value="ar">Argón puro</option></select></div>
+</div>
+
+<div id="tigInputs" class="process-inputs" style="display:none">
+<div class="row"><div><label for="tigMaterial">Material</label><select id="tigMaterial"><option value="carbon" selected>Acero al Carbono</option><option value="stainless">Acero Inoxidable</option><option value="aluminum">Aluminio</option></select></div>
+<div><label for="tigThickness">Espesor (<span class="unit-label">mm</span>)</label><input type="number" id="tigThickness" value="3" min="0.4" max="20" step="0.1" inputmode="decimal"></div></div>
+<div class="row"><div><label for="tigJoint">Junta</label><select id="tigJoint"><option value="butt" selected>A tope</option><option value="lap">Solape</option><option value="tee">En T</option><option value="corner">Esquina</option></select></div>
+<div><label for="tigPosition">Posición</label><select id="tigPosition"><option value="flat" selected>Plana</option><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option><option value="overhead">Sobre cabeza</option></select></div></div>
+</div>
+
+<div id="stickInputs" class="process-inputs" style="display:none">
+<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:14px">
+<div style="flex:1"><label for="stickElectrode">Electrodo</label><select id="stickElectrode" style="margin-bottom:0"></select></div>
+<button class="btn-secondary" id="btnHelpChoose" style="margin-bottom:0;white-space:nowrap;min-height:48px">🧠 Ayúdame a elegir</button>
+</div>
+<div class="row"><div><label for="stickDiameter">Ø Electrodo</label><select id="stickDiameter"></select></div>
+<div><label for="stickThickness">Espesor (<span class="unit-label">mm</span>)</label><input type="number" id="stickThickness" value="6" min="0.5" max="50" step="0.5" inputmode="decimal"></div></div>
+<div class="row"><div><label for="stickJoint">Junta</label><select id="stickJoint"><option value="butt">A tope</option><option value="lap">Solape</option><option value="tee" selected>En T</option><option value="corner">Esquina</option></select></div>
+<div><label for="stickPosition">Posición</label><select id="stickPosition"><option value="flat" selected>Plana</option><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option><option value="overhead">Sobre cabeza</option></select></div></div>
+<label for="stickMaterial">Material</label><select id="stickMaterial"><option value="carbon" selected>Acero al Carbono</option><option value="stainless">Acero Inoxidable</option><option value="cast">Hierro Fundido</option></select>
+</div>
+
+<div id="fcawInputs" class="process-inputs" style="display:none">
+<div class="row"><div><label for="fcawWire">Ø Hilo</label><select id="fcawWire"></select></div>
+<div><label for="fcawThickness">Espesor (<span class="unit-label">mm</span>)</label><input type="number" id="fcawThickness" value="6" min="1" max="30" step="0.5" inputmode="decimal"></div></div>
+<div class="row"><div><label for="fcawJoint">Junta</label><select id="fcawJoint"><option value="butt">A tope</option><option value="lap">Solape</option><option value="tee" selected>En T</option><option value="corner">Esquina</option></select></div>
+<div><label for="fcawPosition">Posición</label><select id="fcawPosition"><option value="flat" selected>Plana</option><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option><option value="overhead">Sobre cabeza</option></select></div></div>
+<div id="fcawGasGroup"><label for="fcawGas">Gas</label><select id="fcawGas"><option value="co2" selected>CO₂ (100%)</option><option value="mix">Ar + CO₂ (M21)</option></select></div>
+<div id="fcawGaslessNote" style="display:none;padding:10px 12px;background:rgba(34,197,94,0.1);border-left:3px solid var(--ok);border-radius:6px;font-size:0.75rem;color:#86efac;margin-bottom:14px">✓ Sin gas — este modelo usa hilo tubular con fundente interno (self-shielded).</div>
+</div>
+
+<button class="btn-primary" id="btnCalc">Calcular Parámetros</button>
+
+<div class="result" id="result">
+<div class="current-range" id="currentRange">—</div>
+<div class="current-label" id="resultProcessLabel">Amperaje Recomendado</div>
+<div class="detail-row"><span class="detail-label">Voltaje</span><span class="detail-value" id="voltageOut">—</span></div>
+<div class="detail-row"><span class="detail-label">Polaridad</span><span class="detail-value" id="polarityOut">—</span></div>
+<div class="detail-row"><span class="detail-label">Gas</span><span class="detail-value" id="gasFlowOut">—</span></div>
+<div class="detail-row"><span class="detail-label" id="wireSpeedLabel">Vel. Hilo (m/min)</span><span class="detail-value" id="wireSpeedOut">—</span></div>
+<div class="detail-row"><span class="detail-label">Pasadas</span><span class="detail-value" id="passesOut">—</span></div>
+<div class="heat-input"><h3>🔥 Aporte Térmico</h3>
+<div class="row"><div><label>Vel. (mm/min)</label><input type="number" id="travelSpeed" value="200" min="20" max="800" step="10" inputmode="numeric"></div>
+<div><label>Corriente (A)</label><input type="number" id="heatAmps" value="120" min="20" max="500" step="5" inputmode="numeric"></div></div>
+<div class="detail-row" style="border-top:1px solid #334155;margin-top:4px"><span class="detail-label">Aporte</span><span class="detail-value" id="heatOut">—</span></div></div>
+<div class="warning" id="warning"></div>
+</div>
+</div>
+
+<div class="panel" id="tab-reference">
+<label>Proceso</label>
+<div class="process-tabs" id="refProcessTabs">
+<button class="process-tab active" data-refprocess="mig">MIG/MAG</button>
+<button class="process-tab" data-refprocess="tig">TIG</button>
+<button class="process-tab" data-refprocess="stick">Electrodo</button>
+<button class="process-tab" data-refprocess="fcaw">FCAW</button>
+</div>
+<div id="refContent"></div>
+</div>
+
+<div class="panel" id="tab-machine">
+<label for="machineSearch">🔍 Buscar Máquina</label>
+<div class="machine-search-wrapper">
+<input type="text" id="machineSearch" placeholder="Ej: Parkside, Einhell, 200A, Vevor..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+<button class="machine-search-clear" id="machineSearchClear" aria-label="Limpiar">✕</button>
+</div>
+<div class="search-hint" id="searchHint">Escribe parte del nombre para filtrar</div>
+<label for="machine">Seleccionar Soldadora</label>
+<select id="machine"></select>
+<div id="machineDetails"></div>
+<label for="dutyAmps">Amperaje Objetivo (A)</label>
+<input type="number" id="dutyAmps" value="100" min="20" max="400" step="5" inputmode="numeric">
+<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px">Ciclo de trabajo: <span id="dutyPercent" style="color:var(--accent);font-weight:700">—</span></div>
+<div class="duty-bar"><div class="duty-bar-fill" id="dutyBar" style="width:0%"></div></div>
+<div class="warning" id="machineWarning" style="margin-top:16px"></div>
+
+<div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px">
+<label>Mis Máquinas</label>
+<div id="customMachinesList" class="custom-machines-list"></div>
+<button class="btn-secondary" id="btnAddMachine" style="width:100%;margin-top:8px">➕ Añadir máquina</button>
+<div class="add-machine-form" id="addMachineForm">
+<label>Nombre</label><input type="text" id="newMchName" placeholder="Ej: Mi soldadora Parkside" maxlength="40">
+<div class="row"><div><label>Amperaje máx (A)</label><input type="number" id="newMchAmps" value="160" min="20" max="500" step="10" inputmode="numeric"></div>
+<div><label>Voltaje</label><select id="newMchVolts"><option>230 V</option><option>120 V</option><option>120/230 V</option></select></div></div>
+<label>Procesos</label>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+<label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;text-transform:none"><input type="checkbox" id="newMchMIG" checked> MIG</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;text-transform:none"><input type="checkbox" id="newMchTIG"> TIG</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;text-transform:none"><input type="checkbox" id="newMchStick" checked> Electrodo</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;text-transform:none"><input type="checkbox" id="newMchFCAW" checked> FCAW</label>
+</div>
+<label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;text-transform:none;margin-bottom:14px"><input type="checkbox" id="newMchGasless"> FCAW sin gas (hilo con fundente interno)</label>
+<div class="row"><div><label>Ciclo ref. (%)</label><input type="number" id="newMchDuty" value="25" min="5" max="100" step="5" inputmode="numeric"></div>
+<div><label>Amp. ref. ciclo</label><input type="number" id="newMchDutyAmps" value="100" min="20" max="400" step="10" inputmode="numeric"></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button class="btn-primary" id="btnSaveMachine" style="margin-top:0">Guardar</button>
+<button class="btn-secondary" id="btnCancelMachine">Cancelar</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="panel" id="tab-guide">
+<div class="ref-section-title">📖 Guía Rápida de Soldadura</div>
+<div id="guideContent"></div>
+</div>
+<div class="panel" id="tab-safety"><div class="ref-section-title">🦺 Seguridad y Normativa</div><div id="safetyContent"></div></div>
+
+</div>
+
+<nav class="bottom-nav" id="bottomNav">
+<button class="nav-btn active" data-tab="calc"><span class="icon">🧮</span><span>Calcular</span></button>
+<button class="nav-btn" data-tab="reference"><span class="icon">📊</span><span>Tablas</span></button>
+<button class="nav-btn" data-tab="machine"><span class="icon">⚙️</span><span>Máquina</span></button>
+<button class="nav-btn" data-tab="guide"><span class="icon">📖</span><span>Guía</span></button>
+<button class="nav-btn" data-tab="safety"><span class="icon">🦺</span><span>Seguridad</span></button>
+</nav>
+</div>
+
+<!-- WIZARD OVERLAY -->
+<div class="wizard-overlay" id="wizardOverlay">
+<div class="wizard" id="wizard">
+<div class="wizard-header">
+<h2>🧠 Asistente de Selección de Electrodo</h2>
+<button class="wizard-close" id="wizardClose" aria-label="Cerrar">✕</button>
+</div>
+<div class="wizard-progress" id="wizardProgress"></div>
+<div id="wizardBody"></div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MM_PER_INCH=25.4;
+const MIG_DATA={'0.6':{baseAmps:[30,80],baseVolts:[14,18],wfs:[2.0,4.5],gasFlow:[6,9],thicknessMax:2},'0.8':{baseAmps:[40,145],baseVolts:[15,21],wfs:[2.5,7.0],gasFlow:[8,12],thicknessMax:5},'0.9':{baseAmps:[50,180],baseVolts:[16,23],wfs:[3.0,8.0],gasFlow:[9,13],thicknessMax:8},'1.0':{baseAmps:[60,220],baseVolts:[17,25],wfs:[3.5,9.5],gasFlow:[10,14],thicknessMax:12},'1.2':{baseAmps:[80,280],baseVolts:[18,28],wfs:[4.0,11.0],gasFlow:[12,16],thicknessMax:20}};
+const TIG_DATA={carbon:{ampsPerMM:[30,40],currentType:'DCEN',gasFlow:[8,12]},stainless:{ampsPerMM:[25,35],currentType:'DCEN',gasFlow:[8,12]},aluminum:{ampsPerMM:[35,50],currentType:'AC',gasFlow:[10,15]}};
+const STICK_ELECTRODES={'6010':{factor:1.00,polarity:'DC+ (DCEP)',cls:'dc+',volts:25,note:'Penetración profunda, tuberías'},'6011':{factor:1.00,polarity:'AC / DC+',cls:'ac',volts:25,note:'Todas posiciones, acero sucio'},'6013':{factor:0.95,polarity:'AC / DC-',cls:'ac',volts:22,note:'Uso general, chapa fina'},'7014':{factor:1.05,polarity:'AC / DC-',cls:'ac',volts:24,note:'Alta deposición'},'7018':{factor:1.05,polarity:'DC+ (DCEP)',cls:'dc+',volts:24,note:'Bajo hidrógeno, estructural'},'7024':{factor:1.15,polarity:'AC / DC-',cls:'ac',volts:28,note:'Alta deposición, solo plana'},'8018':{factor:1.10,polarity:'DC+ (DCEP)',cls:'dc+',volts:25,note:'Alta resistencia'},'11018':{factor:1.10,polarity:'DC+ (DCEP)',cls:'dc+',volts:25,note:'Muy alta resistencia'}};
+const STICK_BASE_AMPS={'1.6':[30,55],'2.0':[50,80],'2.5':[60,110],'3.2':[90,150],'4.0':[120,200],'5.0':[170,260],'6.0':[210,320]};
+const FCAW_DATA={'0.8':{baseAmps:[60,120],baseVolts:[16,20],wfs:[3.0,6.0],gasFlow:[10,14]},'0.9':{baseAmps:[70,150],baseVolts:[17,22],wfs:[3.5,7.0],gasFlow:[10,15]},'1.0':{baseAmps:[90,180],baseVolts:[18,24],wfs:[4.0,8.0],gasFlow:[12,16]},'1.2':{baseAmps:[120,260],baseVolts:[20,28],wfs:[5.0,10.0],gasFlow:[14,18]},'1.6':{baseAmps:[180,350],baseVolts:[23,32],wfs:[6.0,12.0],gasFlow:[15,20]}};
+const POSITION_FACTOR={flat:1.00,horizontal:0.95,vertical:0.85,overhead:0.80};
+const JOINT_FACTOR={butt:1.00,lap:1.03,tee:1.03,corner:0.97};
+const MATERIAL_FACTOR_STICK={carbon:1.00,stainless:0.90,cast:1.10};
+const VOLTAGE_POS_FACTOR={flat:1.00,horizontal:0.97,vertical:0.94,overhead:0.92};
+
+const MACHINE_DB={
+'deko-140':{name:'DEKO 140A MMA',maxAmps:140,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:25},weight:'2.3 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],materials:['Acero al carbono','Acero inoxidable','Acero galvanizado'],recommendedElectrodes:[{code:'E6013',note:'Recomendado para principiantes'},{code:'E7018',note:'Estructural'},{code:'E6011',note:'Todas posiciones'}]},
+'kotsy-300':{name:'Kotsy ARC-300',maxAmps:300,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:150,duty:20},weight:'5 kg',category:'Doméstica económica',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0','5.0'],materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],recommendedElectrodes:[{code:'E6013',note:'Uso general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}]},
+'parkside-pifds120al':{name:'Parkside PIFDS 120AL',maxAmps:120,inputVolts:'230 V',processes:['fcaw'],dutyRef:{amps:100,duty:20},weight:'4.4 kg',category:'Parkside (Lidl)',defaultProcess:'fcaw',defaultWire:'0.8',defaultThickness:2,gaslessFCAW:true,supportedWires:['0.6','0.8','0.9','1.0'],materials:['Acero al carbono (0,8–3 mm)','Chapa fina'],recommendedElectrodes:[{code:'E71T-GS',note:'Hilo tubular sin gas, autoprotegido'}],notes:'Máquina exclusiva FCAW sin gas. Hilo tubular con fundente interno. Ideal para chapa fina (0,8–3 mm).'},
+'parkside-pisg120':{name:'Parkside PISG 120 D5',maxAmps:120,inputVolts:'230 V',processes:['stick'],dutyRef:{amps:100,duty:20},weight:'3 kg',category:'Parkside (Lidl)',defaultProcess:'stick',defaultStickDia:'2.5',defaultThickness:3,supportedStickDia:['1.6','2.0','2.5','3.2'],materials:['Acero al carbono','Acero inoxidable','Hierro fundido'],recommendedElectrodes:[{code:'E6013',note:'Rutilo, ideal principiantes'},{code:'E7018',note:'Básico, estructural'},{code:'E308L',note:'Inoxidable'}]},
+'stayer-potenza200':{name:'Stayer Potenza 200 GEK',maxAmps:200,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:200,duty:60},weight:'4.9 kg',category:'Stayer',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:6,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable','Hierro fundido','Acero celulósico'],recommendedElectrodes:[{code:'E6013',note:'Rutilo, uso general'},{code:'E7018',note:'Básico, estructural'},{code:'E6010',note:'Celulósico, penetración'},{code:'E308L',note:'Inoxidable'},{code:'ENi-Cl',note:'Fundición'}]},
+'einhell-tciw170':{name:'Einhell TC-IW 170',maxAmps:170,inputVolts:'230 V',processes:['stick','tig'],dutyRef:{amps:120,duty:25},weight:'4 kg',category:'Einhell',defaultProcess:'stick',defaultStickDia:'3.2',defaultThickness:5,supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable'],recommendedElectrodes:[{code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'},{code:'E308L',note:'Inoxidable'}]},
+'solter-practico200':{name:'Solter PRACTICO MIG 200 LD',maxAmps:200,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:200,duty:30},weight:'8.5 kg',category:'Multiproceso doméstica',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]},
+'vevor-mig200':{name:'Vevor MIG-200 3-in-1',maxAmps:200,inputVolts:'220 V',processes:['mig','stick'],dutyRef:{amps:200,duty:60},weight:'8.4 kg',category:'Online (Vevor)',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2'],materials:['Acero dulce','Acero inoxidable','Hierro fundido','Cobre','Aleaciones'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E6013',note:'MMA general'},{code:'E7018',note:'MMA estructural'}]},
+'miller-multimatic215':{name:'Miller Multimatic 215',maxAmps:215,inputVolts:'230 V',processes:['mig','stick'],dutyRef:{amps:150,duty:20},weight:'15 kg',category:'Profesional',defaultProcess:'mig',defaultWire:'0.8',defaultThickness:6,supportedWires:['0.6','0.8','0.9','1.0'],supportedStickDia:['1.6','2.0','2.5','3.2','4.0'],materials:['Acero al carbono','Acero inoxidable','Aluminio (spool gun)'],recommendedElectrodes:[{code:'ER70S-6',note:'Hilo MIG acero'},{code:'ER308L',note:'Hilo MIG inox'},{code:'E7018',note:'MMA estructural'}]}};
+
+/* ===== Máquinas ampliadas (datos aproximados: verifica en la ficha del fabricante) ===== */
+(function(){const P={m:'mig',t:'tig',s:'stick',f:'fcaw',g:'fcaw'};
+function add(cat,rows){rows.split('\n').forEach(r=>{r=r.trim();if(!r)return;const[n,a,v,p,da,d,w]=r.split('|');const pr=[...new Set([...p].map(c=>P[c]))],amps=+a,gl=p.includes('g');
+const id=n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');if(MACHINE_DB[id])return;
+const sd=amps<=100?['1.6','2.0','2.5']:amps<=160?['1.6','2.0','2.5','3.2']:amps<=220?['1.6','2.0','2.5','3.2','4.0']:['1.6','2.0','2.5','3.2','4.0','5.0'];
+const e={name:n,maxAmps:amps,inputVolts:(v||'230')+' V',processes:pr,dutyRef:{amps:+da,duty:+d},weight:w+' kg',category:cat,defaultProcess:pr[0],defaultThickness:amps<=120?2:amps<=170?4:6,gaslessFCAW:gl,materials:['Acero al carbono','Acero inoxidable'],recommendedElectrodes:[],notes:'Datos aproximados: verifica en la ficha del fabricante.'};
+if(pr.includes('mig')||pr.includes('fcaw')){e.defaultWire='0.8';e.supportedWires=['0.6','0.8','0.9','1.0'];}
+if(pr.includes('stick')){e.defaultStickDia=amps<=100?'2.5':'3.2';e.supportedStickDia=sd;e.recommendedElectrodes.push({code:'E6013',note:'Rutilo general'},{code:'E7018',note:'Estructural'});}
+if(pr.includes('mig'))e.recommendedElectrodes.push({code:'ER70S-6',note:'Hilo MIG acero'});
+if(gl)e.recommendedElectrodes.push({code:'E71T-GS',note:'Hilo tubular sin gas'});
+if(pr.includes('tig'))e.recommendedElectrodes.push({code:'ER70S-2',note:'Varilla TIG acero'});
+if(/AC\/DC/.test(n))e.materials.push('Aluminio');
+MACHINE_DB[id]=e;});}
+add('Parkside (Lidl)',`Parkside PISG 100 A1|100||s|80|20|2.6
+Parkside PISG 120 B3|120||s|100|20|3
+Parkside PIFDS 120 B2|120||g|100|20|4.7
+Parkside PIFDS 120 A1|120||g|100|20|4.4`);
+add('Powerplus / Kreator',`Powerplus POWX480|160||s|120|20|6
+Powerplus POWX481 Inverter|160||s|120|20|3`);
+add('Stanley',`Stanley Top MIG 1800|160||ms|130|20|10`);
+add('DeWalt',`DeWalt DXWDMMA200E|200||s|200|35|4.5
+DeWalt DXWDMIG200E|200||mst|200|30|9`);
+add('Einhell',`Einhell TC-IW 110|110||s|80|20|2.6`);
+add('Telwin',`Telwin Force 125|120||s|100|20|2.9
+Telwin Force 145|140||s|110|20|3.2
+Telwin Force 165|160||s|130|20|3.4
+Telwin Technology 236 XT|230||s|190|35|4.9
+Telwin Technomig 210 Dual Synergic|200||mst|170|30|11
+Telwin Technomig 215 Dual Synergic|210||mst|180|30|12
+Telwin Technomig 260 Dual Synergic|250||mst|220|35|14
+Telwin Maxima 230 Synergic|230||mst|200|30|13
+Telwin Electromig 300 Synergic|290|400|mst|250|35|26`);
+add('Solter',`Solter Practico MIG 120 LD|120||mst|100|25|7
+Solter Practico MIG 160 LD|160||mst|130|25|8
+Solter Solpro 4en1|200||mst|200|30|9
+Solter Icontig 200 AC/DC|200||ts|180|35|13`);
+add('GYS',`GYS GYSMI 130|130||s|110|25|3
+GYS GYSMI 160P|160||s|140|25|3.5
+GYS GYSMI 200P|200||s|170|30|4
+GYS Neopulse 220C|220||mst|200|35|15`);
+add('Galagar',`Galagar Gala 2000 MP|200||mst|180|30|11
+Galagar TIG 1600|160||ts|140|35|4`);
+add('Cevik',`Cevik CE-EVOLUTION20X|200||s|160|35|3.5
+Cevik CE-TITANIM160|160||s|130|30|3`);
+add('Online (Stahlwerk)',`Stahlwerk FLUX 160 ST Digital|160||gst|130|30|7
+Stahlwerk AC/DC TIG 200 ST|200||ts|180|60|12
+Stahlwerk ARC 200 Synergic Pro Digital|200||st|160|60|4
+Stahlwerk ARC 200 MD|200||s|160|60|3.5`);
+add('Online (Vevor)',`Vevor MIG-130 3-in-1|130||gst|100|60|6
+Vevor MIG-250 5-in-1|250||mgst|200|60|12
+Vevor ARC-100|100||st|80|60|2.5`);
+add('Online (otras marcas)',`Mophorn MIG-200 3 en 1|200||mst|200|60|8
+SucceBuy MIG 130 3 en 1|130||gst|100|60|5
+YesWelder ARC-205DS|205|220|s|170|60|3.5
+ArcCaptain ARC200|200|220|st|170|60|3.5`);
+add('Profesional',`ESAB Rebel EMP 215ic|215||mts|190|40|18
+ESAB Rogue ES 180i|180||s|150|40|8
+Fronius TransPocket 180|180||st|150|35|7
+Fronius MagicWave 230i AC/DC|230||ts|200|40|20
+Kemppi Minarc Evo 180|180||s|150|40|6
+EWM Picomig 180 puls|180||ms|160|35|12
+EWM Tetrix 230 AC/DC|230||ts|200|45|18
+Lincoln Electric Powertec i250C|250||m|200|40|24`);
+add('Telwin',`Telwin Force 135|130||s|110|20|3
+Telwin Tecnica 141|140||s|110|20|3.5
+Telwin Tecnica 161|160||s|130|20|3.8
+Telwin Technology 186 XT|180||s|150|35|4.3
+Telwin Technology 216 XT|210||s|180|35|4.6
+Telwin Tig 222 AC/DC|220||ts|200|35|16
+Telwin Technomig 180 Dual Synergic|180||mst|150|30|10
+Telwin Technomig 230 Dual Synergic|220||mst|190|30|12`);
+add('Lincoln Electric',`Lincoln Electric Bester 175-C|170||m|130|20|30
+Lincoln Electric Bester 210-C|200||m|170|25|34
+Lincoln Electric Speedtec 180C|180||ms|150|30|11
+Lincoln Electric Speedtec 200C|200||ms|170|30|12
+Lincoln Electric Powertec i320C|320|400|m|280|40|34
+Lincoln Electric Invertec V205-T AC/DC|205||ts|180|35|16`);
+add('ESAB',`ESAB Rebel EMP 235ic|235||mts|200|40|20
+ESAB Rebel EMP 205ic AC/DC|205||mts|180|40|17
+ESAB Rogue ES 200i|200||s|170|40|9
+ESAB Buddy Arc 145|140||s|110|30|4
+ESAB Fabricator 211i|210||mst|180|35|15
+ESAB Warrior 400i|400|400|ms|400|100|30`);
+add('Kemppi',`Kemppi Minarc Evo 150|150||s|130|35|4
+Kemppi Minarc Evo 200|200||s|170|35|5
+Kemppi Minarc T 180|180||st|150|35|5
+Kemppi MasterTig MLS 2300 ACDC|230||ts|200|40|20
+Kemppi FastMig X 350|350|400|m|350|60|30`);
+add('Fronius',`Fronius TransPocket 150|150||st|130|35|6
+Fronius TransTig 2200|220||t|200|40|17
+Fronius MagicWave 2200 AC/DC|220||ts|200|40|20
+Fronius TransSteel 2200|220||m|190|35|21`);
+add('EWM',`EWM Picomig 225 puls|220||ms|190|35|14
+EWM Picotig 200 puls|200||ts|180|35|10
+EWM Taurus 355 Synergic|350|400|m|350|60|60
+EWM Tetrix 300 AC/DC|300|400|ts|300|60|30`);
+add('Miller',`Miller Millermatic 211|210||m|150|30|20
+Miller Millermatic 252|250||m|200|40|30
+Miller Multimatic 220 AC/DC|220||mts|170|30|17
+Miller Maxstar 161 STL|160||st|140|35|9
+Miller Dynasty 210 AC/DC|210||ts|170|40|20`);
+add('Jasic',`Jasic ARC 200|200||s|180|60|4.5
+Jasic TIG 200P AC/DC|200||ts|180|60|17`);
+add('Online (otras marcas)',`Lotos TIG200 AC/DC|200|220|ts|180|60|14
+Lotos MIG175|175|220|mst|140|30|20
+Hitbox HBM1000|200||mgst|160|60|8`);
+add('Solter',`Solter Practico 150|150||s|130|35|3.5`);
+add('Telwin',`Telwin Tig 222 DC-HF/Lift|220||ts|200|35|14`);
+add('Lincoln Electric',`Lincoln Electric Precision TIG 225 AC/DC|225||ts|200|40|20
+Lincoln Electric Power MIG 210 MP|210||mts|170|40|25
+Lincoln Electric Power MIG 260|260||m|200|40|33`);
+add('ESAB',`ESAB Fabricator 141i|140||mst|110|30|9
+ESAB Fabricator 252i|250||mst|200|40|26
+ESAB Renegade ES 300i|300|400|s|300|60|17
+ESAB Aristo 500ix|500|400|s|500|100|38`);
+add('Kemppi',`Kemppi FastMig X 450|450|400|m|450|60|33
+Kemppi MinarcMig Adaptive 180|180||ms|150|35|10`);
+add('Fronius',`Fronius TransSteel 3500|350|400|m|350|60|40
+Fronius TPS 320i|320|400|m|320|60|38
+Fronius TPS 400i|400|400|m|400|60|42
+Fronius MagicWave 4000 AC/DC|400|400|ts|400|60|50`);
+add('EWM',`EWM Picomig 305 puls|300|400|ms|270|40|30
+EWM Phoenix 355 Expert 2 puls|350|400|m|350|60|55`);
+add('Miller',`Miller Millermatic 190|190||m|130|30|20
+Miller Millermatic 350P|350|400|m|350|60|60
+Miller Multimatic 200|200||mts|150|30|17
+Miller Maxstar 150 STH|150||st|130|35|8
+Miller Syncrowave 210 AC/DC|210||ts|175|40|60
+Miller Dynasty 280 AC/DC|280|400|ts|250|60|55`);
+add('Jasic',`Jasic ARC 160|160||s|140|60|4`);
+add('Online (otras marcas)',`ArcCaptain MIG200|200|220|mgst|160|60|9
+ArcCaptain TIG200 AC/DC|200|220|ts|170|60|15
+YesWelder MIG-205DS|205|220|mgst|160|60|9
+YesWelder TIG-250P AC/DC|250|220|ts|200|60|17`);
+add('Online (AliExpress genéricas)',`ZX7-200 IGBT|200|220|s|160|60|4
+ZX7-250 IGBT|250|220|s|200|60|5
+WSM-200 TIG Lift|200|220|ts|160|60|6
+NBC-250 MIG|250|220|mst|200|60|14`);
+const rb=document.getElementById('btnReset');if(rb)rb.addEventListener('click',()=>{document.getElementById('machineSearch').value='';populateMachines('');const m=document.getElementById('machine');m.value='';m.dispatchEvent(new Event('change'));selectedMachine=null;document.querySelectorAll('.result.show').forEach(r=>r.classList.remove('show'));document.getElementById('content').scrollTo({top:0});showToast('↻ Filtros restablecidos');});
+})();
+
+let units='metric',currentProcess='mig',currentRefProcess='mig',lastResult=null;
+let selectedMachine=null,customMachines=[];
+let currentLang=(navigator.language||'es').slice(0,2);if(!['es','en'].includes(currentLang))currentLang='es';
+const PREF_UNITS='soldaduraAR_units',PREF_LANG='soldaduraAR_lang',PREF_CUSTOM_MCH='soldaduraAR_customMch';
+const $=id=>document.getElementById(id);
+
+/* ============================================================
+   WIZARD STATE
+   ============================================================ */
+const wizardState={step:0,answers:{metal1:null,metal2:null,thickness1:null,thickness2:null,joint:null,position:null,structural:null}};
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded',()=>{
+const sU=localStorage.getItem(PREF_UNITS);if(sU)units=sU;
+const sL=localStorage.getItem(PREF_LANG);if(sL)currentLang=sL;
+const sC=localStorage.getItem(PREF_CUSTOM_MCH);if(sC)customMachines=JSON.parse(sC);
+populateAllSelects();populateMachines('');
+setupNav();setupLangToggle();setupUnitToggle();setupProcessTabs();setupRefTabs();
+setupCalcButton();setupGuide();setupMachineTab();setupCustomMachineForm();setupWizard();
+applyUnits();buildReference('mig');updateDutyCycle();
+['migThickness','tigThickness','stickThickness','fcawThickness'].forEach(id=>{const el=$(id);if(!el)return;let timer;const h=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(lastResult)calculate();},400);};el.addEventListener('input',h);});
+$('dutyAmps').addEventListener('input',updateDutyCycle);
+['travelSpeed','heatAmps'].forEach(id=>$(id).addEventListener('input',updateHeatInput));
+});
+
+function populateAllSelects(){
+$('migWire').innerHTML=Object.keys(MIG_DATA).map(k=>`<option value="${k}" ${k==='0.8'?'selected':''}>${k} mm</option>`).join('');
+$('fcawWire').innerHTML=Object.keys(FCAW_DATA).map(k=>`<option value="${k}" ${k==='0.8'?'selected':''}>${k} mm</option>`).join('');
+$('stickElectrode').innerHTML=Object.keys(STICK_ELECTRODES).map(k=>`<option value="${k}" ${k==='7018'?'selected':''}>E${k}</option>`).join('');
+$('stickDiameter').innerHTML=Object.keys(STICK_BASE_AMPS).map(k=>`<option value="${k}" ${k==='3.2'?'selected':''}>${k} mm</option>`).join('');
+}
+
+function normalize(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+
+function populateMachines(query){
+query=query||'';
+const nq=normalize(query);
+const grouped={};let count=0;
+Object.entries(MACHINE_DB).forEach(([k,v])=>{
+if(nq){const hay=normalize(v.name+' '+v.category+' '+(v.processes||[]).join(' ')+(v.materials||[]).join(' '));if(!hay.includes(nq))return;}
+if(!grouped[v.category])grouped[v.category]=[];
+grouped[v.category].push(`<option value="${k}">${v.name}</option>`);
+count++;
+});
+customMachines.forEach(m=>{
+if(nq){const hay=normalize(m.name+' '+(m.processes||[]).join(' '));if(!hay.includes(nq))return;}
+if(!grouped['Mis máquinas'])grouped['Mis máquinas']=[];
+grouped['Mis máquinas'].push(`<option value="${m.id}">${m.name}</option>`);
+count++;
+});
+let html='';
+if(count===0){html='<option value="">— Sin resultados —</option>';}
+else{html='<option value="">— Selecciona una máquina —</option>';
+Object.entries(grouped).forEach(([cat,opts])=>{html+=`<optgroup label="${cat}">${opts.join('')}</optgroup>`;});}
+$('machine').innerHTML=html;
+if(selectedMachine){const key=selectedMachine._key||selectedMachine.id;if([...$('machine').options].some(o=>o.value===key))$('machine').value=key;}
+const hint=$('searchHint');
+if(nq){hint.textContent=count===0?`Sin resultados para "${query}"`:`${count} máquina${count>1?'s':''} encontrada${count>1?'s':''}`;hint.style.color=count===0?'var(--danger)':'var(--ok)';$('machineSearchClear').classList.add('show');}
+else{hint.textContent='Escribe parte del nombre para filtrar';hint.style.color='var(--text-dim)';$('machineSearchClear').classList.remove('show');}
+}
+/* ============================================================
+   WIZARD / HELPER
+   ============================================================ */
+function setupWizard(){
+$('btnHelpChoose').addEventListener('click',()=>{
+wizardState.step=0;
+wizardState.answers={metal1:null,metal2:null,thickness1:null,thickness2:null,joint:null,position:null,structural:null};
+renderWizardStep();
+$('wizardOverlay').classList.add('show');
+});
+$('wizardClose').addEventListener('click',()=>{$('wizardOverlay').classList.remove('show');});
+$('wizardOverlay').addEventListener('click',e=>{if(e.target===$('wizardOverlay'))$('wizardOverlay').classList.remove('show');});
+}
+
+const WIZARD_STEPS=[
+{key:'metal1',title:'¿Qué material vas a soldar?',hint:'Selecciona el tipo de metal de la primera pieza. Si no estás seguro, usa la guía inferior.',options:[
+{value:'carbon',label:'Acero común (acero al carbono)',sub:'El más habitual: rejas, perfiles, tuberías, chapa'},
+{value:'stainless',label:'Acero inoxidable',sub:'Brillante, no se oxida fácilmente'},
+{value:'cast',label:'Hierro fundido',sub:'Piezas gruesas y pesadas, se rompe con fractura granulada'},
+{value:'aluminum',label:'Aluminio',sub:'Ligero, no magnético, color plateado mate'},
+{value:'other',label:'Otro metal (oro, plata, cobre, titanio, wolframio…)',sub:'Te indicamos el método de unión correcto'},
+{value:'unsure',label:'No estoy seguro',sub:'Te ayudamos a identificarlo'}]},
+{key:'metal2',title:'¿Y la segunda pieza?',hint:'¿Es del mismo material que la primera?',options:[
+{value:'same',label:'Sí, es el mismo material',sub:'Lo más común'},
+{value:'carbon',label:'Acero común',sub:''},{value:'stainless',label:'Acero inoxidable',sub:''},
+{value:'cast',label:'Hierro fundido',sub:''},{value:'aluminum',label:'Aluminio',sub:''},
+{value:'unsure',label:'No estoy seguro',sub:''}]},
+{key:'thickness1',title:'¿Qué grosor tiene la primera pieza?',hint:'Selecciona el grosor aproximado en milímetros.',options:[
+{value:'1',label:'Muy fina (1–2 mm)',sub:'Como una chapa de carrocería'},
+{value:'2.5',label:'Fina (2–3 mm)',sub:'Como un tubo cuadrado delgado'},
+{value:'4',label:'Media (3–6 mm)',sub:'Como un perfil estructural'},
+{value:'8',label:'Gruesa (6–12 mm)',sub:'Como una pletina o plancha'},
+{value:'15',label:'Muy gruesa (>12 mm)',sub:'Como una brida o bloque'}]},
+{key:'thickness2',title:'¿Y el grosor de la segunda pieza?',hint:'Si son iguales, selecciona la misma opción.',options:[
+{value:'1',label:'Muy fina (1–2 mm)',sub:''},{value:'2.5',label:'Fina (2–3 mm)',sub:''},
+{value:'4',label:'Media (3–6 mm)',sub:''},{value:'8',label:'Gruesa (6–12 mm)',sub:''},
+{value:'15',label:'Muy gruesa (>12 mm)',sub:''},{value:'same',label:'Igual que la primera',sub:'Lo más común'}]},
+{key:'joint',title:'¿Cómo van unidas las piezas?',hint:'Mira las piezas y elige la forma que mejor las describa.',options:[
+{value:'butt',label:'A tope (butt)',sub:'Las dos piezas alineadas, un borde contra el otro'},
+{value:'lap',label:'Solape (lap)',sub:'Una pieza encima de la otra, solapadas'},
+{value:'tee',label:'En T (tee)',sub:'Una pieza perpendicular a la otra, formando una T'},
+{value:'corner',label:'Esquina (corner)',sub:'Las dos piezas formando una L o ángulo'}]},
+{key:'position',title:'¿En qué posición vas a soldar?',hint:'La posición afecta al amperaje y al tipo de electrodo.',options:[
+{value:'flat',label:'Plana',sub:'La pieza está horizontal y sueldas por encima'},
+{value:'horizontal',label:'Horizontal',sub:'La soldadura es horizontal sobre una pared'},
+{value:'vertical',label:'Vertical',sub:'Sueldas de abajo hacia arriba o de arriba hacia abajo'},
+{value:'overhead',label:'Sobre cabeza',sub:'Sueldas por encima de tu cabeza'}]},
+{key:'structural',title:'¿Es un trabajo estructural o crítico?',hint:'¿La pieza va a soportar peso, vibración o es de seguridad?',options:[
+{value:'no',label:'No, es un trabajo general o decorativo',sub:'Reja, mueble, reparación casera'},
+{value:'yes',label:'Sí, es estructural o de seguridad',sub:'Vigas, remolques, barandillas, soportes'}]}
+];
+
+function renderWizardStep(){
+wizardState.ident=null;
+const s=wizardState.step;
+const body=$('wizardBody');
+const progress=$('wizardProgress');
+progress.innerHTML=WIZARD_STEPS.map((_,i)=>`<div class="wizard-progress-dot ${i<=s?'active':''}"></div>`).join('');
+
+if(s>=WIZARD_STEPS.length){
+renderWizardResult();return;
+}
+const step=WIZARD_STEPS[s];
+let html=`<div class="wizard-step active"><h3>${step.title}</h3><p class="hint">${step.hint}</p>`;
+step.options.forEach(opt=>{
+html+=`<button class="wizard-option ${wizardState.answers[step.key]===opt.value?'selected':''}" data-value="${opt.value}"><strong>${opt.label}</strong>${opt.sub?`<small>${opt.sub}</small>`:''}</button>`;
+});
+html+=`</div><div class="wizard-nav">`;
+if(s>0)html+=`<button class="back" id="wizBack">← Atrás</button>`;
+html+=`<button class="next" id="wizNext">${s===WIZARD_STEPS.length-1?'Ver recomendación →':'Siguiente →'}</button>`;
+html+=`</div>`;
+body.innerHTML=html;
+
+body.querySelectorAll('.wizard-option').forEach(btn=>{
+btn.addEventListener('click',()=>{
+wizardState.answers[step.key]=btn.dataset.value;
+body.querySelectorAll('.wizard-option').forEach(b=>b.classList.remove('selected'));
+btn.classList.add('selected');
+});
+});
+const back=$('wizBack');if(back)back.addEventListener('click',()=>{wizardState.step--;renderWizardStep();});
+$('wizNext').addEventListener('click',()=>{
+if(!wizardState.answers[step.key]){showToast('Selecciona una opción para continuar');return;}
+if(wizardState.answers[step.key]==='unsure'&&(step.key==='metal1'||step.key==='metal2')){startIdent(step.key);return;}
+if(wizardState.answers[step.key]==='other'&&step.key==='metal1'){startIdent(step.key,'nomag');return;}
+wizardState.step++;renderWizardStep();
+});
+}
+
+/* ── IDENTIFICADOR DE METAL (desde "No estoy seguro") ── */
+const METAL_NAMES={carbon:'Acero común (al carbono)',stainless:'Acero inoxidable',cast:'Hierro fundido',aluminum:'Aluminio'};
+const IDENT={
+magnet:{t:'Prueba 1: el imán',h:'Acerca un imán a la pieza (sirve uno de nevera).',o:[['Se pega con fuerza','ferro'],['Se pega débilmente','weak'],['No se pega','nomag']]},
+ferro:{t:'Prueba 2: origen y aspecto',h:'Mira cómo está fabricada la pieza.',o:[['Laminado o liso (perfil, tubo, chapa, pletina, eje)','spark'],['Moldeado, rugoso y frágil (bloque, farola, radiador, tapa)','castq']]},
+spark:{t:'Prueba 3: chispas con la amoladora',h:'Roza la pieza con la amoladora y observa las chispas.',o:[['Largas, amarillo-blancas, pocas estrellitas','res_mild'],['Muy brillantes, con muchas estrellitas ramificadas','res_high'],['No puedo hacer la prueba','res_assume']]},
+castq:{t:'Prueba 3: golpe y lima',h:'Golpea con un martillo y prueba a limar una esquina.',o:[['Sonido sordo, se lima fácil y suelta polvo gris','res_gray'],['Suena como campana y se deforma un poco antes de romper','res_ductile'],['Extremadamente duro, no se lima, fractura blanca brillante','res_white']]},
+weak:{t:'Prueba 2: uso de la pieza',h:'¿Para qué se usaba?',o:[['Cuchillos, tornillos, herramientas, ejes','res_mart'],['Electrodomésticos, escapes, embellecedores, fregaderos','res_ferr']]},
+nomag:{t:'Peso y aspecto',h:'Compara con una pieza de acero del mismo tamaño y fíjate en el color.',o:[['Pesa mucho menos y es gris plateado mate','alu'],['Pesa como el acero, brillante o gris acero','aust'],['Amarillo, rojizo o marrón (oro, latón, cobre, bronce)','warm'],['Blanco brillante o de joyería (plata, platino, paladio)','prec'],['Gris oscuro, extremadamente pesado y duro (wolframio)','res_tungsten'],['Gris claro ligero y muy resistente, caro (titanio)','res_ti'],['Muy blando y pesado, se raya con la uña (plomo)','res_lead']]},
+warm:{t:'Color y dureza',h:'Elige la descripción que mejor encaje.',o:[['Amarillo intenso, muy pesado, blando y no se oxida (oro)','res_gold'],['Amarillo pálido que se oscurece (latón)','res_brass'],['Rojo-anaranjado (cobre)','res_copper'],['Marrón dorado oscuro y duro (bronce)','res_bronze']]},
+prec:{t:'Metal blanco',h:'¿Cómo se comporta con el tiempo?',o:[['Blanco brillante, blando, se ennegrece con el tiempo (plata)','res_silver'],['Blanco grisáceo muy pesado, no se empaña (platino o paladio)','res_platinum']]},
+alu:{t:'Prueba 3: tipo de pieza de aluminio',h:'¿Qué tipo de pieza es?',o:[['Perfil extruido o estructural (marcos, ventanas, escaleras, bici)','res_6'],['Chapa naval, depósito o de alta resistencia','res_5'],['Chapa muy blanda (utensilios, señales, latas)','res_1'],['Pieza moldeada y rugosa (culata, carcasa, cárter)','res_alucast']]},
+aust:{t:'Prueba 3: ambiente de uso',h:'¿Dónde trabajaba la pieza?',o:[['Cocina, alimentación, decoración, interior','res_304'],['Exterior costero, químico o piscinas','res_316'],['No lo sé','res_304']]}
+};
+const RES={
+res_mild:['carbon','Acero suave (bajo carbono)','Perfiles, tubos y chapa comunes (tipo S235/S275/A36). Es el más fácil de soldar.','Electrodo E6013 o E7018; hilo MIG ER70S-6.'],
+res_high:['carbon','Acero de medio/alto carbono','Ejes, muelles, herramientas o cuchillas: muchas estrellitas indican más carbono.','Precalienta 200–300 °C, usa E7018 seco y enfría despacio para evitar grietas.'],
+res_assume:['carbon','Acero común (supuesto)','Sin señales claras se asume acero suave, el caso más habitual.','Haz siempre una probeta antes de soldar.'],
+res_gray:['cast','Fundición gris','Se lima fácil, suena sordo y se desmenuza.','Precalienta 300–400 °C, electrodo ENi-Cl, cordones cortos con martilleo y enfriado muy lento.'],
+res_ductile:['cast','Fundición dúctil (nodular)','Suena a campana y se deforma antes de romper.','Precalienta 200–300 °C y usa electrodo ENiFe-Cl.'],
+res_white:['cast','Fundición blanca','Extremadamente dura y frágil: prácticamente no soldable.','Mejor no soldar; considera soldadura fuerte o sustituir la pieza.'],
+res_mart:['stainless','Inoxidable martensítico (410/420)','Débilmente magnético y duro (cuchillería, ejes).','Precalienta 200–300 °C y enfría lento: riesgo alto de grietas.'],
+res_ferr:['stainless','Inoxidable ferrítico (430)','Débilmente magnético: electrodomésticos, escapes.','Electrodo E309L o E430; poco aporte de calor para evitar crecimiento de grano.'],
+res_304:['stainless','Inoxidable austenítico 304','No magnético; es el inoxidable más común.','E308L o hilo ER308L; interpasada bajo 150 °C.'],
+res_316:['stainless','Inoxidable austenítico 316','Contiene molibdeno; ambientes marinos y químicos.','E316L o ER316L; interpasada bajo 150 °C.'],
+res_1:['aluminum','Aluminio 1xxx/3xxx (blando)','Chapa blanda y muy dúctil.','Aporte ER1100 o ER4043; elimina bien el óxido.'],
+res_5:['aluminum','Aluminio 5xxx (Al-Mg)','Chapa naval y depósitos, muy resistente a la corrosión.','Aporte ER5356; TIG en AC.'],
+res_6:['aluminum','Aluminio 6xxx (Al-Mg-Si)','Perfiles extruidos y estructuras.','ER4043 (menos grietas) o ER5356 (más resistencia); TIG en AC.'],
+res_gold:['info','Oro','Metal blando, muy denso y con altísima conductividad térmica.','Método: soldadura por láser pulsado o micro-TIG pulsado con argón, o soldadura blanda/fuerte con aleación de oro del mismo quilate, fundente y soplete. No se suelda con arco convencional.'],
+res_silver:['info','Plata','Muy alta conductividad térmica y reflectante: el calor se disipa deprisa.','Método: soldadura fuerte con aleaciones de plata (fácil, media o dura), fundente y soplete; para joyería, láser o micro-TIG pulsado con argón. Evita el arco convencional.'],
+res_platinum:['info','Platino / paladio','Metales nobles densos con punto de fusión alto.','Método: láser o micro-TIG pulsado con argón y aporte del mismo material; también soplete oxígeno-gas en joyería. Evita contaminar con plomo, estaño o silicio (fragilizan).'],
+res_tungsten:['info','Wolframio (tungsteno)','Punto de fusión de 3422 °C, muy duro y frágil; se fragiliza con el calor.','Método: unión por soldadura fuerte (a menudo en vacío, con aleaciones de Ni, Cu o Ag), haz de electrones o láser. TIG solo en secciones finas, con precalentamiento, argón/helio y poco aporte de calor.'],
+res_ti:['info','Titanio','Reactivo: absorbe oxígeno y nitrógeno del aire y se fragiliza.','Método: TIG en corriente continua (DCEN) con argón puro 100 %, gas de protección trasero (purga) y gas de arrastre; limpieza extrema; varilla ERTi-2. Un cordón plateado o pajizo es correcto; azul o gris indica contaminación.'],
+res_copper:['info','Cobre','Conductividad térmica muy alta: el calor se escapa y cuesta fundir.','Método: TIG en DCEN con argón (o mezcla argón/helio en espesores gruesos), precalentando de 150 a 500 °C según el espesor y con varilla de cobre desoxidado (ERCu); alternativa: MIG con Ar/He o soldadura fuerte (aleaciones BCuP).'],
+res_brass:['info','Latón (Cu-Zn)','El zinc se vaporiza al calentarlo y produce humos tóxicos.','Método: soldadura fuerte con varilla de latón/plata y fundente; o TIG con varilla de bronce al silicio (ERCuSi-A). Trabaja siempre con extracción o buena ventilación.'],
+res_bronze:['info','Bronce','Aleación de cobre (con estaño, aluminio o silicio) de conductividad térmica menor que la del cobre.','Método: TIG o MIG con aporte de bronce al silicio (ERCuSi-A), bronce al aluminio (ERCuAl-A2) o fosforoso (ERCuSn-A); en piezas gruesas, precalienta 150–250 °C.'],
+res_lead:['info','Plomo','Funde a solo 327 °C y sus humos y polvo son tóxicos.','Método: soldadura de plomo con soplete y varilla de plomo, o TIG con corriente baja. Usa respirador con filtro P3, guantes, ventilación y lávate las manos; evita comer o fumar durante el trabajo.'],
+res_alucast:['aluminum','Aluminio de fundición (Al-Si)','Difícil: porosidad y grietas.','Precalienta 150–200 °C, desengrasa a fondo y usa ER4043.']
+};
+function startIdent(key,node){wizardState.ident={key,node:node||'magnet',prev:[]};renderIdent();}
+function renderIdent(){
+const id=wizardState.ident,body=$('wizardBody'),n=id.node;
+let html;
+if(n==='x'){
+html=`<div class="wizard-result" style="border-left-color:var(--warn);background:rgba(234,179,8,0.08)"><h4 style="color:var(--warn)">Metal no cubierto</h4><div class="detail">Latón, cobre y bronce no están incluidos en este asistente (se sueldan con TIG o soldadura fuerte con parámetros específicos). Vuelve atrás si te has equivocado.</div></div><div class="wizard-nav"><button class="back" id="idBack">← Atrás</button></div>`;
+}else if(RES[n]){
+const [m,name,why,tip]=RES[n];
+if(m==='info'){html=`<div class="wizard-result" style="border-left-color:var(--warn);background:rgba(234,179,8,0.08)"><h4 style="color:var(--warn)">Metal identificado</h4><div class="reco" style="color:var(--warn)">${name}</div><div class="detail">${why}</div><div class="reason">🔧 ${tip}<br>Este metal no entra en el calculador de amperaje. Identificación orientativa: consulta la ficha del aporte y del fabricante.</div></div><div class="wizard-nav"><button class="back" id="idBack">← Atrás</button><button class="next" id="idAgain">Identificar otro</button></div>`;}
+else html=`<div class="wizard-result"><h4>Metal identificado</h4><div class="reco">${name}</div><div class="detail">${why}</div><div class="reason">🔧 ${tip}<br>Grupo en el asistente: <strong>${METAL_NAMES[m]}</strong>. Identificación orientativa: confirma con una probeta.</div></div><div class="wizard-nav"><button class="back" id="idBack">← Atrás</button><button class="next" id="idOk">Usar y continuar →</button></div>`;
+}else{
+const q=IDENT[n];
+html=`<div class="wizard-step active"><h3>${q.t}</h3><p class="hint">${q.h}</p>`+q.o.map((o,i)=>`<button class="wizard-option" data-i="${i}"><strong>${o[0]}</strong></button>`).join('')+`</div><div class="wizard-nav"><button class="back" id="idBack">← Atrás</button></div>`;
+}
+body.innerHTML=html;
+body.querySelectorAll('.wizard-option').forEach(b=>b.addEventListener('click',()=>{id.prev.push(n);id.node=IDENT[n].o[+b.dataset.i][1];renderIdent();}));
+$('idBack').addEventListener('click',()=>{if(id.prev.length){id.node=id.prev.pop();renderIdent();}else{renderWizardStep();}});
+const ag=$('idAgain');if(ag)ag.addEventListener('click',()=>{id.node='magnet';id.prev=[];renderIdent();});
+const ok=$('idOk');if(ok)ok.addEventListener('click',()=>{wizardState.answers[id.key]=RES[id.node][0];wizardState.step++;renderWizardStep();});
+}
+
+function renderWizardResult(){
+const a=wizardState.answers;
+const m1=a.metal1==='unsure'?'carbon':a.metal1;
+const m2=(a.metal2==='same'||a.metal2==='unsure')?m1:a.metal2;
+const t1=parseFloat(a.thickness1)||4;
+const t2=a.thickness2==='same'?t1:(parseFloat(a.thickness2)||t1);
+const maxT=Math.max(t1,t2);
+
+// Logic
+let electrode='6013',dia='2.5',reason='';
+if(m1==='cast'||m2==='cast'){electrode='ENi-Cl';dia='3.2';reason='Hierro fundido requiere electrodo de níquel (ENi-Cl) y precalentamiento 200–400°C.';}
+else if(m1==='stainless'||m2==='stainless'){
+if(m1!==m2){electrode='309L';dia=maxT<=3?'2.5':'3.2';reason='Unión de acero inoxidable con otro metal → electrodo 309L.';}
+else{electrode='308L';dia=maxT<=3?'2.5':'3.2';reason='Acero inoxidable con inoxidable → electrodo 308L (o 316L si es 316).';}
+}
+else if(m1==='aluminum'||m2==='aluminum'){electrode='—';dia='—';reason='El aluminio no se suelda bien con electrodo revestido. Usa TIG (AC) o MIG con gas argón.';}
+else{
+// Carbon steel
+if(a.structural==='yes'){electrode='7018';dia=maxT<=3?'2.5':maxT<=6?'3.2':'4.0';reason='Trabajo estructural → electrodo básico de bajo hidrógeno E7018 para máxima resistencia y ductilidad.';}
+else if(a.position==='vertical'||a.position==='overhead'){electrode='6013';dia=maxT<=3?'2.5':'3.2';reason='Posición vertical/sobre cabeza → E6013 rutilo, fácil de controlar y menos propenso a chorrear.';}
+else if(maxT<=3){electrode='6013';dia='2.5';reason='Chapa fina → E6013 rutilo, arco suave y fácil encendido, ideal para principiantes.';}
+else if(maxT<=6){electrode='6013';dia='3.2';reason='Espesor medio → E6013 rutilo, uso general y buena relación facilidad/rendimiento.';}
+else if(maxT<=12){electrode='7018';dia='4.0';reason='Espesor grueso → E7018 básico, mayor penetración y resistencia para materiales gruesos.';}
+else{electrode='7018';dia='5.0';reason='Material muy grueso → E7018 Ø4,0–5,0 mm con múltiples pasadas y posible precalentamiento.';}
+}
+
+// Position adjustment
+let posNote='';
+if(a.position==='vertical'||a.position==='overhead'){posNote='Posición '+a.position+': reduce amperaje un 10–15% respecto a plana.';}
+
+// Joint note
+let jointNote='';
+if(a.joint==='butt')jointNote='Junta a tope: si el espesor >4 mm, prepara bisel en V (60–75°) con root gap de 1,5–3 mm y root face de 1,5–2 mm.';
+else if(a.joint==='lap')jointNote='Junta a solape: filete en uno o ambos bordes. Asegura al menos 3–5 mm de solape.';
+else if(a.joint==='tee')jointNote='Junta en T: filete simple o doble. Para penetración total, prepara bisel si el espesor lo permite.';
+else if(a.joint==='corner')jointNote='Junta en esquina: filete o bisel según acceso. Ángulo típico de 90°.';
+
+const body=$('wizardBody');
+const progress=$('wizardProgress');
+progress.innerHTML=WIZARD_STEPS.map(()=>`<div class="wizard-progress-dot active"></div>`).join('');
+
+let html=`<div class="wizard-result">
+<h4>✅ Electrodo recomendado</h4>
+<div class="reco">${electrode==='—'?'No aplica':'E'+electrode}</div>
+<div class="detail"><strong>Diámetro:</strong> ${dia==='—'?'—':dia+' mm'}</div>
+<div class="reason">📝 ${reason}</div>
+</div>`;
+
+if(electrode!=='—'){
+html+=`<div class="wizard-result" style="border-left-color:var(--warn);background:rgba(234,179,8,0.08)">
+<h4 style="color:var(--warn)">🔧 Preparación de la junta</h4>
+<div class="detail">${jointNote}</div>
+</div>`;
+}
+if(posNote){html+=`<div class="warning" style="margin-bottom:14px">${posNote}</div>`;}
+if(a.structural==='yes'){html+=`<div class="warning" style="margin-bottom:14px">⚠️ Trabajo estructural: limpia la junta, elimina óxido/grasa, y considera precalentamiento si el espesor supera los 20 mm.</div>`;}
+
+html+=`<div class="wizard-nav">
+<button class="back" id="wizRestart">🔄 Empezar de nuevo</button>
+<button class="next" id="wizApply">✓ Aplicar y calcular</button>
+</div>`;
+body.innerHTML=html;
+
+$('wizRestart').addEventListener('click',()=>{wizardState.step=0;wizardState.answers={};renderWizardStep();});
+$('wizApply').addEventListener('click',()=>{
+if(electrode!=='—'){
+$('stickElectrode').value=electrode;
+if(dia!=='—'&&[...$('stickDiameter').options].some(o=>o.value===dia))$('stickDiameter').value=dia;
+$('stickThickness').value=maxT;
+$('stickJoint').value=a.joint||'tee';
+$('stickPosition').value=a.position||'flat';
+$('stickMaterial').value=m1==='stainless'?'stainless':m1==='cast'?'cast':'carbon';
+}
+$('wizardOverlay').classList.remove('show');
+calculate();
+setTimeout(()=>$('result').scrollIntoView({behavior:'smooth',block:'start'}),150);
+});
+}
+
+/* ============================================================
+   JOINT GUIDE RENDERING
+   ============================================================ */
+function buildJointGuide(){
+return `<div class="ref-section-title">🔩 Tipos de Junta — Descripción y Dimensiones</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="20" y="40" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="180" y="40" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="30" text-anchor="middle" fill="#94a3b8" font-size="10">A tope (Butt)</text>
+<line x1="140" y1="45" x2="180" y2="45" stroke="#f97316" stroke-width="1" stroke-dasharray="3,2"/>
+<text x="160" y="70" text-anchor="middle" fill="#f97316" font-size="9">root gap</text>
+<text x="160" y="100" text-anchor="middle" fill="#94a3b8" font-size="8">0–4 mm: square butt · 4–22 mm: V</text>
+</svg>
+<div class="caption"><strong>A tope (Butt):</strong> dos piezas alineadas, borde contra borde. La más común para tuberías y chapas.</div>
+</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="40" y="30" width="100" height="30" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="40" y="60" width="180" height="30" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="20" text-anchor="middle" fill="#94a3b8" font-size="10">Solape (Lap)</text>
+<text x="220" y="75" text-anchor="middle" fill="#f97316" font-size="9">filete</text>
+</svg>
+<div class="caption"><strong>Solape (Lap):</strong> una pieza encima de la otra. Filete en uno o ambos bordes.</div>
+</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="140" y="20" width="40" height="90" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="180" y="70" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="15" text-anchor="middle" fill="#94a3b8" font-size="10">En T (Tee)</text>
+<text x="200" y="60" text-anchor="middle" fill="#f97316" font-size="9">filete</text>
+</svg>
+<div class="caption"><strong>En T (Tee):</strong> una pieza perpendicular a la otra. Filete simple o doble.</div>
+</div>
+<div class="joint-diagram">
+<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="40" y="30" width="120" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<rect x="140" y="70" width="40" height="40" fill="#334155" stroke="#f97316" stroke-width="1.5"/>
+<text x="160" y="20" text-anchor="middle" fill="#94a3b8" font-size="10">Esquina (Corner)</text>
+</svg>
+<div class="caption"><strong>Esquina (Corner):</strong> dos piezas formando una L o ángulo. Filete o bisel según acceso.</div>
+</div>
+<div class="ref-section-title">📐 Dimensiones de preparación por espesor (junta a tope)</div>
+<div class="table-wrap"><table class="ref-table joint-table"><thead><tr><th>Espesor</th><th>Tipo</th><th>Ángulo</th><th>Root gap</th><th>Root face</th></tr></thead><tbody>
+<tr><td>≤4 mm</td><td>Square butt</td><td>0°</td><td>1,5–2,5 mm</td><td>Todo el espesor</td></tr>
+<tr><td>4–8 mm</td><td>V simple</td><td>60–75°</td><td>2,0–3,0 mm</td><td>1,0–1,5 mm</td></tr>
+<tr><td>8–22 mm</td><td>V simple</td><td>60–75°</td><td>2,5–3,0 mm</td><td>1,5–2,0 mm</td></tr>
+<tr><td>>22 mm</td><td>Bisel compuesto / U</td><td>10–20° + landing</td><td>2,0–3,0 mm</td><td>1,5–3,0 mm</td></tr>
+</tbody></table></div>
+<div class="warning" style="margin-top:10px">📝 <strong>Root gap</strong> = separación entre bordes antes de soldar. <strong>Root face</strong> = parte sin biselar al fondo del chaflán. <strong>Ángulo</strong> = ángulo total del bisel (incluido).</div>`;
+}
+
+/* ============================================================
+   NAV / TABS
+   ============================================================ */
+function setupNav(){document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$('tab-'+btn.dataset.tab).classList.add('active');$('content').scrollTo({top:0,behavior:'instant'});if(btn.dataset.tab==='machine')updateDutyCycle();if(btn.dataset.tab==='reference')buildReference(currentRefProcess);});});}
+function setupProcessTabs(){document.querySelectorAll('#processTabs .process-tab').forEach(btn=>{btn.addEventListener('click',()=>{currentProcess=btn.dataset.process;document.querySelectorAll('#processTabs .process-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.process-inputs').forEach(el=>el.style.display='none');$(currentProcess+'Inputs').style.display='block';updateGasVisibility();$('result').classList.remove('show');});});}
+function setupRefTabs(){document.querySelectorAll('#refProcessTabs .process-tab').forEach(btn=>{btn.addEventListener('click',()=>{currentRefProcess=btn.dataset.refprocess;document.querySelectorAll('#refProcessTabs .process-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildReference(currentRefProcess);});});}
+/* ── IDIOMA ES/EN: diccionario + traductor de DOM (añade aquí más textos: 'español':'English') ── */
+const EN={
+"Proceso de Soldadura":"Welding Process","Electrodo":"Stick (SMAW)","Ø Hilo":"Wire Ø","Espesor (":"Thickness (","Junta":"Joint","A tope":"Butt","Solape":"Lap","Esquina":"Corner","Posición":"Position","Plana":"Flat","Horizontal":"Horizontal","Vertical":"Vertical","Sobre cabeza":"Overhead","Argón puro":"Pure argon","Material":"Material","Acero al Carbono":"Carbon Steel","Acero Inoxidable":"Stainless Steel","Aluminio":"Aluminium","Hierro Fundido":"Cast Iron","🧠 Ayúdame a elegir":"🧠 Help me choose","Ø Electrodo":"Electrode Ø","✓ Sin gas — este modelo usa hilo tubular con fundente interno (self-shielded).":"✓ Gasless — this model uses flux-cored wire (self-shielded).","Calcular Parámetros":"Calculate Parameters","Amperaje Recomendado":"Recommended Amperage","Voltaje":"Voltage","Polaridad":"Polarity","Vel. Hilo (m/min)":"Wire Speed (m/min)","Pasadas":"Passes","🔥 Aporte Térmico":"🔥 Heat Input","Vel. (mm/min)":"Speed (mm/min)","Corriente (A)":"Current (A)","Aporte":"Heat input","Proceso":"Process","🔍 Buscar Máquina":"🔍 Search Machine","Escribe parte del nombre para filtrar":"Type part of the name to filter","Seleccionar Soldadora":"Select Welder","Amperaje Objetivo (A)":"Target Amperage (A)","Ciclo de trabajo:":"Duty cycle:","Mis Máquinas":"My Machines","Mis máquinas":"My machines","➕ Añadir máquina":"➕ Add machine","Nombre":"Name","Amperaje máx (A)":"Max amperage (A)","Procesos":"Processes","FCAW sin gas (hilo con fundente interno)":"Gasless FCAW (flux-cored wire)","Ciclo ref. (%)":"Ref. duty (%)","Amp. ref. ciclo":"Ref. duty amps","Guardar":"Save","Cancelar":"Cancel","📖 Guía Rápida de Soldadura":"📖 Quick Welding Guide","Calcular":"Calculate","Tablas":"Tables","Máquina":"Machine","Guía":"Guide","🧠 Asistente de Selección de Electrodo":"🧠 Electrode Selection Assistant",
+"Ej: Parkside, Einhell, 200A, Vevor...":"E.g. Parkside, Einhell, 200A, Vevor...","Restablecer filtros":"Reset filters","Limpiar":"Clear","Cerrar":"Close",
+"— Selecciona una máquina —":"— Select a machine —","— Sin resultados —":"— No results —","Sin resultados para":"No results for","máquinas encontradas":"machines found","máquina encontrada":"machine found","Doméstica económica":"Budget home","Multiproceso doméstica":"Home multiprocess","Profesional":"Professional","Salida Máx.":"Max Output","Ciclo @ Referencia":"Duty @ Reference","Voltaje Entrada":"Input Voltage","Peso":"Weight",
+"⚠️ Verifica con probeta. Ajusta ±10–15% según el arco.":"⚠️ Check with a test piece. Adjust ±10–15% by arc feel.","⚠️ Material delgado: reduce amperaje y aumenta velocidad.":"⚠️ Thin material: reduce amperage and increase speed.","⚠️ Material grueso: considera precalentamiento.":"⚠️ Thick material: consider preheating.","⚠️ Inox: mantén interpass bajo 150°C.":"⚠️ Stainless: keep interpass below 150°C.","⚠️ Aluminio: usa AC y limpia la superficie.":"⚠️ Aluminium: use AC and clean the surface.","⚠️ Fundición: precalienta 200–400°C.":"⚠️ Cast iron: preheat 200–400°C.","⚠️ Vertical: reduce amperaje un 10–15%.":"⚠️ Vertical: reduce amperage 10–15%.","⚠️ Sobre cabeza: reduce amperaje un 15–20%.":"⚠️ Overhead: reduce amperage 15–20%.","🚨 Ciclo muy bajo — riesgo de sobrecalentamiento.":"🚨 Very low duty cycle — overheating risk.","⚠️ Ciclo moderado — permite enfriamientos.":"⚠️ Moderate duty cycle — allow cool-downs.","✅ Ciclo saludable para trabajo continuo.":"✅ Healthy duty cycle for continuous work.",
+"Introduce un nombre":"Enter a name","✓ Máquina guardada":"✓ Machine saved","✓ Máquina eliminada":"✓ Machine deleted","↻ Filtros restablecidos":"↻ Filters reset","Selecciona una opción para continuar":"Select an option to continue","Introduce un espesor válido.":"Enter a valid thickness.",
+"Siguiente →":"Next →","← Atrás":"← Back","Ver recomendación →":"See recommendation →","Usar y continuar →":"Use and continue →","Identificar otro":"Identify another",
+"¿Qué material vas a soldar?":"What material are you welding?","Selecciona el tipo de metal de la primera pieza. Si no estás seguro, usa la guía inferior.":"Select the metal type of the first piece. If unsure, use the guide below.","Acero común (acero al carbono)":"Common steel (carbon steel)","El más habitual: rejas, perfiles, tuberías, chapa":"The most common: gates, profiles, pipes, sheet","Acero inoxidable":"Stainless steel","Brillante, no se oxida fácilmente":"Shiny, does not rust easily","Hierro fundido":"Cast iron","Piezas gruesas y pesadas, se rompe con fractura granulada":"Thick, heavy parts; breaks with a grainy fracture","Ligero, no magnético, color plateado mate":"Light, non-magnetic, matte silver","Otro metal (oro, plata, cobre, titanio, wolframio…)":"Other metal (gold, silver, copper, titanium, tungsten…)","Te indicamos el método de unión correcto":"We tell you the correct joining method","No estoy seguro":"I am not sure","Te ayudamos a identificarlo":"We help you identify it",
+"¿Y la segunda pieza?":"And the second piece?","¿Es del mismo material que la primera?":"Is it the same material as the first?","Sí, es el mismo material":"Yes, same material","Lo más común":"Most common","Acero común":"Common steel",
+"¿Qué grosor tiene la primera pieza?":"How thick is the first piece?","Selecciona el grosor aproximado en milímetros.":"Select the approximate thickness in millimetres.","Muy fina (1–2 mm)":"Very thin (1–2 mm)","Fina (2–3 mm)":"Thin (2–3 mm)","Media (3–6 mm)":"Medium (3–6 mm)","Gruesa (6–12 mm)":"Thick (6–12 mm)","Muy gruesa (>12 mm)":"Very thick (>12 mm)","Como una chapa de carrocería":"Like car body sheet","Como un tubo cuadrado delgado":"Like thin square tube","Como un perfil estructural":"Like a structural profile","Como una pletina o plancha":"Like a flat bar or plate","Como una brida o bloque":"Like a flange or block","¿Y el grosor de la segunda pieza?":"And the thickness of the second piece?","Si son iguales, selecciona la misma opción.":"If equal, select the same option.","Igual que la primera":"Same as the first",
+"¿Cómo van unidas las piezas?":"How are the pieces joined?","Mira las piezas y elige la forma que mejor las describa.":"Look at the pieces and choose the shape that best describes them.","A tope (butt)":"Butt","Solape (lap)":"Lap","En T (tee)":"Tee","Esquina (corner)":"Corner","Las dos piezas alineadas, un borde contra el otro":"Two aligned pieces, edge to edge","Una pieza encima de la otra, solapadas":"One piece over the other, overlapping","Una pieza perpendicular a la otra, formando una T":"One piece perpendicular to the other, forming a T","Las dos piezas formando una L o ángulo":"Two pieces forming an L or angle",
+"¿En qué posición vas a soldar?":"In which position will you weld?","La posición afecta al amperaje y al tipo de electrodo.":"Position affects amperage and electrode type.","La pieza está horizontal y sueldas por encima":"The piece is horizontal and you weld from above","La soldadura es horizontal sobre una pared":"The weld runs horizontally on a wall","Sueldas de abajo hacia arriba o de arriba hacia abajo":"You weld upwards or downwards","Sueldas por encima de tu cabeza":"You weld above your head",
+"¿Es un trabajo estructural o crítico?":"Is it structural or critical work?","¿La pieza va a soportar peso, vibración o es de seguridad?":"Will it carry load, vibration, or is it safety-related?","No, es un trabajo general o decorativo":"No, general or decorative work","Reja, mueble, reparación casera":"Gate, furniture, home repair","Sí, es estructural o de seguridad":"Yes, structural or safety-related","Vigas, remolques, barandillas, soportes":"Beams, trailers, railings, supports",
+"Prueba 1: el imán":"Test 1: the magnet","Acerca un imán a la pieza (sirve uno de nevera).":"Hold a magnet to the piece (a fridge magnet works).","Se pega con fuerza":"Sticks strongly","Se pega débilmente":"Sticks weakly","No se pega":"Does not stick","Prueba 2: origen y aspecto":"Test 2: origin and appearance","Mira cómo está fabricada la pieza.":"Look at how the piece is made.","Laminado o liso (perfil, tubo, chapa, pletina, eje)":"Rolled or smooth (profile, tube, sheet, bar, shaft)","Moldeado, rugoso y frágil (bloque, farola, radiador, tapa)":"Cast, rough and brittle (block, lamp post, radiator, cover)","Prueba 3: chispas con la amoladora":"Test 3: grinder sparks","Roza la pieza con la amoladora y observa las chispas.":"Touch the piece with a grinder and watch the sparks.","Largas, amarillo-blancas, pocas estrellitas":"Long, yellow-white, few starbursts","Muy brillantes, con muchas estrellitas ramificadas":"Very bright, many branching starbursts","No puedo hacer la prueba":"I cannot do the test","Prueba 3: golpe y lima":"Test 3: hammer and file","Golpea con un martillo y prueba a limar una esquina.":"Strike with a hammer and try filing a corner.","Sonido sordo, se lima fácil y suelta polvo gris":"Dull sound, files easily, gives grey powder","Suena como campana y se deforma un poco antes de romper":"Rings like a bell and deforms slightly before breaking","Extremadamente duro, no se lima, fractura blanca brillante":"Extremely hard, cannot be filed, bright white fracture","Prueba 2: uso de la pieza":"Test 2: use of the piece","¿Para qué se usaba?":"What was it used for?","Cuchillos, tornillos, herramientas, ejes":"Knives, screws, tools, shafts","Electrodomésticos, escapes, embellecedores, fregaderos":"Appliances, exhausts, trim, sinks","Peso y aspecto":"Weight and appearance","Compara con una pieza de acero del mismo tamaño y fíjate en el color.":"Compare with a steel piece of the same size and note the colour.","Pesa mucho menos y es gris plateado mate":"Much lighter, matte silver-grey","Pesa como el acero, brillante o gris acero":"Weighs like steel, shiny or steel-grey","Amarillo, rojizo o marrón (oro, latón, cobre, bronce)":"Yellow, reddish or brown (gold, brass, copper, bronze)","Blanco brillante o de joyería (plata, platino, paladio)":"Bright white or jewellery (silver, platinum, palladium)","Gris oscuro, extremadamente pesado y duro (wolframio)":"Dark grey, extremely heavy and hard (tungsten)","Gris claro ligero y muy resistente, caro (titanio)":"Light grey, lightweight and very strong, expensive (titanium)","Muy blando y pesado, se raya con la uña (plomo)":"Very soft and heavy, scratched by a fingernail (lead)",
+"Color y dureza":"Colour and hardness","Amarillo intenso, muy pesado, blando y no se oxida (oro)":"Deep yellow, very heavy, soft, does not tarnish (gold)","Amarillo pálido que se oscurece (latón)":"Pale yellow that darkens (brass)","Rojo-anaranjado (cobre)":"Red-orange (copper)","Marrón dorado oscuro y duro (bronce)":"Dark golden brown and hard (bronze)","Metal blanco":"White metal","Blanco brillante, blando, se ennegrece con el tiempo (plata)":"Bright white, soft, blackens over time (silver)","Blanco grisáceo muy pesado, no se empaña (platino o paladio)":"Greyish white, very heavy, does not tarnish (platinum or palladium)","Prueba 3: tipo de pieza de aluminio":"Test 3: type of aluminium part","Prueba 3: ambiente de uso":"Test 3: environment of use","Metal identificado":"Metal identified","Metal no cubierto":"Metal not covered",
+"Acero suave (bajo carbono)":"Mild steel (low carbon)","Acero de medio/alto carbono":"Medium/high-carbon steel","Acero común (supuesto)":"Common steel (assumed)","Fundición gris":"Grey cast iron","Fundición dúctil (nodular)":"Ductile (nodular) cast iron","Fundición blanca":"White cast iron","Inoxidable martensítico (410/420)":"Martensitic stainless (410/420)","Inoxidable ferrítico (430)":"Ferritic stainless (430)","Inoxidable austenítico 304":"Austenitic stainless 304","Inoxidable austenítico 316":"Austenitic stainless 316","Aluminio de fundición (Al-Si)":"Cast aluminium (Al-Si)","Oro":"Gold","Plata":"Silver","Platino / paladio":"Platinum / palladium","Wolframio (tungsteno)":"Tungsten","Titanio":"Titanium","Cobre":"Copper","Latón (Cu-Zn)":"Brass (Cu-Zn)","Bronce":"Bronze","Plomo":"Lead","Grupo en el asistente:":"Assistant group:","Identificación orientativa: confirma con una probeta.":"Indicative identification: confirm with a test piece.","Este metal no entra en el calculador de amperaje.":"This metal is not covered by the amperage calculator.","Método:":"Method:","Seguridad":"Safety","Seguridad y Normativa":"Safety and Regulations","🦺 Seguridad y Normativa":"🦺 Safety and Regulations","En T":"In Tee","En T (tee)":"In Tee","En T (Tee)":"In Tee","A tope (Butt)":"Butt","A tope (butt)":"Butt","Solape (Lap)":"Lap","Solape (lap)":"Lap","Esquina (Corner)":"Corner","Esquina (corner)":"Corner","Junta en T":"T-joint","Junta a tope":"Butt joint","Junta a solape":"Lap joint","Junta en esquina":"Corner joint",
+"Trabajo estructural → electrodo básico de bajo hidrógeno E7018 para máxima resistencia y ductilidad.":"Structural work → low-hydrogen basic electrode E7018 for maximum strength and ductility.",
+"Junta en esquina: filete o bisel según acceso. Ángulo típico de 90°.":"Corner joint: fillet or bevel depending on access. Typical angle 90°.",
+"Acero celulósico":"Cellulosic steel","Celulósico, penetración":"Cellulosic, penetration",
+"Material muy grueso → E7018 Ø4,0–5,0 mm con múltiples pasadas y posible precalentamiento.":"Very thick material → E7018 Ø4.0–5.0 mm with multiple passes and possible preheating.",
+"Espesor grueso → E7018 básico, mayor penetración y resistencia para materiales gruesos.":"Thick section → basic E7018, deeper penetration and strength for thick materials.",
+"Espesor medio → E6013 rutilo, uso general y buena relación facilidad/rendimiento.":"Medium thickness → rutile E6013, general use with a good ease/performance balance.",
+"Chapa fina → E6013 rutilo, arco suave y fácil encendido, ideal para principiantes.":"Thin sheet → rutile E6013, smooth arc and easy starting, ideal for beginners.",
+"Unión de acero inoxidable con otro metal → electrodo 309L.":"Joining stainless steel to another metal → 309L electrode.",
+"Junta a tope: si el espesor >4 mm, prepara bisel en V (60–75°) con root gap de 1,5–3 mm y root face de 1,5–2 mm.":"Butt joint: if thickness >4 mm, prepare a V bevel (60–75°) with a 1.5–3 mm root gap and 1.5–2 mm root face.",
+"Junta a solape: filete en uno o ambos bordes. Asegura al menos 3–5 mm de solape.":"Lap joint: fillet on one or both edges. Ensure at least 3–5 mm of overlap.",
+"Hierro fundido requiere electrodo de níquel (ENi-Cl) y precalentamiento 200–400°C.":"Cast iron requires a nickel electrode (ENi-Cl) and preheating at 200–400°C.",
+"⚠️ Trabajo estructural: limpia la junta, elimina óxido/grasa, y considera precalentamiento si el espesor supera los 20 mm.":"⚠️ Structural work: clean the joint, remove rust/grease, and consider preheating if thickness exceeds 20 mm.",
+"Máquina exclusiva FCAW sin gas. Hilo tubular con fundente interno. Ideal para chapa fina (0,8–3 mm).":"Dedicated gasless FCAW machine. Flux-cored wire. Ideal for thin sheet (0.8–3 mm).",
+"✅ Electrodo recomendado":"✅ Recommended electrode","No aplica":"N/A","🔄 Empezar de nuevo":"🔄 Start again","✓ Aplicar y calcular":"✓ Apply and calculate",
+"🟣 FCAW — Con gas vs sin gas":"🟣 FCAW — With gas vs gasless","Tipo":"Type","Uso":"Use","Con gas (M21/CO₂)":"With gas (M21/CO₂)","Alta calidad, taller":"High quality, workshop","Sin gas (fundente interno)":"Gasless (flux core)","Exterior, portátil":"Outdoor, portable",
+"🟢 TIG — Parámetros por Material":"🟢 TIG — Parameters by Material","Corriente":"Current","🟠 Electrodo — Amperaje por Ø":"🟠 Stick — Amperage by Ø","Rango (A)":"Range (A)","🟠 Electrodo — Polaridad y Aplicación":"🟠 Stick — Polarity and Application","Aplicación":"Application",
+"Restricciones de":"Restrictions of","Hilos soportados":"Supported wires","Electrodos soportados":"Supported electrodes","FCAW sin gas — hilo tubular con fundente interno":"Gasless FCAW — flux-cored wire","Espesor:":"Thickness:","Proceso:":"Process:","Online (AliExpress genéricas)":"Online (generic AliExpress)","Online (otras marcas)":"Online (other brands)",
+"Metal blando, muy denso y con altísima conductividad térmica.":"Soft, very dense metal with very high thermal conductivity.",
+"Método: soldadura por láser pulsado o micro-TIG pulsado con argón, o soldadura blanda/fuerte con aleación de oro del mismo quilate, fundente y soplete. No se suelda con arco convencional.":"Method: pulsed laser or pulsed micro-TIG with argon, or soft/hard soldering with a gold alloy of the same karat, flux and torch. Not welded with conventional arc.",
+"Muy alta conductividad térmica y reflectante: el calor se disipa deprisa.":"Very high thermal conductivity and reflective: heat dissipates quickly.",
+"Método: soldadura fuerte con aleaciones de plata (fácil, media o dura), fundente y soplete; para joyería, láser o micro-TIG pulsado con argón. Evita el arco convencional.":"Method: silver brazing with silver alloys (easy, medium or hard), flux and torch; for jewellery, laser or pulsed micro-TIG with argon. Avoid conventional arc.",
+"Metales nobles densos con punto de fusión alto.":"Dense noble metals with a high melting point.",
+"Método: láser o micro-TIG pulsado con argón y aporte del mismo material; también soplete oxígeno-gas en joyería. Evita contaminar con plomo, estaño o silicio (fragilizan).":"Method: laser or pulsed micro-TIG with argon and same-material filler; also oxy-gas torch in jewellery. Avoid contamination with lead, tin or silicon (embrittles).",
+"Punto de fusión de 3422 °C, muy duro y frágil; se fragiliza con el calor.":"Melting point 3422 °C, very hard and brittle; embrittles with heat.",
+"Método: unión por soldadura fuerte (a menudo en vacío, con aleaciones de Ni, Cu o Ag), haz de electrones o láser. TIG solo en secciones finas, con precalentamiento, argón/helio y poco aporte de calor.":"Method: brazing (often in vacuum, with Ni, Cu or Ag alloys), electron beam or laser. TIG only on thin sections, with preheat, argon/helium and low heat input.",
+"Reactivo: absorbe oxígeno y nitrógeno del aire y se fragiliza.":"Reactive: absorbs oxygen and nitrogen from the air and becomes brittle.",
+"Método: TIG en corriente continua (DCEN) con argón puro 100 %, gas de protección trasero (purga) y gas de arrastre; limpieza extrema; varilla ERTi-2. Un cordón plateado o pajizo es correcto; azul o gris indica contaminación.":"Method: DC TIG (DCEN) with 100% pure argon, back-purge shielding gas and trailing gas; extreme cleanliness; ERTi-2 rod. A silver or straw-coloured bead is correct; blue or grey indicates contamination.",
+"Conductividad térmica muy alta: el calor se escapa y cuesta fundir.":"Very high thermal conductivity: heat escapes and melting is difficult.",
+"Método: TIG en DCEN con argón (o mezcla argón/helio en espesores gruesos), precalentando de 150 a 500 °C según el espesor y con varilla de cobre desoxidado (ERCu); alternativa: MIG con Ar/He o soldadura fuerte (aleaciones BCuP).":"Method: DCEN TIG with argon (or argon/helium mix on thick sections), preheating 150–500 °C depending on thickness, with deoxidised copper rod (ERCu); alternative: MIG with Ar/He or brazing (BCuP alloys).",
+"El zinc se vaporiza al calentarlo y produce humos tóxicos.":"Zinc vaporises when heated and produces toxic fumes.",
+"Método: soldadura fuerte con varilla de latón/plata y fundente; o TIG con varilla de bronce al silicio (ERCuSi-A). Trabaja siempre con extracción o buena ventilación.":"Method: brazing with brass/silver rod and flux; or TIG with silicon bronze rod (ERCuSi-A). Always work with extraction or good ventilation.",
+"Aleación de cobre (con estaño, aluminio o silicio) de conductividad térmica menor que la del cobre.":"Copper alloy (with tin, aluminium or silicon) with lower thermal conductivity than copper.",
+"Método: TIG o MIG con aporte de bronce al silicio (ERCuSi-A), bronce al aluminio (ERCuAl-A2) o fosforoso (ERCuSn-A); en piezas gruesas, precalienta 150–250 °C.":"Method: TIG or MIG with silicon bronze (ERCuSi-A), aluminium bronze (ERCuAl-A2) or phosphor bronze (ERCuSn-A) filler; on thick parts, preheat 150–250 °C.",
+"Funde a solo 327 °C y sus humos y polvo son tóxicos.":"Melts at only 327 °C and its fumes and dust are toxic.",
+"Método: soldadura de plomo con soplete y varilla de plomo, o TIG con corriente baja. Usa respirador con filtro P3, guantes, ventilación y lávate las manos; evita comer o fumar durante el trabajo.":"Method: lead welding with torch and lead rod, or low-current TIG. Use a P3 respirator, gloves and ventilation, and wash your hands; do not eat or smoke while working.",
+"Tu máquina":"Your machine","Hilo continuo con gas.":"Continuous wire with gas.",
+"Ideal para chapa fina a media. Polaridad DC+. Gas: Ar+CO₂ (M21) para acero, Argón puro para aluminio.":"Ideal for thin to medium sheet. DC+ polarity. Gas: Ar+CO₂ (M21) for steel, pure argon for aluminium.",
+"Materiales:":"Materials:","Acero al carbono, inoxidable, aluminio.":"Carbon steel, stainless, aluminium.","Hilos:":"Wires:","ER70S-6 (acero), ER308L/316L (inox), ER4043 (aluminio).":"ER70S-6 (steel), ER308L/316L (stainless), ER4043 (aluminium).",
+"Electrodo de tungsteno no consumible.":"Non-consumable tungsten electrode.","Máxima calidad y control. DCEN para acero e inox, AC para aluminio.":"Maximum quality and control. DCEN for steel and stainless, AC for aluminium.","Acero carbono, inoxidable, aluminio (AC), titanio, cobre.":"Carbon steel, stainless, aluminium (AC), titanium, copper.","Tungsteno:":"Tungsten:","WC20 (cerio), WL15 (lantano). Gas: argón puro.":"WC20 (ceriated), WL15 (lanthanated). Gas: pure argon.",
+"🟠 Electrodo (SMAW)":"🟠 Stick (SMAW)","Electrodo revestido consumible.":"Consumable coated electrode.","Versátil, funciona con viento.":"Versatile, works in wind.","Electrodos por material:":"Electrodes by material:","Acero al carbono:":"Carbon steel:",
+"E6013 (rutilo, fácil), E7018 (básico, estructural), E6010/E6011 (celulósico, penetración)":"E6013 (rutile, easy), E7018 (basic, structural), E6010/E6011 (cellulosic, penetration)",
+"Inoxidable:":"Stainless:","E308L, E316L, E309L (uniones mixtas)":"E308L, E316L, E309L (dissimilar joints)","Aluminio:":"Aluminium:","Fundición:":"Cast iron:","Hierro fundido:":"Cast iron:","Acero inoxidable:":"Stainless steel:",
+"No recomendado con electrodo revestido (usar TIG/MIG)":"Not recommended with stick electrodes (use TIG/MIG)","Alta deposición. Puede usarse con o sin gas.":"High deposition. Can be used with or without gas.","Con gas (DC+):":"With gas (DC+):","mayor calidad, taller. Hilo E70T-1, E71T-1.":"higher quality, workshop. Wire E70T-1, E71T-1.","Sin gas (DC-, self-shielded):":"Gasless (DC-, self-shielded):","exterior, portátil. Hilo E71T-GS.":"outdoor, portable. Wire E71T-GS.",
+"📐 Reglas generales":"📐 General rules","Amperaje aproximado:":"Approximate amperage:","30–40 A por mm de espesor para electrodo revestido, 25–35 A/mm para TIG en acero, 35–50 A/mm para TIG en aluminio.":"30–40 A per mm of thickness for stick, 25–35 A/mm for TIG on steel, 35–50 A/mm for TIG on aluminium.",
+"Aporte térmico:":"Heat input:","Valores típicos: 0,5–2,5 kJ/mm. Inoxidables:":"Typical values: 0.5–2.5 kJ/mm. Stainless:","⚠️ Seguridad":"⚠️ Safety","Usa siempre":"Always use","careta homologada":"an approved welding helmet",", guantes de cuero, delantal y ventilación adecuada. Nunca sueldes en espacios confinados sin extracción.":", leather gloves, an apron and adequate ventilation. Never weld in confined spaces without extraction.",
+"Acero al carbono":"Carbon steel","Acero dulce":"Mild steel","Acero galvanizado":"Galvanized steel","Aleaciones":"Alloys","Chapa fina":"Thin sheet","Acero al carbono (0,8–3 mm)":"Carbon steel (0.8–3 mm)","Aluminio (spool gun)":"Aluminium (spool gun)","Fundición":"Cast iron",
+"Rutilo general":"General-purpose rutile","Estructural":"Structural","Hilo MIG acero":"MIG wire for steel","Hilo MIG inox":"MIG wire for stainless","MMA estructural":"Structural stick","Hilo tubular sin gas":"Flux-cored wire, gasless","Hilo tubular sin gas, autoprotegido":"Flux-cored wire, gasless, self-shielded","Varilla TIG acero":"TIG rod for steel","Rutilo, uso general":"Rutile, general use","Básico, estructural":"Basic, structural","Uso general":"General use",
+"Datos aproximados: verifica en la ficha del fabricante.":"Approximate data: verify on the manufacturer's data sheet.",
+"Perfiles, tubos y chapa comunes (tipo S235/S275/A36). Es el más fácil de soldar.":"Common profiles, tubes and sheet (S235/S275/A36 type). The easiest to weld.",
+"Electrodo E6013 o E7018; hilo MIG ER70S-6.":"E6013 or E7018 electrode; ER70S-6 MIG wire.",
+"Ejes, muelles, herramientas o cuchillas: muchas estrellitas indican más carbono.":"Shafts, springs, tools or blades: many starbursts indicate more carbon.",
+"Precalienta 200–300 °C, usa E7018 seco y enfría despacio para evitar grietas.":"Preheat 200–300 °C, use dry E7018 and cool slowly to avoid cracks.",
+"Sin señales claras se asume acero suave, el caso más habitual.":"With no clear signs, mild steel is assumed, the most common case.",
+"Haz siempre una probeta antes de soldar.":"Always do a test piece before welding.",
+"Se lima fácil, suena sordo y se desmenuza.":"Files easily, sounds dull and crumbles.",
+"Precalienta 300–400 °C, electrodo ENi-Cl, cordones cortos con martilleo y enfriado muy lento.":"Preheat 300–400 °C, ENi-Cl electrode, short beads with peening and very slow cooling.",
+"Suena a campana y se deforma antes de romper.":"Rings like a bell and deforms before breaking.",
+"Precalienta 200–300 °C y usa electrodo ENiFe-Cl.":"Preheat 200–300 °C and use ENiFe-Cl electrode.",
+"Extremadamente dura y frágil: prácticamente no soldable.":"Extremely hard and brittle: practically unweldable.",
+"Mejor no soldar; considera soldadura fuerte o sustituir la pieza.":"Better not to weld; consider brazing or replacing the part.",
+"Débilmente magnético y duro (cuchillería, ejes).":"Weakly magnetic and hard (cutlery, shafts).",
+"Precalienta 200–300 °C y enfría lento: riesgo alto de grietas.":"Preheat 200–300 °C and cool slowly: high risk of cracking.",
+"Débilmente magnético: electrodomésticos, escapes.":"Weakly magnetic: appliances, exhausts.",
+"Electrodo E309L o E430; poco aporte de calor para evitar crecimiento de grano.":"E309L or E430 electrode; low heat input to avoid grain growth.",
+"No magnético; es el inoxidable más común.":"Non-magnetic; the most common stainless.",
+"E308L o hilo ER308L; interpasada bajo 150 °C.":"E308L or ER308L wire; interpass below 150 °C.",
+"Contiene molibdeno; ambientes marinos y químicos.":"Contains molybdenum; marine and chemical environments.",
+"E316L o ER316L; interpasada bajo 150 °C.":"E316L or ER316L; interpass below 150 °C.",
+"Aluminio 1xxx/3xxx (blando)":"Aluminium 1xxx/3xxx (soft)","Chapa blanda y muy dúctil.":"Soft, very ductile sheet.","Aporte ER1100 o ER4043; elimina bien el óxido.":"ER1100 or ER4043 filler; remove the oxide thoroughly.",
+"Aluminio 5xxx (Al-Mg)":"Aluminium 5xxx (Al-Mg)","Chapa naval y depósitos, muy resistente a la corrosión.":"Marine plate and tanks, very corrosion resistant.","Aporte ER5356; TIG en AC.":"ER5356 filler; TIG on AC.",
+"Aluminio 6xxx (Al-Mg-Si)":"Aluminium 6xxx (Al-Mg-Si)","Perfiles extruidos y estructuras.":"Extruded profiles and structures.","ER4043 (menos grietas) o ER5356 (más resistencia); TIG en AC.":"ER4043 (fewer cracks) or ER5356 (more strength); TIG on AC.",
+"Difícil: porosidad y grietas.":"Difficult: porosity and cracking.","Precalienta 150–200 °C, desengrasa a fondo y usa ER4043.":"Preheat 150–200 °C, degrease thoroughly and use ER4043.",
+"Penetración profunda, tuberías":"Deep penetration, pipework","Bajo hidrógeno, estructural":"Low hydrogen, structural","Alta deposición, solo plana":"High deposition, flat position only","Recomendado para principiantes":"Recommended for beginners",
+"Acero común (al carbono)":"Common steel (carbon)","Elige la descripción que mejor encaje.":"Choose the description that fits best.","¿Cómo se comporta con el tiempo?":"How does it behave over time?","¿Qué tipo de pieza es?":"What type of piece is it?",
+"Chapa naval, depósito o de alta resistencia":"Marine plate, tank or high-strength","Chapa muy blanda (utensilios, señales, latas)":"Very soft sheet (utensils, signs, cans)","Pieza moldeada y rugosa (culata, carcasa, cárter)":"Cast, rough part (cylinder head, housing, sump)","Perfil extruido o estructural (marcos, ventanas, escaleras, bici)":"Extruded or structural profile (frames, windows, ladders, bike)",
+"¿Dónde trabajaba la pieza?":"Where did the piece work?","Cocina, alimentación, decoración, interior":"Kitchen, food, decoration, indoors","Exterior costero, químico o piscinas":"Coastal outdoors, chemical or pools","No lo sé":"I do not know",
+"Latón, cobre y bronce no están incluidos en este asistente (se sueldan con TIG o soldadura fuerte con parámetros específicos). Vuelve atrás si te has equivocado.":"Brass, copper and bronze are not included in this assistant (they are welded with TIG or brazing using specific parameters). Go back if you made a mistake.",
+"Este metal no entra en el calculador de amperaje. Identificación orientativa: consulta la ficha del aporte y del fabricante.":"This metal is not covered by the amperage calculator. Indicative identification: check the filler and manufacturer data sheets.",
+". Identificación orientativa: confirma con una probeta.":". Indicative identification: confirm with a test piece.",
+"Acero inoxidable con inoxidable → electrodo 308L (o 316L si es 316).":"Stainless steel to stainless steel → 308L electrode (or 316L if the metal is 316).",
+"El aluminio no se suelda bien con electrodo revestido. Usa TIG (AC) o MIG con gas argón.":"Aluminium does not weld well with stick electrodes. Use TIG (AC) or MIG with argon gas.",
+"Posición vertical/sobre cabeza → E6013 rutilo, fácil de controlar y menos propenso a chorrear.":"Vertical/overhead position → rutile E6013, easy to control and less prone to dripping.",
+"Junta en T: filete simple o doble. Para penetración total, prepara bisel si el espesor lo permite.":"T-joint: single or double fillet. For full penetration, prepare a bevel if thickness allows.",
+"Diámetro:":"Diameter:","🔧 Preparación de la junta":"🔧 Joint preparation","🔩 Tipos de Junta — Descripción y Dimensiones":"🔩 Joint Types — Description and Dimensions",
+"dos piezas alineadas, borde contra borde. La más común para tuberías y chapas.":"two aligned pieces, edge to edge. The most common for pipes and sheet.",
+"una pieza encima de la otra. Filete en uno o ambos bordes.":"one piece over the other. Fillet on one or both edges.",
+"una pieza perpendicular a la otra. Filete simple o doble.":"one piece perpendicular to the other. Single or double fillet.",
+"dos piezas formando una L o ángulo. Filete o bisel según acceso.":"two pieces forming an L or angle. Fillet or bevel depending on access.",
+"📐 Dimensiones de preparación por espesor (junta a tope)":"📐 Preparation dimensions by thickness (butt joint)","Todo el espesor":"Full thickness","🔩 Materiales soldables con":"🔩 Weldable materials with","mm · Máx:":"mm · Max:","No hay máquinas personalizadas.":"No custom machines.","l/min (Argón)":"l/min (Argon)","FCAW (sin gas) — Amperaje Recomendado":"FCAW (gasless) — Recommended Amperage",
+"🔵 MIG/MAG — Parámetros por Ø de Hilo":"🔵 MIG/MAG — Parameters by Wire Ø","Espesor Máx.":"Max Thickness","Regla rápida de diámetro:":"Quick diameter rule:","🟣 FCAW — Parámetros por Ø de Hilo":"🟣 FCAW — Parameters by Wire Ø"
+};
+const WORDS=[[/\bHilos\b/g,'Wires'],[/\bHilo\b/g,'Wire'],[/\b3 en 1\b/g,'3-in-1'],[/\b4en1\b/g,'4-in-1'],[/\b5 en 1\b/g,'5-in-1'],[/\bMáquina\b/g,'Machine'],[/\bJunta\b/g,'Joint']];
+const ENK=Object.keys(EN).filter(k=>k.length>=8).sort((a,b)=>b.length-a.length);
+const _o=new WeakMap(),ATTRS=['placeholder','title','aria-label','label'];
+function trEn(str){const t=str.trim();if(!t)return str;if(EN[t]!==undefined)return str.replace(t,EN[t]);let r=str;for(const k of ENK)if(r.includes(k))r=r.split(k).join(EN[k]);for(const [re,w] of WORDS)r=r.replace(re,w);return r;}
+function trText(n,en){let o=_o.get(n);if(en){if(!o||n.data!==o.tr){o={src:n.data};_o.set(n,o);o.tr=trEn(o.src);if(o.tr!==n.data)n.data=o.tr;}}else if(o&&n.data===o.tr&&o.src!==o.tr){n.data=o.src;}}
+function trAttrs(el,en){let o=_o.get(el);if(!o){o={};_o.set(el,o);}ATTRS.forEach(a=>{if(!el.hasAttribute(a))return;const v=el.getAttribute(a),r=o[a];if(en){if(!r||v!==r.tr){o[a]={src:v,tr:trEn(v)};if(o[a].tr!==v)el.setAttribute(a,o[a].tr);}}else if(r&&v===r.tr)el.setAttribute(a,r.src);});}
+function trWalk(root,en){if(root.nodeType===3){trText(root,en);return;}if(root.nodeType!==1)return;if(/^(SCRIPT|STYLE)$/.test(root.tagName))return;trAttrs(root,en);const w=document.createTreeWalker(root,NodeFilter.SHOW_ALL);let n;while((n=w.nextNode())){if(n.nodeType===3){if(!/^(SCRIPT|STYLE)$/.test(n.parentNode.tagName))trText(n,en);}else if(n.nodeType===1)trAttrs(n,en);}}
+
+/* ── SEGURIDAD, NORMATIVA Y CUALIFICACIONES (bilingüe: [es, en, descripción es, descripción en]) ── */
+const SAFE=[
+{t:['🛡️ Reglas básicas de seguridad','🛡️ Basic safety rules'],i:[
+['Protección ocular y facial','Eye and face protection','Careta con filtro (EN 169) o pantalla electroóptica (EN 379). Orientativo: MMA/MIG sombra 10–13; TIG 8–12 según intensidad. El arco sin protección causa "ojo de soldador" (fotoqueratitis).','Helmet with filter (EN 169) or auto-darkening filter (EN 379). Indicative: stick/MIG shade 10–13; TIG 8–12 depending on current. An unprotected arc causes "arc eye" (photokeratitis).'],
+['Humos y gases','Fumes and gases','Extracción localizada (EN ISO 21904) y, si no basta, mascarilla FFP2/FFP3. El humo de soldadura está clasificado como cancerígeno (IARC, grupo 1). Inoxidable (Cr VI, Ni) y galvanizado (zinc) son los más peligrosos.','Local exhaust ventilation (EN ISO 21904) and, where insufficient, an FFP2/FFP3 respirator. Welding fume is classified as carcinogenic (IARC group 1). Stainless (Cr VI, Ni) and galvanized (zinc) are the most hazardous.'],
+['Ropa y guantes','Clothing and gloves','Ropa ignífuga (EN ISO 11611), guantes EN 12477 (tipo A para MMA/MIG, tipo B para TIG), calzado de seguridad (EN ISO 20345) y sin ropa sintética ni bolsillos abiertos.','Flame-retardant clothing (EN ISO 11611), EN 12477 gloves (type A for stick/MIG, type B for TIG), safety footwear (EN ISO 20345), no synthetic clothing or open pockets.'],
+['Incendio y trabajos en caliente','Fire and hot work','Retira materiales combustibles (unos 10 m), usa mantas ignífugas, ten un extintor a mano y vigila la zona al menos 30–60 min al terminar. En muchas empresas se exige permiso de trabajo en caliente.','Remove combustibles (around 10 m), use fire blankets, keep an extinguisher at hand and watch the area for at least 30–60 min afterwards. Many employers require a hot-work permit.'],
+['Riesgo eléctrico','Electrical risk','Cables y pinzas en buen estado, pinza de masa cerca de la pieza, no soldar en suelo mojado. Para ambientes con riesgo eléctrico elevado, usa equipos con marca S (EN 60974-1) o reductor de tensión.','Keep cables and clamps in good condition, place the earth clamp near the work, do not weld on wet floors. In high-electrical-risk environments use equipment marked S (EN 60974-1) or a voltage-reducing device.'],
+['Botellas de gas','Gas cylinders','Fijas y verticales, con capuchón, manorreductor y válvula antirretorno. Nunca uses aceite o grasa con oxígeno. Argón y CO₂ desplazan el oxígeno: ventila bien.','Secured and upright, with cap, regulator and flashback arrestor. Never use oil or grease with oxygen. Argon and CO₂ displace oxygen: ventilate well.'],
+['Espacios confinados','Confined spaces','Solo con procedimiento y permiso, medición de atmósfera, ventilación continua y una persona vigilando desde el exterior.','Only with a procedure and permit, atmosphere testing, continuous ventilation and a person watching from outside.'],
+['Recubrimientos peligrosos','Hazardous coatings','No sueldes sobre restos de disolventes clorados (riesgo de fosgeno), pintura con plomo o cadmio sin retirarlos. El galvanizado provoca "fiebre de humos metálicos".','Do not weld over chlorinated solvent residues (phosgene risk), or lead or cadmium paint, without removing them. Galvanizing causes "metal fume fever".'],
+['Ruido y ergonomía','Noise and ergonomics','Protección auditiva en amolado y picado (RD 286/2006). Alterna posturas y evita trabajar mucho tiempo en cuclillas o con el cuello flexionado.','Hearing protection when grinding and chipping (RD 286/2006). Vary postures and avoid long periods squatting or with a bent neck.']
+]},
+{t:['🇪🇸 Normativa española','🇪🇸 Spanish regulations'],i:[
+['Ley 31/1995 (LPRL)','Law 31/1995 (Occupational Risk Prevention)','Marco general: evaluación de riesgos, formación, información, vigilancia de la salud y equipos de protección.','General framework: risk assessment, training, information, health surveillance and protective equipment.'],
+['RD 39/1997','RD 39/1997','Reglamento de los servicios de prevención (evaluación y planificación de la actividad preventiva).','Prevention services regulation (risk assessment and planning of preventive activity).'],
+['RD 773/1997','RD 773/1997','Utilización de equipos de protección individual (EPI) en el trabajo.','Use of personal protective equipment (PPE) at work.'],
+['RD 1215/1997','RD 1215/1997','Seguridad y salud en el uso de equipos de trabajo (incluye las máquinas de soldar).','Safety and health in the use of work equipment (includes welding machines).'],
+['RD 486/1997','RD 486/1997','Condiciones mínimas de los lugares de trabajo (ventilación, orden, iluminación).','Minimum workplace conditions (ventilation, tidiness, lighting).'],
+['RD 665/1997','RD 665/1997','Protección frente a agentes cancerígenos (humos con Cr VI y níquel).','Protection against carcinogens (fumes containing Cr VI and nickel).'],
+['RD 374/2001','RD 374/2001','Riesgos por agentes químicos: gases y humos de soldadura, límites de exposición.','Risks from chemical agents: welding gases and fumes, exposure limits.'],
+['RD 286/2006','RD 286/2006','Exposición al ruido.','Exposure to noise.'],
+['RD 614/2001','RD 614/2001','Riesgo eléctrico en el trabajo.','Electrical risk at work.'],
+['RD 842/2002 (REBT)','RD 842/2002 (Low Voltage Regulation)','Reglamento electrotécnico de baja tensión para las instalaciones.','Low-voltage electrotechnical regulation for installations.'],
+['RD 2267/2004','RD 2267/2004','Seguridad contra incendios en establecimientos industriales.','Fire safety in industrial establishments.'],
+['RD 1627/1997','RD 1627/1997','Seguridad y salud en obras de construcción.','Safety and health on construction sites.'],
+['RD 2060/2008','RD 2060/2008','Reglamento de equipos a presión (incluye botellas de gas).','Pressure equipment regulation (includes gas cylinders).'],
+['INSST · LEP','INSST · OELs','Límites de exposición profesional para agentes químicos, actualizados cada año.','Occupational exposure limits for chemical agents, updated every year.']
+]},
+{t:['🇪🇺 Normativa europea y normas técnicas','🇪🇺 European regulations and standards'],i:[
+['Directiva 89/391/CEE','Directive 89/391/EEC','Directiva marco de seguridad y salud en el trabajo.','Framework directive on occupational safety and health.'],
+['Directiva 89/656/CEE','Directive 89/656/EEC','Uso de equipos de protección individual en el lugar de trabajo.','Use of personal protective equipment in the workplace.'],
+['Reglamento (UE) 2016/425','Regulation (EU) 2016/425','EPI: marcado CE y categorías de riesgo (caretas, guantes, ropa, respiración).','PPE: CE marking and risk categories (helmets, gloves, clothing, respiratory).'],
+['Directiva 2004/37/CE','Directive 2004/37/EC','Agentes cancerígenos o mutágenos (humos de soldadura con Cr VI y Ni).','Carcinogens or mutagens (welding fumes with Cr VI and Ni).'],
+['Directiva 98/24/CE','Directive 98/24/EC','Agentes químicos en el trabajo.','Chemical agents at work.'],
+['Directiva 2006/25/CE','Directive 2006/25/EC','Radiaciones ópticas artificiales (UV e IR del arco).','Artificial optical radiation (UV and IR from the arc).'],
+['Directiva 2003/10/CE','Directive 2003/10/EC','Ruido en el trabajo.','Noise at work.'],
+['Directiva 2013/35/UE','Directive 2013/35/EU','Campos electromagnéticos (importante con marcapasos).','Electromagnetic fields (important with pacemakers).'],
+['Directiva 2009/104/CE','Directive 2009/104/EC','Uso de equipos de trabajo.','Use of work equipment.'],
+['Directivas 2006/42/CE, 2014/35/UE, 2014/30/UE','Directives 2006/42/EC, 2014/35/EU, 2014/30/EU','Máquinas, baja tensión y compatibilidad electromagnética de los equipos de soldadura.','Machinery, low voltage and electromagnetic compatibility for welding equipment.'],
+['EN 60974-1','EN 60974-1','Seguridad de las fuentes de corriente de soldadura (marca S, ciclo de trabajo).','Safety of welding power sources (S mark, duty cycle).'],
+['EN ISO 21904','EN ISO 21904','Captación y separación de humos de soldadura.','Capture and separation of welding fume.'],
+['EN 169 / EN 379 / EN 175','EN 169 / EN 379 / EN 175','Filtros, filtros electroópticos y equipos de protección ocular para soldadura.','Filters, auto-darkening filters and eye protection equipment for welding.'],
+['EN ISO 11611 / EN 12477 / EN ISO 20345','EN ISO 11611 / EN 12477 / EN ISO 20345','Ropa, guantes y calzado de protección para soldadores.','Protective clothing, gloves and footwear for welders.'],
+['EN 149','EN 149','Mascarillas filtrantes FFP1, FFP2 y FFP3.','Filtering half masks FFP1, FFP2 and FFP3.']
+]},
+{t:['🎓 Cualificaciones en España','🎓 Qualifications in Spain'],i:[
+['Certificados de profesionalidad (Nivel 2)','Vocational certificates (Level 2)','FMEC0110 Soldadura con electrodo revestido y TIG; FMEC0210 Soldadura oxigás y MIG/MAG. Formación oficial del SEPE para trabajadores y desempleados.','FMEC0110 Stick (SMAW) and TIG welding; FMEC0210 Oxy-gas and MIG/MAG welding. Official SEPE training for workers and jobseekers.'],
+['Formación Profesional','Vocational education (FP)','Técnico en Soldadura y Calderería (grado medio) y Técnico Superior en Construcciones Metálicas (grado superior).','Technician in Welding and Boilermaking (intermediate) and Higher Technician in Metal Construction (higher).'],
+['UNE-EN ISO 9606-1 (acero) y -2, -3, -4, -5','UNE-EN ISO 9606-1 (steel) and -2, -3, -4, -5','Cualificación del soldador: acero (-1), aluminio (-2), cobre (-3), níquel (-4), titanio y circonio (-5). Especifica proceso (111, 131, 135, 141…), tipo de junta, material, espesor y posición (PA, PC, PF, PE…). Válida 3 años con confirmación semestral del empleador.','Welder qualification: steel (-1), aluminium (-2), copper (-3), nickel (-4), titanium and zirconium (-5). Specifies process (111, 131, 135, 141…), joint type, material, thickness and position (PA, PC, PF, PE…). Valid for 3 years with employer confirmation every six months.'],
+['EN ISO 14732','EN ISO 14732','Cualificación de operadores de soldadura mecanizada y automática.','Qualification of welding operators for mechanised and automatic welding.'],
+['EN 1090 y EN ISO 3834','EN 1090 and EN ISO 3834','Ejecución de estructuras de acero (clases EXC1–EXC4) y requisitos de calidad: exigen soldadores cualificados y coordinación de soldadura.','Execution of steel structures (classes EXC1–EXC4) and quality requirements: they demand qualified welders and welding coordination.'],
+['EWF / IIW (CESOL)','EWF / IIW (CESOL)','Personal de soldadura: IWP (practicante), IWS (especialista), IWT (tecnólogo) e IWE (ingeniero). CESOL es la entidad autorizada en España.','Welding personnel: IWP (practitioner), IWS (specialist), IWT (technologist) and IWE (engineer). CESOL is the authorised body in Spain.'],
+['Inspector de soldadura IWI','IWI welding inspector','Inspectores IWI-C (completo), IWI-S (estándar) e IWI-B (básico).','IWI-C (comprehensive), IWI-S (standard) and IWI-B (basic) inspectors.'],
+['UNE-EN ISO 9712','UNE-EN ISO 9712','Certificación de personal de ensayos no destructivos (VT, PT, MT, UT, RT), niveles 1, 2 y 3.','Certification of non-destructive testing personnel (VT, PT, MT, UT, RT), levels 1, 2 and 3.']
+]},
+{t:['🎓 Cualificaciones en Reino Unido y EE. UU.','🎓 UK and US qualifications'],i:[
+['Reino Unido: NVQ y aprendizajes','UK: NVQ and apprenticeships','NVQ nivel 2 y 3 en fabricación y soldadura, hoy sustituidos en gran medida por los aprendizajes (apprenticeships) de Welder (nivel 2) y de nivel 3.','NVQ Levels 2 and 3 in fabrication and welding, now largely replaced by Welder apprenticeships (Level 2) and Level 3 programmes.'],
+['Coded welder (BS EN ISO 9606-1)','Coded welder (BS EN ISO 9606-1)','Soldador certificado en proceso, material y posición (por ejemplo 6G). Es el equivalente británico de la cualificación europea.','A welder certified for process, material and position (for example 6G). The UK equivalent of the European qualification.'],
+['TWI · CSWIP','TWI · CSWIP','CSWIP 3.1 (Welding Inspector) y 3.2 (Senior Welding Inspector), además de certificaciones de soldador de chapa y tubo.','CSWIP 3.1 (Welding Inspector) and 3.2 (Senior Welding Inspector), plus plate and pipe welder certifications.'],
+['AWS · EE. UU.','AWS · USA','CW (Certified Welder), CWI (Certified Welding Inspector), SCWI y CWS (Supervisor). Códigos: D1.1 (acero estructural), D1.2 (aluminio), D1.6 (inoxidable).','CW (Certified Welder), CWI (Certified Welding Inspector), SCWI and CWS (Supervisor). Codes: D1.1 (structural steel), D1.2 (aluminium), D1.6 (stainless).'],
+['ASME IX y API 1104','ASME IX and API 1104','ASME IX: cualificación de procedimientos (WPS/PQR) y soldadores en recipientes a presión y tuberías. API 1104: soldadura de oleoductos.','ASME IX: procedure (WPS/PQR) and welder qualification for pressure vessels and piping. API 1104: pipeline welding.'],
+['Equivalencia de posiciones','Position equivalents','EN ISO 9606-1 frente a AWS: PA = 1G (plana), PC = 2G (horizontal), PF = 3G (vertical ascendente), PE = 4G (sobre cabeza), H-L045 = 6G (tubo inclinado 45°).','EN ISO 9606-1 versus AWS: PA = 1G (flat), PC = 2G (horizontal), PF = 3G (vertical up), PE = 4G (overhead), H-L045 = 6G (pipe inclined 45°).']
+]}
+];
+function buildSafety(){const k=currentLang==='en'?1:0,el=document.getElementById('safetyContent');if(!el)return;
+el.innerHTML=SAFE.map((sec,n)=>`<details class="safe-sec"${n===0?' open':''}><summary>${sec.t[k]}</summary>`+sec.i.map(x=>`<div class="safe-item"><b>${x[k]}</b>${x[2+k]}</div>`).join('')+'</details>').join('')+`<p class="safe-note">${k?'Informational summary. It is not legal advice and regulations are updated regularly: check the current text on BOE, EUR-Lex and INSST, and the validity of any qualification with the issuing body.':'Resumen informativo. No es asesoramiento legal y la normativa se actualiza con frecuencia: consulta el texto vigente en el BOE, EUR-Lex y el INSST, y la validez de cada cualificación con el organismo emisor.'}</p>`;}
+function applyLang(){buildSafety();document.documentElement.lang=currentLang;document.querySelectorAll('#langToggle button').forEach(x=>x.classList.toggle('active',x.dataset.lang===currentLang));trWalk(document.body,currentLang==='en');}
+function setupLangToggle(){document.querySelectorAll('#langToggle button').forEach(b=>b.addEventListener('click',()=>{currentLang=b.dataset.lang;localStorage.setItem(PREF_LANG,currentLang);applyLang();}));
+new MutationObserver(ms=>{if(currentLang!=='en')return;ms.forEach(m=>{if(m.type==='characterData')trText(m.target,true);else if(m.type==='attributes')trAttrs(m.target,true);else m.addedNodes.forEach(n=>trWalk(n,true));});}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
+document.addEventListener('DOMContentLoaded',applyLang);if(document.readyState!=='loading')applyLang();}
+function setupUnitToggle(){document.querySelectorAll('#unitToggle button').forEach(b=>b.addEventListener('click',()=>{units=b.dataset.unit;localStorage.setItem(PREF_UNITS,units);applyUnits();if(lastResult)calculate();}));}
+function applyUnits(){document.querySelectorAll('#unitToggle button').forEach(b=>b.classList.toggle('active',b.dataset.unit===units));document.querySelectorAll('.unit-label').forEach(el=>el.textContent=units==='metric'?'mm':'in');}
+
+function setupMachineTab(){
+const search=$('machineSearch');let searchTimer;
+search.addEventListener('input',e=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>populateMachines(e.target.value),120);});
+$('machineSearchClear').addEventListener('click',()=>{search.value='';populateMachines('');search.focus();});
+$('machine').addEventListener('change',()=>{
+const key=$('machine').value;
+if(!key){selectedMachine=null;$('machineBanner').classList.remove('show');$('constraintNote').classList.remove('show');$('materialPanel').classList.remove('show');$('electrodePanel').classList.remove('show');resetMachineConstraints();highlightGuideProcess(null);return;}
+let m=MACHINE_DB[key];if(m){m._key=key;}else{m=customMachines.find(x=>x.id===key);}
+if(!m)return;selectedMachine=m;applyMachineConstraints(m);applyMachinePreset(m);updateMaterialPanel(m);updateElectrodePanel(m);
+});
+$('dutyAmps').addEventListener('input',updateDutyCycle);
+renderCustomMachines();
+}
+
+function updateMaterialPanel(m){const panel=$('materialPanel');if(!m.materials||!m.materials.length){panel.classList.remove('show');return;}panel.classList.add('show');panel.innerHTML=`<h4>🔩 Materiales soldables con ${m.name}</h4><div class="material-chips">${m.materials.map(mat=>`<span class="material-chip">${mat}</span>`).join('')}</div>${m.notes?`<div style="font-size:0.72rem;color:#86efac;margin-top:6px;line-height:1.5">📝 ${m.notes}</div>`:''}`;}
+function updateElectrodePanel(m){const panel=$('electrodePanel');if(!m.recommendedElectrodes||!m.recommendedElectrodes.length){panel.classList.remove('show');return;}panel.classList.add('show');panel.innerHTML=`<h4>⚡ Electrodos / Hilos recomendados</h4><ul class="electrode-list">${m.recommendedElectrodes.map(e=>`<li><span class="code">${e.code}</span><span class="note">${e.note}</span></li>`).join('')}</ul>`;if(m.notes)panel.innerHTML+=`<div class="electrode-notes">📝 ${m.notes}</div>`;}
+
+function resetMachineConstraints(){document.querySelectorAll('#processTabs .process-tab').forEach(t=>{t.style.display='';});[...$('migWire').options].forEach(o=>o.style.display='');[...$('fcawWire').options].forEach(o=>o.style.display='');[...$('stickDiameter').options].forEach(o=>o.style.display='');$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}
+function updateGasVisibility(){if(!selectedMachine){$('migGasGroup').style.display='';$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';return;}if(currentProcess==='mig'){$('migGasGroup').style.display='';}if(currentProcess==='fcaw'){if(selectedMachine.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}}
+function applyMachineConstraints(m){const procs=m.processes||[];document.querySelectorAll('#processTabs .process-tab').forEach(tab=>{tab.style.display=procs.includes(tab.dataset.process)?'':'none';});if(procs.includes('mig')){if(m.supportedWires){[...$('migWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('migWire').value))$('migWire').value=m.supportedWires[0];}$('migGasGroup').style.display='';}if(procs.includes('fcaw')){if(m.supportedWires){[...$('fcawWire').options].forEach(o=>{o.style.display=m.supportedWires.includes(o.value)?'':'none';});if(!m.supportedWires.includes($('fcawWire').value))$('fcawWire').value=m.supportedWires[0];}if(m.gaslessFCAW){$('fcawGasGroup').style.display='none';$('fcawGaslessNote').style.display='block';}else{$('fcawGasGroup').style.display='';$('fcawGaslessNote').style.display='none';}}if(procs.includes('stick')&&m.supportedStickDia){[...$('stickDiameter').options].forEach(o=>{o.style.display=m.supportedStickDia.includes(o.value)?'':'none';});if(!m.supportedStickDia.includes($('stickDiameter').value))$('stickDiameter').value=m.supportedStickDia[0];}const notes=[];if(m.gaslessFCAW)notes.push('🟣 FCAW sin gas — hilo tubular con fundente interno');if(m.supportedWires)notes.push(`🔵 Hilos soportados: ${m.supportedWires.join(', ')} mm`);if(m.supportedStickDia)notes.push(`🟠 Electrodos soportados: ${m.supportedStickDia.join(', ')} mm`);const noteEl=$('constraintNote');if(notes.length){noteEl.classList.add('show');noteEl.innerHTML=`<strong>Restricciones de ${m.name}</strong>`+notes.map(n=>`<div>${n}</div>`).join('');}else{noteEl.classList.remove('show');}}
+
+function applyMachinePreset(m){const proc=m.defaultProcess||(m.processes&&m.processes[0])||'stick';currentProcess=proc;document.querySelectorAll('#processTabs .process-tab').forEach(b=>{b.classList.toggle('active',b.dataset.process===proc);});document.querySelectorAll('.process-inputs').forEach(el=>el.style.display='none');$(proc+'Inputs').style.display='block';updateGasVisibility();if(proc==='mig'||proc==='fcaw'){const d=m.defaultWire||(m.supportedWires?m.supportedWires[0]:'0.8');const sel=proc==='mig'?$('migWire'):$('fcawWire');if([...sel.options].some(o=>o.value===d))sel.value=d;}if(proc==='stick'){const d=m.defaultStickDia||(m.supportedStickDia?m.supportedStickDia[0]:'3.2');const sel=$('stickDiameter');if([...sel.options].some(o=>o.value===d))sel.value=d;}const th=m.defaultThickness||4;if(proc==='mig')$('migThickness').value=th;else if(proc==='tig')$('tigThickness').value=th;else if(proc==='stick')$('stickThickness').value=th;else if(proc==='fcaw')$('fcawThickness').value=th;currentRefProcess=proc;document.querySelectorAll('#refProcessTabs .process-tab').forEach(b=>b.classList.toggle('active',b.dataset.refprocess===proc));buildReference(proc);highlightGuideProcess(proc);$('dutyAmps').value=m.dutyRef?m.dutyRef.amps:100;updateDutyCycle();const banner=$('machineBanner');banner.classList.add('show');const dia=m.defaultWire?m.defaultWire+' mm':(m.defaultStickDia?m.defaultStickDia+' mm':'—');banner.innerHTML=`✅ <strong>${m.name}</strong><br><span style="font-size:0.75rem;opacity:0.9">Proceso: ${proc.toUpperCase()} · Ø: ${dia} · Espesor: ${th} mm · Máx: ${m.maxAmps} A</span>`;setTimeout(()=>calculate(),100);}
+function highlightGuideProcess(process){document.querySelectorAll('.guide-card').forEach(card=>{card.classList.toggle('highlighted',process&&card.dataset.process===process);});}
+
+function setupCustomMachineForm(){$('btnAddMachine').addEventListener('click',()=>{$('addMachineForm').classList.toggle('show');});$('btnCancelMachine').addEventListener('click',()=>{$('addMachineForm').classList.remove('show');});$('btnSaveMachine').addEventListener('click',()=>{const name=$('newMchName').value.trim();if(!name)return showToast('Introduce un nombre');const maxAmps=parseFloat($('newMchAmps').value)||160;const volts=$('newMchVolts').value;const processes=[];if($('newMchMIG').checked)processes.push('mig');if($('newMchTIG').checked)processes.push('tig');if($('newMchStick').checked)processes.push('stick');if($('newMchFCAW').checked)processes.push('fcaw');if(!processes.length)processes.push('stick');const duty=parseFloat($('newMchDuty').value)||25;const dutyAmps=parseFloat($('newMchDutyAmps').value)||100;const gasless=$('newMchGasless').checked;const custom={id:'custom-'+Date.now(),name,maxAmps,inputVolts:volts,processes,dutyRef:{amps:dutyAmps,duty},weight:'—',category:'Mis máquinas',defaultProcess:processes[0],defaultThickness:4,gaslessFCAW:gasless&&processes.includes('fcaw'),materials:['Acero al carbono'],recommendedElectrodes:[]};if(processes.includes('mig'))custom.defaultWire='0.8';if(processes.includes('stick'))custom.defaultStickDia='3.2';customMachines.push(custom);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));$('newMchName').value='';$('newMchGasless').checked=false;$('addMachineForm').classList.remove('show');renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina guardada');});}
+function renderCustomMachines(){const list=$('customMachinesList');if(!customMachines.length){list.innerHTML='<div style="font-size:0.82rem;color:var(--text-dim);padding:8px 0">No hay máquinas personalizadas.</div>';return;}list.innerHTML=customMachines.map(m=>`<div class="custom-machine-item"><div><strong style="color:var(--accent)">${m.name}</strong><br><span style="font-size:0.72rem;color:var(--text-dim)">${m.maxAmps}A · ${m.processes.join(', ').toUpperCase()}${m.gaslessFCAW?' · Sin gas':''}</span></div><button data-id="${m.id}">🗑</button></div>`).join('');list.querySelectorAll('button[data-id]').forEach(btn=>{btn.addEventListener('click',()=>{customMachines=customMachines.filter(x=>x.id!==btn.dataset.id);localStorage.setItem(PREF_CUSTOM_MCH,JSON.stringify(customMachines));renderCustomMachines();populateMachines($('machineSearch').value);showToast('✓ Máquina eliminada');});});}
+
+function updateDutyCycle(){const key=$('machine').value;if(!key)return;let m=MACHINE_DB[key]||customMachines.find(x=>x.id===key);if(!m)return;const amps=parseFloat($('dutyAmps').value)||100;const refDuty=m.dutyRef.duty/100,ratio=m.dutyRef.amps/amps;let duty=Math.max(5,Math.min(100,refDuty*ratio*ratio*100));$('dutyPercent').textContent=duty.toFixed(0)+'%';const bar=$('dutyBar');bar.style.width=duty+'%';bar.style.background=duty>=60?'#22c55e':duty>=30?'#eab308':'#ef4444';const w=$('machineWarning');if(duty<20){w.textContent='🚨 Ciclo muy bajo — riesgo de sobrecalentamiento.';w.className='warning danger';}else if(duty<40){w.textContent='⚠️ Ciclo moderado — permite enfriamientos.';w.className='warning';}else{w.textContent='✅ Ciclo saludable para trabajo continuo.';w.className='warning ok';}$('machineDetails').innerHTML=`<div class="detail-row"><span class="detail-label">Salida Máx.</span><span class="detail-value">${m.maxAmps} A</span></div><div class="detail-row"><span class="detail-label">Ciclo @ Referencia</span><span class="detail-value">${m.dutyRef.duty}% @ ${m.dutyRef.amps} A</span></div><div class="detail-row"><span class="detail-label">Voltaje Entrada</span><span class="detail-value">${m.inputVolts}</span></div><div class="detail-row"><span class="detail-label">Procesos</span><span class="detail-value">${m.processes.join(', ').toUpperCase()}</span></div><div class="detail-row"><span class="detail-label">Peso</span><span class="detail-value">${m.weight||'—'}</span></div>`;}
+
+function setupCalcButton(){$('btnCalc').addEventListener('click',()=>{calculate();setTimeout(()=>$('result').scrollIntoView({behavior:'smooth',block:'start'}),100);});}
+function calculate(){if(currentProcess==='mig')calcMIG();else if(currentProcess==='tig')calcTIG();else if(currentProcess==='stick')calcStick();else if(currentProcess==='fcaw')calcFCAW();$('result').classList.add('show');}
+function getThicknessMM(id){const v=parseFloat($(id).value)||0;return units==='metric'?v:v*MM_PER_INCH;}
+
+function calcMIG(){const wire=$('migWire').value;const thickness=getThicknessMM('migThickness');const joint=$('migJoint').value,position=$('migPosition').value,gas=$('migGas').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const d=MIG_DATA[wire];const tRatio=Math.min(1,thickness/d.thicknessMax);let ampsMin=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.max(0,tRatio-0.15);let ampsMax=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.min(1,tRatio+0.15);let voltsMin=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.max(0,tRatio-0.15);let voltsMax=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.min(1,tRatio+0.15);const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];ampsMin*=posF*jointF;ampsMax*=posF*jointF;const vPosF=VOLTAGE_POS_FACTOR[position];voltsMin*=vPosF;voltsMax*=vPosF;let gasFlow=d.gasFlow.slice();if(gas==='co2'){voltsMax*=1.05;gasFlow[0]+=2;gasFlow[1]+=3;}else if(gas==='ar'){voltsMax*=1.03;}ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);voltsMin=Math.round(voltsMin);voltsMax=Math.round(voltsMax);const wfsMin=(d.wfs[0]*posF*jointF).toFixed(1);const wfsMax=(d.wfs[1]*posF*jointF).toFixed(1);const passes=Math.max(1,Math.ceil(thickness/(d.thicknessMax*0.6)));lastResult={process:'MIG',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity:'DC+ (DCEP)',gasFlow:`${gasFlow[0]}–${gasFlow[1]} l/min`,wireSpeed:`${wfsMin}–${wfsMax} m/min`,passes,thickness,position,material:null};renderResult(lastResult);$('wireSpeedLabel').style.display='flex';$('resultProcessLabel').textContent='MIG/MAG — Amperaje Recomendado';}
+
+function calcTIG(){const material=$('tigMaterial').value;const thickness=getThicknessMM('tigThickness');const joint=$('tigJoint').value,position=$('tigPosition').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const d=TIG_DATA[material];const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];let ampsMin=thickness*d.ampsPerMM[0]*posF*jointF;let ampsMax=thickness*d.ampsPerMM[1]*posF*jointF;ampsMin=Math.max(10,Math.round(ampsMin));ampsMax=Math.max(15,Math.round(ampsMax));const voltsMin=material==='aluminum'?12:10;const voltsMax=material==='aluminum'?16:14;const passes=Math.max(1,Math.ceil(thickness/4));lastResult={process:'TIG',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity:d.currentType,gasFlow:`${d.gasFlow[0]}–${d.gasFlow[1]} l/min (Argón)`,wireSpeed:'—',passes,thickness,position,material};renderResult(lastResult);$('wireSpeedLabel').style.display='none';$('resultProcessLabel').textContent='TIG — Amperaje Recomendado';}
+
+function calcStick(){const electrode=$('stickElectrode').value;const diameter=$('stickDiameter').value;const thickness=getThicknessMM('stickThickness');const joint=$('stickJoint').value,position=$('stickPosition').value,material=$('stickMaterial').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const e=STICK_ELECTRODES[electrode];const[baseMin,baseMax]=STICK_BASE_AMPS[diameter]||STICK_BASE_AMPS['3.2'];const posF=POSITION_FACTOR[position],matF=MATERIAL_FACTOR_STICK[material],jointF=JOINT_FACTOR[joint];const thickF=thickness<=3?0.85:thickness<=6?0.95:thickness<=10?1.00:thickness<=20?1.05:1.10;let ampsMin=baseMin*e.factor*posF*thickF*matF*jointF;let ampsMax=baseMax*e.factor*posF*thickF*matF*jointF;if(thickness<2)ampsMax*=0.9;ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);const passes=Math.max(1,Math.ceil((thickness/3.5)*({butt:1,lap:1.2,tee:1.3,corner:1.1}[joint]||1)));lastResult={process:'Electrodo',ampsMin,ampsMax,voltage:`${e.volts} V`,polarity:e.polarity,gasFlow:'— (electrodo revestido)',wireSpeed:'—',passes,thickness,position,material,electrodeNote:e.note};renderResult(lastResult);$('wireSpeedLabel').style.display='none';$('resultProcessLabel').textContent='Electrodo — Amperaje Recomendado';}
+
+function calcFCAW(){const wire=$('fcawWire').value;const thickness=getThicknessMM('fcawThickness');const joint=$('fcawJoint').value,position=$('fcawPosition').value;const isGasless=selectedMachine&&selectedMachine.gaslessFCAW;const gas=isGasless?null:$('fcawGas').value;if(!thickness||thickness<=0)return showToast('Introduce un espesor válido.');const d=FCAW_DATA[wire];const tRatio=Math.min(1,thickness/15);let ampsMin=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.max(0,tRatio-0.15);let ampsMax=d.baseAmps[0]+(d.baseAmps[1]-d.baseAmps[0])*Math.min(1,tRatio+0.15);let voltsMin=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.max(0,tRatio-0.15);let voltsMax=d.baseVolts[0]+(d.baseVolts[1]-d.baseVolts[0])*Math.min(1,tRatio+0.15);const posF=POSITION_FACTOR[position],jointF=JOINT_FACTOR[joint];ampsMin*=posF*jointF;ampsMax*=posF*jointF;const vPosF=VOLTAGE_POS_FACTOR[position];voltsMin*=vPosF;voltsMax*=vPosF;let gasFlow=d.gasFlow.slice();let gasText;if(isGasless){gasText='Sin gas (fundente interno)';}else{if(gas==='mix'){gasFlow[0]+=1;gasFlow[1]+=2;}gasText=`${gasFlow[0]}–${gasFlow[1]} l/min`;}ampsMin=Math.round(ampsMin);ampsMax=Math.round(ampsMax);voltsMin=Math.round(voltsMin);voltsMax=Math.round(voltsMax);const wfsMin=(d.wfs[0]*posF*jointF).toFixed(1);const wfsMax=(d.wfs[1]*posF*jointF).toFixed(1);const passes=Math.max(1,Math.ceil(thickness/5));const polarity=isGasless?'DC- (DCEN)':'DC+ (DCEP)';lastResult={process:'FCAW',ampsMin,ampsMax,voltage:`${voltsMin}–${voltsMax} V`,polarity,gasFlow:gasText,wireSpeed:`${wfsMin}–${wfsMax} m/min`,passes,thickness,position,material:null};renderResult(lastResult);$('wireSpeedLabel').style.display='flex';$('resultProcessLabel').textContent=isGasless?'FCAW (sin gas) — Amperaje Recomendado':'FCAW — Amperaje Recomendado';}
+
+function renderResult(r){if(selectedMachine&&r.ampsMax>selectedMachine.maxAmps){r.ampsMax=selectedMachine.maxAmps;if(r.ampsMin>selectedMachine.maxAmps)r.ampsMin=selectedMachine.maxAmps;}$('currentRange').textContent=`${r.ampsMin} – ${r.ampsMax} A`;$('voltageOut').textContent=r.voltage;const polCls=(r.polarity||'').includes('DC+')?'dc\\+':(r.polarity||'').includes('DC-')?'dc-':'ac';$('polarityOut').innerHTML=`<span class="polarity-badge ${polCls}">${r.polarity}</span>`;$('gasFlowOut').textContent=r.gasFlow;$('wireSpeedOut').textContent=r.wireSpeed;$('passesOut').textContent=r.passes+' '+(r.passes>1?'pasadas':'pasada');$('heatAmps').value=Math.round((r.ampsMin+r.ampsMax)/2);updateHeatInput();let warn='⚠️ Verifica con probeta. Ajusta ±10–15% según el arco.';if(selectedMachine&&r.ampsMax>=selectedMachine.maxAmps)warn=`⚠️ Tu máquina alcanza máx ${selectedMachine.maxAmps}A. La app ha limitado el resultado.`;else if(r.thickness<2)warn='⚠️ Material delgado: reduce amperaje y aumenta velocidad.';else if(r.thickness>15)warn='⚠️ Material grueso: considera precalentamiento.';else if(r.material==='stainless')warn='⚠️ Inox: mantén interpass bajo 150°C.';else if(r.material==='aluminum')warn='⚠️ Aluminio: usa AC y limpia la superficie.';else if(r.material==='cast')warn='⚠️ Fundición: precalienta 200–400°C.';else if(r.position==='vertical')warn='⚠️ Vertical: reduce amperaje un 10–15%.';else if(r.position==='overhead')warn='⚠️ Sobre cabeza: reduce amperaje un 15–20%.';if(r.electrodeNote)warn+=`<br><span style="color:#fdba74">📝 Electrodo E${r.electrodeCode||''}: ${r.electrodeNote}</span>`;$('warning').innerHTML=warn;}
+
+function updateHeatInput(){const amps=parseFloat($('heatAmps').value)||0;let volts=24;if(lastResult&&lastResult.voltage){const m=lastResult.voltage.match(/(\d+)/);if(m)volts=parseInt(m[1]);}const speed=parseFloat($('travelSpeed').value)||200;const heat=(amps*volts*60)/(speed*1000);const heatIP=heat*25.4;const el=$('heatOut');el.textContent=units==='metric'?`${heat.toFixed(2)} kJ/mm`:`${heatIP.toFixed(2)} kJ/in`;el.style.color=heat>2.5?'#fca5a5':heat<0.5?'#86efac':'#f1f5f9';}
+
+function buildReference(process){const c=$('refContent');let html='';if(process==='mig'){html+=`<div class="ref-section-title">🔵 MIG/MAG — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th><th>Espesor Máx.</th></tr></thead><tbody>`;Object.entries(MIG_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td><td>${d.thicknessMax} mm</td></tr>`;});html+=`</tbody></table></div>`;}else if(process==='tig'){html+=`<div class="ref-section-title">🟢 TIG — Parámetros por Material</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Material</th><th>Corriente</th><th>A/mm</th></tr></thead><tbody>`;Object.entries(TIG_DATA).forEach(([k,d])=>{const n={carbon:'Acero Carbono',stainless:'Inoxidable',aluminum:'Aluminio'};html+=`<tr><td>${n[k]||k}</td><td>${d.currentType}</td><td>${d.ampsPerMM[0]}–${d.ampsPerMM[1]} A/mm</td></tr>`;});html+=`</tbody></table></div>`;}else if(process==='stick'){html+=`<div class="ref-section-title">🟠 Electrodo — Amperaje por Ø</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Ø</th><th>Rango (A)</th></tr></thead><tbody>`;Object.entries(STICK_BASE_AMPS).forEach(([k,v])=>{html+=`<tr><td>${k} mm</td><td>${v[0]}–${v[1]} A</td></tr>`;});html+=`</tbody></table></div><div class="ref-section-title">🟠 Electrodo — Polaridad y Aplicación</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Electrodo</th><th>Polaridad</th><th>Aplicación</th></tr></thead><tbody>`;Object.entries(STICK_ELECTRODES).forEach(([k,d])=>{html+=`<tr><td>E${k}</td><td>${d.polarity}</td><td>${d.note||''}</td></tr>`;});html+=`</tbody></table></div>`;html+=`<div class="warning" style="margin-top:10px">📐 <strong>Regla rápida de diámetro:</strong> ≤1,5 mm→Ø2,0 · 1,5–2 mm→Ø2,5 · 2–5 mm→Ø3,2 · 5–8 mm→Ø4,0 · >8 mm→Ø5,0</div>`;}else if(process==='fcaw'){html+=`<div class="ref-section-title">🟣 FCAW — Parámetros por Ø de Hilo</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Hilo</th><th>Amperaje</th><th>Voltaje</th></tr></thead><tbody>`;Object.entries(FCAW_DATA).forEach(([k,d])=>{html+=`<tr><td>${k} mm</td><td>${d.baseAmps[0]}–${d.baseAmps[1]} A</td><td>${d.baseVolts[0]}–${d.baseVolts[1]} V</td></tr>`;});html+=`</tbody></table></div><div class="ref-section-title">🟣 FCAW — Con gas vs sin gas</div><div class="table-wrap"><table class="ref-table"><thead><tr><th>Tipo</th><th>Polaridad</th><th>Uso</th></tr></thead><tbody><tr><td>Con gas (M21/CO₂)</td><td>DC+</td><td>Alta calidad, taller</td></tr><tr><td>Sin gas (fundente interno)</td><td>DC-</td><td>Exterior, portátil</td></tr></tbody></table></div>`;}c.innerHTML=html;}
+
+function setupGuide(){buildGuide();}
+function buildGuide(){$('guideContent').innerHTML=`
+<div class="guide-card" data-process="mig"><h3>🔵 MIG/MAG <span class="active-badge">Tu máquina</span></h3>
+<p><strong>Hilo continuo con gas.</strong> Ideal para chapa fina a media. Polaridad DC+. Gas: Ar+CO₂ (M21) para acero, Argón puro para aluminio.</p>
+<p><strong>Materiales:</strong> Acero al carbono, inoxidable, aluminio.</p>
+<p><strong>Hilos:</strong> ER70S-6 (acero), ER308L/316L (inox), ER4043 (aluminio).</p></div>
+<div class="guide-card" data-process="tig"><h3>🟢 TIG <span class="active-badge">Tu máquina</span></h3>
+<p><strong>Electrodo de tungsteno no consumible.</strong> Máxima calidad y control. DCEN para acero e inox, AC para aluminio.</p>
+<p><strong>Materiales:</strong> Acero carbono, inoxidable, aluminio (AC), titanio, cobre.</p>
+<p><strong>Tungsteno:</strong> WC20 (cerio), WL15 (lantano). Gas: argón puro.</p></div>
+<div class="guide-card" data-process="stick"><h3>🟠 Electrodo (SMAW) <span class="active-badge">Tu máquina</span></h3>
+<p><strong>Electrodo revestido consumible.</strong> Versátil, funciona con viento.</p>
+<p><strong>Electrodos por material:</strong></p>
+<p>• <strong>Acero al carbono:</strong> E6013 (rutilo, fácil), E7018 (básico, estructural), E6010/E6011 (celulósico, penetración)</p>
+<p>• <strong>Inoxidable:</strong> E308L, E316L, E309L (uniones mixtas)</p>
+<p>• <strong>Fundición:</strong> ENi-Cl, ENiFe-Cl</p>
+<p>• <strong>Aluminio:</strong> No recomendado con electrodo revestido (usar TIG/MIG)</p></div>
+<div class="guide-card" data-process="fcaw"><h3>🟣 FCAW <span class="active-badge">Tu máquina</span></h3>
+<p><strong>Hilo tubular con fundente interno.</strong> Alta deposición. Puede usarse con o sin gas.</p>
+<p><strong>Con gas (DC+):</strong> mayor calidad, taller. Hilo E70T-1, E71T-1.</p>
+<p><strong>Sin gas (DC-, self-shielded):</strong> exterior, portátil. Hilo E71T-GS.</p></div>
+${buildJointGuide()}
+<div class="guide-card"><h3>📐 Reglas generales</h3>
+<p><strong>Amperaje aproximado:</strong> 30–40 A por mm de espesor para electrodo revestido, 25–35 A/mm para TIG en acero, 35–50 A/mm para TIG en aluminio.</p>
+<p><strong>Aporte térmico:</strong> Heat Input (kJ/mm) = (A × V × 60) / (Vel × 1000). Valores típicos: 0,5–2,5 kJ/mm. Inoxidables: &lt;1,5 kJ/mm.</p></div>
+<div class="guide-card"><h3>⚠️ Seguridad</h3>
+<p>Usa siempre <strong>careta homologada</strong>, guantes de cuero, delantal y ventilación adecuada. Nunca sueldes en espacios confinados sin extracción.</p></div>`;
+if(selectedMachine){const proc=selectedMachine.defaultProcess||(selectedMachine.processes&&selectedMachine.processes[0]);if(proc)highlightGuideProcess(proc);}}
+
+let toastTimer=null;
+function showToast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500);}
+</script>
+</body>
+</html>
